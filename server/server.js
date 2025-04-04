@@ -1,43 +1,59 @@
-// const express = require('express');
-// const mongoose = require('mongoose');
-// const cors = require('cors');
-// const userRoutes = require('./routes/userRoutes');
-
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-
-// mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log('MongoDB connected'))
-//   .catch(err => console.log(err));
-
-// app.use('/api/users', userRoutes);
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-// // I8qGjr7vC6F9OUaZ  password
-
-const express = require('express');
+const express = require("express");
 const mongoose = require('mongoose');
-const cors = require('cors');
-const userRoutes = require('./routes/userRoutes');
+const colors = require("colors");
+const morgan = require("morgan");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const appointmentRoutes = require('./routes/appointment');
 
+// dotenv config
+dotenv.config();
+
+// mongoDB connection
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    dbName: 'petcare' // Add this line to specify database name
+})
+    .then(() => {
+        console.log('MongoDB Connected Successfully'.bgGreen.white);
+    })
+    .catch((err) => {
+        console.error('MongoDB Connection Error:'.bgRed.white, err);
+        process.exit(1); // Exit if unable to connect to database
+    });
+
+// Add error handling for MongoDB connection
+mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:'.bgRed.white, err);
+});
+
+mongoose.connection.on('connected', () => {
+    console.log('MongoDB connected to database'.bgGreen.white);
+});
+
+// rest object
 const app = express();
 
+// middleware
 app.use(cors());
 app.use(express.json());
+app.use(morgan("dev"));
 
-// Serve static files from 'uploads' directory
-app.use('/uploads', express.static('uploads'));
+// Test MongoDB connection
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+    console.log('MongoDB database connection established successfully');
+});
 
-mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+// routes
+app.use('/api/appointment', appointmentRoutes);
 
-app.use('/api/users', userRoutes);
+// port
+const port = process.env.PORT || 8080;
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// listen port
+app.listen(port, () => {
+    console.log(`Server Running on port ${port}`.bgCyan.white);
+});
