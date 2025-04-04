@@ -1,43 +1,30 @@
-// const express = require('express');
-// const mongoose = require('mongoose');
-// const cors = require('cors');
-// const userRoutes = require('./routes/userRoutes');
-
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-
-// mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log('MongoDB connected'))
-//   .catch(err => console.log(err));
-
-// app.use('/api/users', userRoutes);
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-// // I8qGjr7vC6F9OUaZ  password
-
 const express = require('express');
-const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const cors = require('cors');
-const userRoutes = require('./routes/userRoutes');
+const connectDB = require('./config/db');
+const productRoutes = require('./routes/productRoutes');
 
+// Initialize the app
 const app = express();
 
-app.use(cors());
-app.use(express.json());
 
-// Serve static files from 'uploads' directory
-app.use('/uploads', express.static('uploads'));
+const corsOptions = {
+    origin: 'http://localhost:3000', // Allow React frontend to connect
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
+};
 
-mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+// Apply CORS middleware
+app.use(cors(corsOptions));
 
-app.use('/api/users', userRoutes);
+dotenv.config(); // Load environment variables
 
+connectDB(); 
+
+app.use(express.json()); // To parse JSON in the body
+app.use('/api/products', productRoutes); 
+
+// Define the port and start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
