@@ -230,11 +230,11 @@ export default function App() {
 
   return (
     <Router>
-      <AppContent 
-        isLoggedIn={isLoggedIn} 
-        setIsLoggedIn={setIsLoggedIn} 
-        isAdmin={isAdmin} 
-        setIsAdmin={setIsAdmin} 
+      <AppContent
+        isLoggedIn={isLoggedIn}
+        setIsLoggedIn={setIsLoggedIn}
+        isAdmin={isAdmin}
+        setIsAdmin={setIsAdmin}
       />
     </Router>
   );
