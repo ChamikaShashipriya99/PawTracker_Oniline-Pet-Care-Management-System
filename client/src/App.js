@@ -12,6 +12,9 @@ import AddPet from './components/AddPet';
 import MyPets from './components/MyPets';
 import ForgotPassword from './components/ForgotPassword'; // New import
 import ResetPassword from './components/ResetPassword'; // New import
+import PetGrooming from './components/PetGrooming';
+import VetService from './components/VetService';
+import PetTraining from './components/PetTraining';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -70,9 +73,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                         Services
                       </a>
                       <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
-                        <li><Link className="dropdown-item" to="/services/veterinary">Veterinary Service</Link></li>
-                        <li><Link className="dropdown-item" to="/services/grooming">Grooming</Link></li>
-                        <li><Link className="dropdown-item" to="/services/training">Pet Training</Link></li>
+                        <li><Link className="dropdown-item" to="/components/VetService">Veterinary Service</Link></li>
+                        <li><Link className="dropdown-item" to="/components/PetGrooming">Grooming</Link></li>
+                        <li><Link className="dropdown-item" to="./components/PetTraining">Pet Training</Link></li>
                       </ul>
                     </li>
                     <li className="nav-item">
@@ -155,9 +158,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/add-pet" element={<AddPet />} />
               <Route path="/my-pets" element={<MyPets />} />
               <Route path="/store" element={<div>Store Page</div>} />
-              <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
-              <Route path="/services/grooming" element={<div>Grooming Page</div>} />
-              <Route path="/services/training" element={<div>Pet Training Page</div>} />
+              <Route path="/components/VetService" element={<VetService />} />
+              <Route path="/components/PetGrooming" element={<PetGrooming />} />
+              <Route path="/components/PetTraining" element={<PetTraining />} />
               <Route path="/advertising" element={<div>Advertising Page</div>} />
               <Route path="/faq" element={<div>FAQ Page</div>} />
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
@@ -230,11 +233,11 @@ export default function App() {
 
   return (
     <Router>
-      <AppContent 
-        isLoggedIn={isLoggedIn} 
-        setIsLoggedIn={setIsLoggedIn} 
-        isAdmin={isAdmin} 
-        setIsAdmin={setIsAdmin} 
+      <AppContent
+        isLoggedIn={isLoggedIn}
+        setIsLoggedIn={setIsLoggedIn}
+        isAdmin={isAdmin}
+        setIsAdmin={setIsAdmin}
       />
     </Router>
   );

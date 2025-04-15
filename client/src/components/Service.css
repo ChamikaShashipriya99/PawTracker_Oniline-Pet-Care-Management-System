@@ -1,0 +1,157 @@
+/* client/src/components/Service.css */
+
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    color: #000306;
+    /* Dark gray text */
+}
+
+/* Hero Section */
+.hero-overlay {
+    background: linear-gradient(to bottom, rgba(45, 212, 191, 0.8), rgba(59, 130, 246, 0.8));
+    /* Teal to blue gradient */
+}
+
+.brightness-70 {
+    filter: brightness(0.7);
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+
+/* Section Heading */
+.section-heading {
+    color: #007bff;
+    position: relative;
+}
+
+.section-heading::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #629dfa;
+    /* Blue accent */
+    margin: 10px auto 0;
+}
+
+/* Feature Cards */
+.feature-card {
+    background-color: #d5e8ff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.feature-icon {
+    font-size: 2.2rem;
+    color: #1b86f0;
+}
+
+/* Pricing Table */
+.pricing-table thead th {
+    background-color: #3B82F6 !important;
+    /* Blue header */
+    color: #FFFFFF !important;
+    /* White text */
+}
+
+/* Testimonials */
+.testimonial-card::before {
+    content: '“';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 2rem;
+    color: #6B7280;
+    /* Muted purple for quote mark */
+    opacity: 0.3;
+}
+
+.testimonial-card {
+    background-color: #F9FAFB;
+    /* Very light gray background */
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #3B82F6 !important;
+    /* Blue button */
+    border-color: #3B82F6 !important;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2563EB !important;
+    /* Darker blue on hover */
+    border-color: #2563EB !important;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15) !important;
+}
+
+
+/* Animations (using Animate.css) */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.testimonial-card {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+    animation-delay: calc(var(--animation-order) * 200ms);
+}
+
+.testimonial-card:nth-child(1) {
+    --animation-order: 1;
+}
+
+.testimonial-card:nth-child(2) {
+    --animation-order: 2;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem !important;
+    }
+
+    .fs-4 {
+        font-size: 1rem !important;
+    }
+
+    .btn-lg {
+        width: 240px;
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .display-4 {
+        font-size: 1.8rem !important;
+    }
+
+    .fs-4 {
+        font-size: 0.9rem !important;
+    }
+
+    .btn-lg {
+        width: 200px;
+        padding: 12px 20px;
+    }
+
+    .card-title.h5 {
+        font-size: 1.3rem !important;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px !important;
+        font-size: 0.85rem !important;
+    }
+}
