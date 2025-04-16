@@ -180,7 +180,7 @@ router.put('/:id', async (req, res) => {
   const { password, ...otherFields } = req.body; // Separate password from other fields
   try {
     const updateData = { ...otherFields };
-    
+
     // If password is provided, hash it and add to update data
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -191,7 +191,7 @@ router.put('/:id', async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     // Return user data without the password
     const { password: _, ...userWithoutPassword } = user.toObject();
     res.json(userWithoutPassword);
