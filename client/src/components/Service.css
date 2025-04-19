@@ -222,6 +222,120 @@
     }
 }
 
+/* Additional styles for BookAppointment.js */
+
+/* Form Styling */
+.appointment-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1.1rem;
+    color: #007bff;
+    /* Blue labels */
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-control,
+.form-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #00c4cc;
+    /* Teal border on focus */
+    box-shadow: 0 0 5px rgba(0, 196, 204, 0.3);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.service-options {
+    margin-top: 10px;
+}
+
+.error {
+    display: block;
+    color: #F44336;
+    /* Red for errors */
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.amount-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #00c4cc;
+    /* Teal for total amount */
+    text-align: center;
+    margin: 20px 0;
+}
+
+.submit-button {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* Responsive Adjustments for Form */
+@media (max-width: 768px) {
+    .form-group label {
+        font-size: 1rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .amount-display {
+        font-size: 1.1rem;
+    }
+
+    .submit-button {
+        font-size: 1rem;
+        padding: 10px 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 0.85rem;
+        padding: 6px;
+    }
+
+    .amount-display {
+        font-size: 1rem;
+    }
+
+    .submit-button {
+        font-size: 0.9rem;
+        padding: 8px 20px;
+    }
+}
+
 /* Additional styles for MyAppointments.js */
 
 /* Table and Row Styling */

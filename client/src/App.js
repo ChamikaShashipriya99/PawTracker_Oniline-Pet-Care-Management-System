@@ -16,6 +16,7 @@ import PetGrooming from './components/PetGrooming';
 import VetService from './components/VetService';
 import PetTraining from './components/PetTraining';
 import MyAppointments from './components/MyAppointments';
+import BookAppointment from './components/BookAppointment';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -167,6 +168,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/components/MyAppointments" element={<MyAppointments />} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
+              <Route path="/book-appointment" element={<BookAppointment />} />
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
