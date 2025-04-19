@@ -258,10 +258,6 @@ function BookAppointment() {
                     </div>
                 </div>
             </section>
-
-            <footer className="service-footer text-center py-4">
-                <p className="mb-0">© 2025 PetCare System. All rights reserved.</p>
-            </footer>
         </div>
     );
 }

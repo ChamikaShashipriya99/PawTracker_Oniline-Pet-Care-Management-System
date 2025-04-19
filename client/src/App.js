@@ -17,6 +17,7 @@ import VetService from './components/VetService';
 import PetTraining from './components/PetTraining';
 import MyAppointments from './components/MyAppointments';
 import BookAppointment from './components/BookAppointment';
+import EditAppointment from './components/EditAppointment';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -75,9 +76,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                         Services
                       </a>
                       <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
-                        <li><Link className="dropdown-item" to="/components/VetService">Veterinary Service</Link></li>
-                        <li><Link className="dropdown-item" to="/components/PetGrooming">Grooming</Link></li>
-                        <li><Link className="dropdown-item" to="./components/PetTraining">Pet Training</Link></li>
+                        <li><Link className="dropdown-item" to="/vet-service">Veterinary Service</Link></li>
+                        <li><Link className="dropdown-item" to="/pet-grooming">Grooming</Link></li>
+                        <li><Link className="dropdown-item" to="/pet-training">Pet Training</Link></li>
                       </ul>
                     </li>
                     <li className="nav-item">
@@ -107,7 +108,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       </a>
                       <ul className="dropdown-menu" aria-labelledby="profileDropdown">
                         <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
-                        <li><Link className="dropdown-item" to="/components/MyAppointments">My Appointments</Link></li>
+                        <li><Link className="dropdown-item" to="/MyAppointments">My Appointments</Link></li>
                         <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
                         <li><Link className="dropdown-item" to="/my-payments">My Payments</Link></li>
                       </ul>
@@ -160,15 +161,16 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/add-pet" element={<AddPet />} />
               <Route path="/my-pets" element={<MyPets />} />
               <Route path="/store" element={<div>Store Page</div>} />
-              <Route path="/components/VetService" element={<VetService />} />
-              <Route path="/components/PetGrooming" element={<PetGrooming />} />
-              <Route path="/components/PetTraining" element={<PetTraining />} />
+              <Route path="/vet-service" element={<VetService />} />
+              <Route path="/pet-grooming" element={<PetGrooming />} />
+              <Route path="/pet-training" element={<PetTraining />} />
               <Route path="/advertising" element={<div>Advertising Page</div>} />
               <Route path="/faq" element={<div>FAQ Page</div>} />
-              <Route path="/components/MyAppointments" element={<MyAppointments />} />
+              <Route path="/MyAppointments" element={<MyAppointments />} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
               <Route path="/book-appointment" element={<BookAppointment />} />
+              <Route path="/edit-appointment/:id" element={<EditAppointment />} />
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />

@@ -336,6 +336,56 @@
     }
 }
 
+/* Additional styles for EditAppointment.js */
+
+/* Service Info Text */
+.service-info {
+    font-size: 1rem;
+    color: #555;
+    /* Gray text, matching card body text */
+    margin: 5px 0;
+}
+
+/* Action Buttons for Form */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.submit-button {
+    background-color: #ff5733;
+    /* Orange */
+    border-color: #ff5733;
+}
+
+.cancel-button {
+    background-color: #F44336;
+    /* Red */
+    border-color: #F44336;
+}
+
+.submit-button:hover,
+.cancel-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Adjustments for Buttons */
+@media (max-width: 480px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .submit-button,
+    .cancel-button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
 /* Additional styles for MyAppointments.js */
 
 /* Table and Row Styling */
