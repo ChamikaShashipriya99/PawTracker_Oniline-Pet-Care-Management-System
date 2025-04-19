@@ -221,3 +221,130 @@
         font-size: 0.85rem;
     }
 }
+
+/* Additional styles for MyAppointments.js */
+
+/* Table and Row Styling */
+.appointments-list {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.appointments-table th,
+.appointments-table td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.appointments-table thead th {
+    background-color: #007bff;
+    /* Blue header */
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+.appointment-row:hover {
+    background-color: #E5E7EB;
+    /* Light gray hover */
+}
+
+.status-pending {
+    color: #FF9800;
+    /* Orange for Pending */
+    font-weight: bold;
+}
+
+.status-approved {
+    color: #4CAF50;
+    /* Green for Approved */
+    font-weight: bold;
+}
+
+.status-cancelled {
+    color: #F44336;
+    /* Red for Cancelled */
+    font-weight: bold;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.view-button {
+    background-color: #00c4cc;
+    /* Teal */
+    border-color: #00c4cc;
+}
+
+.edit-button {
+    background-color: #FFCA28;
+    /* Yellow */
+    border-color: #FFCA28;
+}
+
+.delete-button {
+    background-color: #F44336;
+    /* Red */
+    border-color: #F44336;
+}
+
+.pay-button {
+    background-color: #4CAF50;
+    /* Green */
+    border-color: #4CAF50;
+}
+
+.download-button {
+    background-color: #9C27B0;
+    /* Purple */
+    border-color: #9C27B0;
+}
+
+.view-button:hover,
+.edit-button:hover,
+.delete-button:hover,
+.pay-button:hover,
+.download-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Adjustments for Table */
+@media (max-width: 768px) {
+
+    .appointments-table th,
+    .appointments-table td {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .appointments-table th,
+    .appointments-table td {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .hero-btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}

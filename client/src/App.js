@@ -15,6 +15,7 @@ import ResetPassword from './components/ResetPassword'; // New import
 import PetGrooming from './components/PetGrooming';
 import VetService from './components/VetService';
 import PetTraining from './components/PetTraining';
+import MyAppointments from './components/MyAppointments';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -105,7 +106,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       </a>
                       <ul className="dropdown-menu" aria-labelledby="profileDropdown">
                         <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
-                        <li><Link className="dropdown-item" to="/my-appointments">My Appointments</Link></li>
+                        <li><Link className="dropdown-item" to="/components/MyAppointments">My Appointments</Link></li>
                         <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
                         <li><Link className="dropdown-item" to="/my-payments">My Payments</Link></li>
                       </ul>
@@ -163,7 +164,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/components/PetTraining" element={<PetTraining />} />
               <Route path="/advertising" element={<div>Advertising Page</div>} />
               <Route path="/faq" element={<div>FAQ Page</div>} />
-              <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
+              <Route path="/components/MyAppointments" element={<MyAppointments />} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
             </>
