@@ -135,9 +135,6 @@ function EditAppointment() {
                     </div>
                 </section>
                 <p className="text-center py-5 fade-in">Loading appointment details...</p>
-                <footer className="service-footer text-center py-4">
-                    <p className="mb-0">© 2025 PetCare System. All rights reserved.</p>
-                </footer>
             </div>
         );
     }

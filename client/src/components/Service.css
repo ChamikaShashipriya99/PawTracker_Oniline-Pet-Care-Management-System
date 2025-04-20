@@ -386,6 +386,95 @@
     }
 }
 
+/* Additional styles for ViewAppointment.js */
+
+/* Appointment Details */
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.detail-label {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #007bff;
+    /* Blue labels */
+}
+
+.detail-value {
+    font-size: 1rem;
+    color: #00c4cc;
+    /* Teal values */
+}
+
+.status-pending {
+    color: #FF9800;
+    /* Orange for Pending */
+    font-weight: bold;
+}
+
+.status-approved {
+    color: #4CAF50;
+    /* Green for Approved */
+    font-weight: bold;
+}
+
+.status-cancelled {
+    color: #F44336;
+    /* Red for Cancelled */
+    font-weight: bold;
+}
+
+/* Card Footer */
+.card-footer {
+    padding: 15px;
+    text-align: center;
+    background-color: #F9FAFB;
+    /* Light gray background */
+    border-top: 1px solid #E5E7EB;
+}
+
+.back-button {
+    background-color: #ff5733;
+    /* Orange */
+    border-color: #ff5733;
+}
+
+.back-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Adjustments for Details */
+@media (max-width: 768px) {
+
+    .detail-label,
+    .detail-value {
+        font-size: 0.95rem;
+    }
+
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .detail-label,
+    .detail-value {
+        font-size: 0.9rem;
+    }
+
+    .back-button {
+        width: 100%;
+    }
+}
+
 /* Additional styles for MyAppointments.js */
 
 /* Table and Row Styling */
