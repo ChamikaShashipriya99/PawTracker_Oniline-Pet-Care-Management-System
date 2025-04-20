@@ -600,4 +600,47 @@
         width: 100%;
         margin-bottom: 5px;
     }
+
+    /* Additional styles for AdminAppointments.js */
+
+    /* Approve and Reject Buttons */
+    .approve-button {
+        background-color: #4CAF50;
+        /* Green */
+        border-color: #4CAF50;
+    }
+
+    .reject-button {
+        background-color: #F44336;
+        /* Red */
+        border-color: #F44336;
+    }
+
+    .download-button {
+        background-color: #2196F3;
+        /* Blue */
+        border-color: #2196F3;
+    }
+
+    .download-all-button {
+        background-color: #FF9800;
+        /* Orange-Yellow */
+        border-color: #FF9800;
+        margin-bottom: 20px;
+    }
+
+    .approve-button:hover,
+    .reject-button:hover,
+    .download-button:hover,
+    .download-all-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive Adjustments for Buttons */
+    @media (max-width: 480px) {
+        .download-all-button {
+            width: 100%;
+        }
+    }
 }
