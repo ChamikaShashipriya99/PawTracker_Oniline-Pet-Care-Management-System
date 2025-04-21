@@ -20,6 +20,7 @@ import BookAppointment from './components/BookAppointment';
 import EditAppointment from './components/EditAppointment';
 import ViewAppointment from './components/ViewAppointment';
 import AdminAppointments from './components/AdminAppointments';
+import Notification from './components/Notification';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -175,6 +176,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/edit-appointment/:id" element={<EditAppointment />} />
               <Route path="/view-appointment/:id" element={<ViewAppointment />} />
               <Route path="/admin-appointments" element={<AdminAppointments />} />
+              <Route path="/notification" element={<Notification />} />
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />

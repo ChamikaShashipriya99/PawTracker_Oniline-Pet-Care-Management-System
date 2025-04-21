@@ -643,4 +643,65 @@
             width: 100%;
         }
     }
+
+    /* Notification Styles */
+    .notification {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px;
+        margin: 15px auto;
+        max-width: 600px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        font-size: 1rem;
+        font-weight: 500;
+        color: #fff;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .notification-success {
+        background-color: #4CAF50;
+        /* Green, matches Approve button */
+    }
+
+    .notification-error {
+        background-color: #F44336;
+        /* Red, matches error messages and Reject button */
+    }
+
+    .notification-message {
+        flex: 1;
+    }
+
+    .notification-close {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0 5px;
+        margin-left: 10px;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .notification-close:hover {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+
+    /* Responsive Adjustments for Notification */
+    @media (max-width: 480px) {
+        .notification {
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+
+        .notification-close {
+            font-size: 1rem;
+        }
+    }
 }
