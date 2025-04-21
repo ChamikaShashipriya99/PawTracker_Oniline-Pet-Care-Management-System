@@ -658,7 +658,8 @@
         font-weight: 500;
         color: #fff;
         position: relative;
-        transition: all 0.3s ease;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        /* For fade-out */
     }
 
     .notification-success {
@@ -668,7 +669,17 @@
 
     .notification-error {
         background-color: #F44336;
-        /* Red, matches error messages and Reject button */
+        /* Red, matches error messages */
+    }
+
+    .notification-info {
+        background-color: #2196F3;
+        /* Blue, matches Download button */
+    }
+
+    .notification-warning {
+        background-color: #FF9800;
+        /* Orange, matches Download All button */
     }
 
     .notification-message {
@@ -690,6 +701,13 @@
     .notification-close:hover {
         transform: scale(1.2);
         opacity: 0.8;
+    }
+
+    /* Fade-Out Animation */
+    .fade-out {
+        opacity: 0;
+        transform: translateY(10px);
+        /* Slight slide down effect */
     }
 
     /* Responsive Adjustments for Notification */
