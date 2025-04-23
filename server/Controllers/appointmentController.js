@@ -1,7 +1,7 @@
 // server/controllers/appointmentController.js
-const Appointment = require('../models/appointmentModel');
-// const { sendNotification } = require('../utils/notifications'); // Uncomment if notifications are implemented
-const User = require('../models/userModel'); // Uncomment if user authentication is implemented
+const Appointment = require('../models/Appointment');
+const { sendNotification } = require('../utils/notifications');
+const User = require('../models/User');
 
 // Get all appointments (used by MyAppointments.js and AdminAppointments.js)
 exports.getAllAppointments = async (req, res) => {

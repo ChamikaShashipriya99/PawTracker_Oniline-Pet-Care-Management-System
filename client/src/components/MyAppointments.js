@@ -32,7 +32,7 @@ function MyAppointments() {
         }
     };
 
-    const handleViewAppointment = (id) => navigate(`/appointment/${id}`);
+    const handleViewAppointment = (id) => navigate(`/view-appointment/${id}`);
     const handleEditAppointment = (id) => navigate(`/edit-appointment/${id}`);
     const handleDeleteAppointment = async (id) => {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
