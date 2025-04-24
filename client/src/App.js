@@ -12,6 +12,7 @@ import AddPet from './components/AddPet';
 import MyPets from './components/MyPets';
 import ForgotPassword from './components/ForgotPassword'; // New import
 import ResetPassword from './components/ResetPassword'; // New import
+import CreateAdvertisement from './components/CreateAdvertisement';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       </ul>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link" to="/advertising">Advertising</Link>
+                      <Link className="nav-link" to="/advertisings">Advertising</Link>
                     </li>
                     <li className="nav-item">
                       <Link className="nav-link" to="/faq">FAQ</Link>
@@ -158,11 +159,12 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />
               <Route path="/services/training" element={<div>Pet Training Page</div>} />
-              <Route path="/advertising" element={<div>Advertising Page</div>} />
+              <Route path="/advertisings" element={<div>Advertising Page</div>} />
               <Route path="/faq" element={<div>FAQ Page</div>} />
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
+              <Route path="/advertising" element={<CreateAdvertisement/>}/>
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
