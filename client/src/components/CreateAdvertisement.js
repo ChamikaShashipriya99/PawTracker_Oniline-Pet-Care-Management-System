@@ -83,7 +83,7 @@ const CreateAdvertisement = () => {
   };
 
   // Inline BackButton component
-  const BackButton = ({ destination = "/" }) => (
+  const BackButton = ({ destination = "/ad-dashboard" }) => (
     <div className="d-flex">
       <Link
         to={destination}
