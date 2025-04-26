@@ -70,6 +70,12 @@
     border-top-right-radius: 15px;
   }
   
+  .card-body-text {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  
   .fade-in {
     animation: fadeIn 1s ease-in;
   }
@@ -208,20 +214,20 @@
     background-color: #e0a800;
   }
   
-  .action-btn.danger {
-    background-color: #dc3545;
-  }
-  
-  .action-btn.danger:hover {
-    background-color: #c82333;
-  }
-  
   .action-btn.success {
     background-color: #28a745;
   }
   
   .action-btn.success:hover {
     background-color: #218838;
+  }
+  
+  .action-btn.danger {
+    background-color: #dc3545;
+  }
+  
+  .action-btn.danger:hover {
+    background-color: #c82333;
   }
   
   /* Status text styles */
@@ -489,25 +495,22 @@
   }
   
   .back-btn {
-    display: inline-flex;
+    /* display: flex; */
     align-items: center;
-    justify-content: center;
     background: #ff5733;
     color: white;
-    padding: 6px 12px; /* smaller padding */
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 25px;
     cursor: pointer;
     text-decoration: none;
-    font-size: 14px;
     transition: background 0.3s;
     min-width: auto; /* prevent stretching */
-    width: auto; /* auto-size based on content */
+  width: auto; /* auto-size based on content */
   }
   
   .back-btn:hover {
     background: #e04e2d;
   }
-  
   
   /* Spinner styles */
   .spinner-container {
@@ -548,6 +551,17 @@
     background-color: #f2dede;
     color: #a94442;
     border: 1px solid #ebccd1;
+  }
+  
+  /* No advertisements found */
+  .no-ads {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    text-align: center;
+    color: #555;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
   }
   
   /* Loading styles */

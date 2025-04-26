@@ -18,6 +18,7 @@ import MyAdvertisement from './components/MyAdvertisement';
 import ShowAdvertisement from './components/ShowAdvertisement';
 import DeleteAdvertisement from './components/DeleteAdvertisement';
 import EditAdvertisement from './components/EditAdvertisement';
+import AdminAdvertisement from './components/AdminAdvertisement';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -87,6 +88,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                     <li className="nav-item">
                       <Link className="nav-link" to="/faq">FAQ</Link>
                     </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/feedback">Feedback</Link>
+                    </li>
                   </>
                 )}
               </ul>
@@ -139,6 +143,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/admin-add">Advertisement</Link>
+                </li>
+                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
@@ -173,6 +180,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/show-add" element={<ShowAdvertisement/>}/>
               <Route path="/delete-add" element={<DeleteAdvertisement/>}/>
               <Route path="/edit-add" element={<EditAdvertisement/>}/>
+              <Route path="/admin-add" element={<AdminAdvertisement/>}/>
             
             </>
           )}
