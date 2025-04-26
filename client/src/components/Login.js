@@ -43,12 +43,30 @@ function Login({ setIsLoggedIn }) {
     
     try {
       const res = await axios.post('http://localhost:5000/api/users/login', formData);
+      
+      // Check if user needs verification
+      if (res.data.needsVerification) {
+        // Redirect to verification page
+        navigate('/verify-email', { 
+          state: { 
+            email: formData.email,
+            previewUrl: res.data.previewUrl 
+          } 
+        });
+        return;
+      }
+      
       localStorage.setItem('user', JSON.stringify(res.data.user));
       setIsLoggedIn(true);
       alert('Login successful!');
       navigate('/profile');
     } catch (error) {
-      alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
+      if (error.response?.status === 403 && error.response?.data?.needsVerification) {
+        // Redirect to verification page
+        navigate('/verify-email', { state: { email: formData.email } });
+      } else {
+        alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
+      }
     }
   };
 

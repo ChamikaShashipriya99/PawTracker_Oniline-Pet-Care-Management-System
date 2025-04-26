@@ -6,12 +6,14 @@ function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setEmail(e.target.value);
     setError('');
     setMessage('');
+    setPreviewUrl('');
   };
 
   const validateForm = () => {
@@ -34,8 +36,15 @@ function ForgotPassword() {
       const res = await axios.post('http://localhost:5000/api/users/forgot-password', { email });
       setMessage(res.data.message);
       setEmail('');
+      
+      // If we have a preview URL (from Ethereal Email), set it
+      if (res.data.previewUrl) {
+        setPreviewUrl(res.data.previewUrl);
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred. Please try again.');
+      console.error('Forgot password error:', error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'An error occurred. Please try again.';
+      setError(errorMessage);
     }
   };
 
@@ -62,6 +71,16 @@ function ForgotPassword() {
             Send Reset Link
           </button>
         </form>
+        {previewUrl && (
+          <div className="mt-3 text-center">
+            <p className="text-info">
+              <strong>Note:</strong> This is a test email. Click the link below to view it:
+            </p>
+            <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-info">
+              View Email
+            </a>
+          </div>
+        )}
         <p className="text-center mt-3" style={{ color: '#555' }}>
           Back to <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>Login</Link>
         </p>

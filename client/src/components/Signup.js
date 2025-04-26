@@ -42,23 +42,35 @@ function Signup({ setIsLoggedIn }) {
     if (!validateForm()) return;
 
     const formData = new FormData();
-    for (const key in user) {
+    Object.keys(user).forEach(key => {
       formData.append(key, user[key]);
-    }
+    });
     if (profilePhoto) {
       formData.append('profilePhoto', profilePhoto);
     }
 
     try {
       const res = await axios.post('http://localhost:5000/api/users/signup', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
+      
+      // Store user data in localStorage
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      setIsLoggedIn(true);
-      alert('Signup successful!');
-      navigate('/Login');
+      
+      // Show success message
+      alert('Registration successful! Please verify your email.');
+      
+      // Redirect to verification page with email and previewUrl
+      navigate('/verify-email', { 
+        state: { 
+          email: user.email,
+          previewUrl: res.data.previewUrl 
+        } 
+      });
     } catch (error) {
-      alert('Signup failed: ' + error.message);
+      alert('Registration failed: ' + (error.response?.data?.error || 'Unknown error'));
     }
   };
 

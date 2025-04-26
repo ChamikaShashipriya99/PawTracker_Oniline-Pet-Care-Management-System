@@ -12,6 +12,7 @@ import AddPet from './components/AddPet';
 import MyPets from './components/MyPets';
 import ForgotPassword from './components/ForgotPassword'; // New import
 import ResetPassword from './components/ResetPassword'; // New import
+import EmailVerification from './components/EmailVerification'; // New import
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -148,6 +149,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/forgot-password" element={<ForgotPassword />} /> {/* New route */}
           <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} /> {/* New route */}
+          <Route path="/verify-email" element={<EmailVerification />} /> {/* New route */}
           {isLoggedIn && (
             <>
               <Route path="/profile" element={<Profile />} />
