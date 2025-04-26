@@ -110,6 +110,15 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                         <li><Link className="dropdown-item" to="/my-payments">My Payments</Link></li>
                       </ul>
                     </li>
+                    <li className="nav-item me-2">
+                      <a className="nav-link position-relative" href="#" onClick={(e) => e.preventDefault()}>
+                        <i className="fas fa-bell fa-lg"></i>
+                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                          3
+                          <span className="visually-hidden">unread notifications</span>
+                        </span>
+                      </a>
+                    </li>
                     <li className="nav-item">
                       <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                     </li>
