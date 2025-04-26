@@ -10,9 +10,11 @@ import AdminDashboard from './components/AdminDashboard';
 import AdminSignup from './components/AdminSignup';
 import AddPet from './components/AddPet';
 import MyPets from './components/MyPets';
-import ForgotPassword from './components/ForgotPassword'; // New import
-import ResetPassword from './components/ResetPassword'; // New import
-import EmailVerification from './components/EmailVerification'; // New import
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import EmailVerification from './components/EmailVerification';
+import FAQ from './components/FAQ';
+import Contact from './components/Contact';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -147,9 +149,11 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
           <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} /> {/* New route */}
-          <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} /> {/* New route */}
-          <Route path="/verify-email" element={<EmailVerification />} /> {/* New route */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
           {isLoggedIn && (
             <>
               <Route path="/profile" element={<Profile />} />
@@ -161,7 +165,8 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />
               <Route path="/services/training" element={<div>Pet Training Page</div>} />
               <Route path="/advertising" element={<div>Advertising Page</div>} />
-              <Route path="/faq" element={<div>FAQ Page</div>} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
