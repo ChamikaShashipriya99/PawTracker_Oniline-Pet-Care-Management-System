@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 function Signup({ setIsLoggedIn }) {
   const navigate = useNavigate();
@@ -30,7 +31,11 @@ function Signup({ setIsLoggedIn }) {
     if (!user.username.match(/^[A-Za-z0-9]{4,}$/)) newErrors.username = "Username must be at least 4 characters and alphanumeric.";
     if (!user.email.match(/^\S+@\S+\.\S+$/)) newErrors.email = "Enter a valid email address.";
     if (!user.phone.match(/^\d{10}$/)) newErrors.phone = "Phone number must be 10 digits.";
-    if (user.password.length < 6) newErrors.password = "Password must be at least 6 characters long.";
+    if (user.password.length < 8) newErrors.password = "Password must be at least 8 characters long.";
+    if (!/\d/.test(user.password)) newErrors.password = "Password must contain at least one number.";
+    if (!/[a-z]/.test(user.password)) newErrors.password = "Password must contain at least one lowercase letter.";
+    if (!/[A-Z]/.test(user.password)) newErrors.password = "Password must contain at least one uppercase letter.";
+    if (!/[^A-Za-z0-9]/.test(user.password)) newErrors.password = "Password must contain at least one special character.";
     if (profilePhoto && !profilePhoto.type.startsWith('image/')) newErrors.profilePhoto = "Only image files are allowed.";
     
     setErrors(newErrors);
@@ -107,6 +112,7 @@ function Signup({ setIsLoggedIn }) {
             <div className="col-md-6 mb-3">
               <input type="password" name="password" className="form-control" placeholder="Password" value={user.password} onChange={handleChange} required style={{ borderRadius: '10px' }} />
               {errors.password && <small className="text-danger">{errors.password}</small>}
+              <PasswordStrengthIndicator password={user.password} />
             </div>
           </div>
           <div className="mb-3">

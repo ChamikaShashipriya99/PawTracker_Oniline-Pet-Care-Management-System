@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 function ResetPassword({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
@@ -22,8 +23,20 @@ function ResetPassword({ setIsLoggedIn }) {
     if (!formData.password) {
       newErrors.password = 'Password is required.';
       valid = false;
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long.';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long.';
+      valid = false;
+    } else if (!/\d/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one number.';
+      valid = false;
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one lowercase letter.';
+      valid = false;
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one uppercase letter.';
+      valid = false;
+    } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one special character.';
       valid = false;
     }
 
@@ -73,6 +86,7 @@ function ResetPassword({ setIsLoggedIn }) {
               style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }}
             />
             {errors.password && <small className="text-danger">{errors.password}</small>}
+            <PasswordStrengthIndicator password={formData.password} />
           </div>
           <div className="mb-3">
             <input
