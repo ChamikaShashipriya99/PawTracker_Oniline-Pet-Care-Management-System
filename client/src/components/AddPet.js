@@ -100,48 +100,159 @@ function AddPet() {
 
   return (
     <div className="container mt-5">
-      <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
+      <div className="card shadow-lg p-4" style={{ maxWidth: '600px', margin: '0 auto', borderRadius: '15px', border: 'none' }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 style={{ color: '#007bff', margin: 0 }}>Add Pet 🐾</h2>
+          <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Add Pet 🐾</h2>
           <button 
             className="btn btn-outline-primary" 
             onClick={() => navigate('/profile')}
             style={{ borderRadius: '10px' }}
           >
-            <i className="fas fa-arrow-left me-2"></i> Back to Profile
+            <i className="fas fa-arrow-left me-2"></i> Back
           </button>
         </div>
         
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <input type="text" name="petName" className="form-control" placeholder="Pet Name" value={pet.petName} onChange={handleChange} required />
-            {errors.petName && <small className="text-danger">{errors.petName}</small>}
+          <div className="row">
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="text"
+                  name="petName"
+                  className={`form-control ${errors.petName ? 'is-invalid' : ''}`}
+                  value={pet.petName}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="Pet Name"
+                />
+                <label>Pet Name</label>
+                {errors.petName && <div className="invalid-feedback">{errors.petName}</div>}
+              </div>
+            </div>
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="text"
+                  name="breed"
+                  className={`form-control ${errors.breed ? 'is-invalid' : ''}`}
+                  value={pet.breed}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="Breed"
+                />
+                <label>Breed</label>
+                {errors.breed && <div className="invalid-feedback">{errors.breed}</div>}
+              </div>
+            </div>
           </div>
-          <div className="mb-3">
-            <input type="text" name="breed" className="form-control" placeholder="Breed" value={pet.breed} onChange={handleChange} required />
-            {errors.breed && <small className="text-danger">{errors.breed}</small>}
+          
+          <div className="row">
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="date"
+                  name="birthday"
+                  className={`form-control ${errors.birthday ? 'is-invalid' : ''}`}
+                  value={pet.birthday}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                />
+                <label>Birthday</label>
+                {errors.birthday && <div className="invalid-feedback">{errors.birthday}</div>}
+              </div>
+            </div>
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="number"
+                  name="age"
+                  className={`form-control ${errors.age ? 'is-invalid' : ''}`}
+                  value={pet.age}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="Age"
+                />
+                <label>Age</label>
+                {errors.age && <div className="invalid-feedback">{errors.age}</div>}
+              </div>
+            </div>
           </div>
-          <div className="mb-3">
-            <input type="date" name="birthday" className="form-control" value={pet.birthday} onChange={handleChange} required />
-            {errors.birthday && <small className="text-danger">{errors.birthday}</small>}
+          
+          <div className="mb-4">
+            <div className="form-floating">
+              <input
+                type="number"
+                name="weight"
+                className={`form-control ${errors.weight ? 'is-invalid' : ''}`}
+                value={pet.weight}
+                onChange={handleChange}
+                required
+                style={{ borderRadius: '10px', height: '50px' }}
+                placeholder="Weight (kg)"
+              />
+              <label>Weight (kg)</label>
+              {errors.weight && <div className="invalid-feedback">{errors.weight}</div>}
+            </div>
           </div>
-          <div className="mb-3">
-            <input type="number" name="age" className="form-control" placeholder="Age" value={pet.age} onChange={handleChange} required />
-            {errors.age && <small className="text-danger">{errors.age}</small>}
+          
+          <div className="mb-4">
+            <div className="form-floating">
+              <textarea
+                name="specialConditions"
+                className="form-control"
+                value={pet.specialConditions}
+                onChange={handleChange}
+                style={{ borderRadius: '10px', height: '100px' }}
+                placeholder="Special Conditions/Notes"
+              />
+              <label>Special Conditions/Notes</label>
+            </div>
           </div>
-          <div className="mb-3">
-            <input type="number" name="weight" className="form-control" placeholder="Weight (kg)" value={pet.weight} onChange={handleChange} required />
-            {errors.weight && <small className="text-danger">{errors.weight}</small>}
+          
+          <div className="card mb-4" style={{ borderRadius: '10px', backgroundColor: '#f8f9fa' }}>
+            <div className="card-body">
+              <h5 className="card-title mb-3" style={{ color: '#007bff' }}>Pet Photo</h5>
+              <div className="mb-3">
+                <input
+                  type="file"
+                  name="petPhoto"
+                  className={`form-control ${errors.petPhoto ? 'is-invalid' : ''}`}
+                  onChange={handleFileChange}
+                  required
+                  style={{ borderRadius: '10px' }}
+                />
+                {errors.petPhoto && <div className="invalid-feedback">{errors.petPhoto}</div>}
+              </div>
+            </div>
           </div>
-          <div className="mb-3">
-            <textarea name="specialConditions" className="form-control" placeholder="Special Conditions/Notes" value={pet.specialConditions} onChange={handleChange} />
+          
+          <div className="d-flex justify-content-between mt-4">
+            <button 
+              type="submit" 
+              className="btn btn-primary px-4 py-2" 
+              style={{ 
+                backgroundColor: '#00c4cc', 
+                border: 'none', 
+                borderRadius: '10px',
+                fontWeight: '500',
+                boxShadow: '0 4px 6px rgba(0, 196, 204, 0.2)'
+              }}
+            >
+              <i className="fas fa-plus-circle me-2"></i> Add Pet
+            </button>
+            <button 
+              type="button" 
+              className="btn btn-outline-secondary px-4 py-2" 
+              style={{ borderRadius: '10px' }} 
+              onClick={() => navigate('/profile')}
+            >
+              <i className="fas fa-times me-2"></i> Cancel
+            </button>
           </div>
-          <div className="mb-3">
-            <label htmlFor="petPhoto" className="form-label">Pet Photo</label>
-            <input type="file" name="petPhoto" className="form-control" onChange={handleFileChange} required />
-            {errors.petPhoto && <small className="text-danger">{errors.petPhoto}</small>}
-          </div>
-          <button type="submit" className="btn btn-primary w-100">Add Pet</button>
         </form>
       </div>
       <br></br>
