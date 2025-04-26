@@ -90,7 +90,16 @@ function MyPets() {
   return (
     <div className="container mt-5">
       <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
-        <h2 className="text-center mb-4" style={{ color: '#007bff' }}>My Pets 🐾</h2>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 style={{ color: '#007bff', margin: 0 }}>My Pets 🐾</h2>
+          <button 
+            className="btn btn-outline-primary" 
+            onClick={() => navigate('/profile')}
+            style={{ borderRadius: '10px' }}
+          >
+            <i className="fas fa-arrow-left me-2"></i> Back to Profile
+          </button>
+        </div>
         {pets.length === 0 ? (
           <p className="text-center">No pets added yet.</p>
         ) : (

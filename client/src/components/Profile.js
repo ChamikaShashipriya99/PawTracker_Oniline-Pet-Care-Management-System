@@ -119,6 +119,90 @@ function Profile() {
           <p><strong>Username:</strong> {user.username}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
+
+          {/* Account Statistics Section */}
+          <div className="mt-4 mb-4">
+            <h3 style={{ color: '#007bff' }}>Account Statistics</h3>
+            <div className="row">
+              <div className="col-md-4">
+                <div className="card text-center p-3" style={{ backgroundColor: '#e6f7ff', borderRadius: '10px', border: '1px solid #007bff' }}>
+                  <h4 style={{ color: '#007bff' }}>Pets</h4>
+                  <p className="fs-3" style={{ color: '#00c4cc', fontWeight: 'bold' }}>{pets.length}</p>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="card text-center p-3" style={{ backgroundColor: '#ffe6e6', borderRadius: '10px', border: '1px solid #ff5733' }}>
+                  <h4 style={{ color: '#007bff' }}>Appointments</h4>
+                  <p className="fs-3" style={{ color: '#ff5733', fontWeight: 'bold' }}>0</p>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="card text-center p-3" style={{ backgroundColor: '#e6ffe6', borderRadius: '10px', border: '1px solid #28a745' }}>
+                  <h4 style={{ color: '#007bff' }}>Services</h4>
+                  <p className="fs-3" style={{ color: '#28a745', fontWeight: 'bold' }}>0</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity Section */}
+          <div className="mt-4 mb-4">
+            <h3 style={{ color: '#007bff' }}>Recent Activity</h3>
+            <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
+              <div className="list-group">
+                <div className="list-group-item border-0" style={{ backgroundColor: 'transparent' }}>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <i className="fas fa-user-plus text-primary me-2"></i>
+                      <span>Account created</span>
+                    </div>
+                    <small className="text-muted">{new Date(user.createdAt).toLocaleDateString()}</small>
+                  </div>
+                </div>
+                {pets.length > 0 && (
+                  <div className="list-group-item border-0" style={{ backgroundColor: 'transparent' }}>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <i className="fas fa-paw text-success me-2"></i>
+                        <span>Added {pets.length} pet{pets.length > 1 ? 's' : ''}</span>
+                      </div>
+                      <small className="text-muted">Recently</small>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions Section */}
+          <div className="mt-4 mb-4">
+            <h3 style={{ color: '#007bff' }}>Quick Actions</h3>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px', cursor: 'pointer' }} onClick={() => navigate('/add-pet')}>
+                  <div className="d-flex align-items-center">
+                    <i className="fas fa-plus-circle text-primary me-3" style={{ fontSize: '1.5rem' }}></i>
+                    <div>
+                      <h5 className="mb-0">Add New Pet</h5>
+                      <small className="text-muted">Register a new pet to your profile</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-6 mb-3">
+                <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px', cursor: 'pointer' }} onClick={() => navigate('/my-pets')}>
+                  <div className="d-flex align-items-center">
+                    <i className="fas fa-list text-success me-3" style={{ fontSize: '1.5rem' }}></i>
+                    <div>
+                      <h5 className="mb-0">View All Pets</h5>
+                      <small className="text-muted">See detailed information about your pets</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <h3 className="mt-4" style={{ color: '#007bff' }}>My Pets</h3>
           {pets.length === 0 ? (
             <p>No pets added yet.</p>
