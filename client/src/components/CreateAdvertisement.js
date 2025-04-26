@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { BsArrowLeft } from "react-icons/bs";
+import "./Advertisement.css";
 
 const CreateAdvertisement = () => {
   const [name, setName] = useState("");
@@ -84,147 +85,181 @@ const CreateAdvertisement = () => {
 
   // Inline BackButton component
   const BackButton = ({ destination = "/ad-dashboard" }) => (
-    <div className="d-flex">
-      <Link
-        to={destination}
-        className="btn btn-primary d-flex align-items-center"
-      >
-        <BsArrowLeft className="me-2" style={{ fontSize: "1.5rem" }} />
-        Back
-      </Link>
-    </div>
+    <Link to={destination} className="back-button">
+      <BsArrowLeft style={{ marginRight: "8px", fontSize: "18px" }} />
+      Go Back
+    </Link>
   );
 
   // Inline Spinner component
   const Spinner = () => (
-    <div className="d-flex justify-content-center my-4">
-      <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
-        <span className="visually-hidden">Loading...</span>
-      </div>
-    </div>
+    <div className="loading fade-in">Loading...</div>
   );
 
   return (
-    <div className="container my-4">
-      <BackButton />
-      <h1 className="display-5 my-4 fw-bold">Create Pet Advertisement</h1>
-      {loading && <Spinner />}
-      <div className="card shadow p-4" style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <div className="mb-3">
-          <label htmlFor="name" className="form-label fs-5 text-muted">Name</label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="form-control"
-          />
+    <div className="home-container">
+      <section className="hero-section">
+        <div className="hero-content fade-in">
+          <h1 className="hero-title">Create Pet Advertisement 🐾</h1>
+          <p className="hero-subtitle">Share your pet ad with the PawTracker community.</p>
         </div>
-        <div className="-Chris mb-3">
-          <label htmlFor="email" className="form-label fs-5 text-muted">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="form-control"
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="contactNumber" className="form-label fs-5 text-muted">Contact Number</label>
-          <input
-            type="text"
-            id="contactNumber"
-            value={contactNumber}
-            onChange={(e) => setContactNumber(e.target.value)}
-            className="form-control"
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label fs-5 text-muted">Advertisement Type</label>
-          <div className="d-flex gap-3">
-            <div className="form-check">
-              <input
-                type="radio"
-                id="lostAndFound"
-                name="advertisementType"
-                value="Lost and Found"
-                checked={advertisementType === "Lost and Found"}
-                onChange={(e) => setAdvertisementType(e.target.value)}
-                className="form-check-input"
-              />
-              <label htmlFor="lostAndFound" className="form-check-label">Lost and Found</label>
-            </div>
-            <div className="form-check">
-              <input
-                type="radio"
-                id="sellAPet"
-                name="advertisementType"
-                value="Sell a Pet"
-                checked={advertisementType === "Sell a Pet"}
-                onChange={(e) => setAdvertisementType(e.target.value)}
-                className="form-check-input"
-              />
-              <label htmlFor="sellAPet" className="form-check-label">Sell a Pet</label>
-            </div>
+      </section>
+
+      <section className="content-section fade-in">
+        <div className="session-container">
+          <div className="session-header">
+            <BackButton />
+            <h1>Add New Advertisement</h1>
           </div>
+
+          {enqueueSnackbar.message && (
+            <div className={`notification ${enqueueSnackbar.variant}`}>
+              {enqueueSnackbar.message}
+            </div>
+          )}
+
+          <form className="session-form" onSubmit={(e) => { e.preventDefault(); handleSaveAdvertisement(); }}>
+            <div className="form-group">
+              <label htmlFor="name">Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="form-control"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="form-control"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="contactNumber">Contact Number</label>
+              <input
+                type="text"
+                id="contactNumber"
+                name="contactNumber"
+                value={contactNumber}
+                onChange={(e) => setContactNumber(e.target.value)}
+                className="form-control"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Advertisement Type</label>
+              <div className="form-row">
+                <div className="form-radio">
+                  <input
+                    type="radio"
+                    id="lostAndFound"
+                    name="advertisementType"
+                    value="Lost and Found"
+                    checked={advertisementType === "Lost and Found"}
+                    onChange={(e) => setAdvertisementType(e.target.value)}
+                    className="form-radio-input"
+                  />
+                  <label htmlFor="lostAndFound" className="form-radio-label">Lost and Found</label>
+                </div>
+                <div className="form-radio">
+                  <input
+                    type="radio"
+                    id="sellAPet"
+                    name="advertisementType"
+                    value="Sell a Pet"
+                    checked={advertisementType === "Sell a Pet"}
+                    onChange={(e) => setAdvertisementType(e.target.value)}
+                    className="form-radio-input"
+                  />
+                  <label htmlFor="sellAPet" className="form-radio-label">Sell a Pet</label>
+                </div>
+              </div>
+            </div>
+
+            {advertisementType === "Sell a Pet" && (
+              <div className="form-group">
+                <label htmlFor="petType">Pet Type</label>
+                <select
+                  id="petType"
+                  name="petType"
+                  value={petType}
+                  onChange={(e) => setPetType(e.target.value)}
+                  className="form-control"
+                >
+                  <option value="">Select Pet Type</option>
+                  <option value="Cat">Cat</option>
+                  <option value="Dog">[CENSORED]og</option>
+                  <option value="Bird">Bird</option>
+                  <option value="Fish">Fish</option>
+                  <option value="Another">Another</option>
+                </select>
+              </div>
+            )}
+
+            <div className="form-group">
+              <label htmlFor="heading">Heading</label>
+              <input
+                type="text"
+                id="heading"
+                name="heading"
+                value={heading}
+                onChange={(e) => setHeading(e.target.value)}
+                className="form-control"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="form-control"
+                rows="4"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="uploadImage">Upload Image</label>
+              <input
+                type="file"
+                id="uploadImage"
+                name="uploadImage"
+                onChange={(e) => setUploadImage(e.target.files[0])}
+                className="form-control"
+                accept="image/*"
+              />
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="submit"
+                className="submit-button"
+                disabled={loading}
+              >
+                {loading ? "Submitting..." : "Add Advertisement"}
+              </button>
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={() => navigate("/advertising")}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
-        {advertisementType === "Sell a Pet" && (
-          <div className="mb-3">
-            <label htmlFor="petType" className="form-label fs-5 text-muted">Pet Type</label>
-            <select
-              id="petType"
-              value={petType}
-              onChange={(e) => setPetType(e.target.value)}
-              className="form-select"
-            >
-              <option value="">Select Pet Type</option>
-              <option value="Cat">Cat</option>
-              <option value="Dog">Dog</option>
-              <option value="Bird">Bird</option>
-              <option value="Fish">Fish</option>
-              <option value="Another">Another</option>
-            </select>
-          </div>
-        )}
-        <div className="mb-3">
-          <label htmlFor="heading" className="form-label fs-5 text-muted">Heading</label>
-          <input
-            type="text"
-            id="heading"
-            value={heading}
-            onChange={(e) => setHeading(e.target.value)}
-            className="form-control"
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="description" className="form-label fs-5 text-muted">Description</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="form-control"
-            rows="4"
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="uploadImage" className="form-label fs-5 text-muted">Upload Image</label>
-          <input
-            type="file"
-            id="uploadImage"
-            accept="image/*"
-            onChange={(e) => setUploadImage(e.target.files[0])}
-            className="form-control"
-          />
-        </div>
-        <button
-          className="btn btn-primary mt-3"
-          onClick={handleSaveAdvertisement}
-          disabled={loading}
-        >
-          {loading ? "Submitting..." : "Submit Advertisement"}
-        </button>
-      </div>
+      </section>
     </div>
   );
 };
