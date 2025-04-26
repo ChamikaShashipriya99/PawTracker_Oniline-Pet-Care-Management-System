@@ -106,65 +106,211 @@ function Profile() {
 
   return (
     <div className="container mt-5">
-      <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
-        <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Profile 🐾</h2>
-        <div className="card-body">
-          {user.profilePhoto && (
-            <div className="text-center mb-4">
-              <img src={`http://localhost:5000${user.profilePhoto}`} alt="Profile" className="img-fluid rounded-circle" style={{ maxWidth: '150px', border: '2px solid #007bff' }} />
+      <div className="card shadow-lg p-4" style={{ borderRadius: '15px', border: 'none' }}>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Profile 🐾</h2>
+          <div>
+            <button 
+              onClick={handleDownloadProfile} 
+              className="btn btn-outline-success me-2" 
+              style={{ borderRadius: '10px' }}
+            >
+              <i className="fas fa-download me-2"></i> Download Profile
+            </button>
+            <button 
+              onClick={handleDeleteAccount} 
+              className="btn btn-outline-danger" 
+              style={{ borderRadius: '10px' }}
+            >
+              <i className="fas fa-trash-alt me-2"></i> Delete Account
+            </button>
+          </div>
+        </div>
+        
+        <div className="row">
+          {/* Profile Photo and Basic Info */}
+          <div className="col-md-4 mb-4">
+            <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+              <div className="card-body text-center">
+                {user.profilePhoto ? (
+                  <img 
+                    src={`http://localhost:5000${user.profilePhoto}`} 
+                    alt="Profile" 
+                    className="img-fluid rounded-circle mb-3" 
+                    style={{ 
+                      width: '150px', 
+                      height: '150px', 
+                      objectFit: 'cover', 
+                      border: '3px solid #007bff',
+                      boxShadow: '0 4px 8px rgba(0, 123, 255, 0.2)'
+                    }} 
+                  />
+                ) : (
+                  <div 
+                    className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                    style={{ 
+                      width: '150px', 
+                      height: '150px', 
+                      backgroundColor: '#e9ecef',
+                      border: '3px solid #007bff'
+                    }}
+                  >
+                    <i className="fas fa-user fa-4x text-secondary"></i>
+                  </div>
+                )}
+                <h4 className="mb-1">{user.firstName} {user.lastName}</h4>
+                <p className="text-muted mb-3">@{user.username}</p>
+                <Link 
+                  to="/update-profile" 
+                  className="btn btn-primary w-100" 
+                  style={{ borderRadius: '10px' }}
+                >
+                  <i className="fas fa-edit me-2"></i> Edit Profile
+                </Link>
+              </div>
             </div>
-          )}
-          <p><strong>First Name:</strong> {user.firstName}</p>
-          <p><strong>Last Name:</strong> {user.lastName}</p>
-          <p><strong>Username:</strong> {user.username}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Phone:</strong> {user.phone}</p>
-
-          {/* Account Statistics Section */}
-          <div className="mt-4 mb-4">
-            <h3 style={{ color: '#007bff' }}>Account Statistics</h3>
-            <div className="row">
-              <div className="col-md-4">
-                <div className="card text-center p-3" style={{ backgroundColor: '#e6f7ff', borderRadius: '10px', border: '1px solid #007bff' }}>
-                  <h4 style={{ color: '#007bff' }}>Pets</h4>
-                  <p className="fs-3" style={{ color: '#00c4cc', fontWeight: 'bold' }}>{pets.length}</p>
-                </div>
+          </div>
+          
+          {/* Contact Information */}
+          <div className="col-md-8 mb-4">
+            <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+              <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+                <h5 className="mb-0" style={{ color: '#007bff' }}>
+                  <i className="fas fa-address-card me-2"></i> Contact Information
+                </h5>
               </div>
-              <div className="col-md-4">
-                <div className="card text-center p-3" style={{ backgroundColor: '#ffe6e6', borderRadius: '10px', border: '1px solid #ff5733' }}>
-                  <h4 style={{ color: '#007bff' }}>Appointments</h4>
-                  <p className="fs-3" style={{ color: '#ff5733', fontWeight: 'bold' }}>0</p>
+              <div className="card-body">
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <div className="d-flex align-items-center">
+                      <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', backgroundColor: '#e6f7ff' }}>
+                        <i className="fas fa-envelope text-primary"></i>
+                      </div>
+                      <div>
+                        <p className="text-muted mb-0">Email</p>
+                        <p className="mb-0 fw-bold">{user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <div className="d-flex align-items-center">
+                      <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', backgroundColor: '#e6f7ff' }}>
+                        <i className="fas fa-phone text-primary"></i>
+                      </div>
+                      <div>
+                        <p className="text-muted mb-0">Phone</p>
+                        <p className="mb-0 fw-bold">{user.phone}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="col-md-4">
-                <div className="card text-center p-3" style={{ backgroundColor: '#e6ffe6', borderRadius: '10px', border: '1px solid #28a745' }}>
-                  <h4 style={{ color: '#007bff' }}>Services</h4>
-                  <p className="fs-3" style={{ color: '#28a745', fontWeight: 'bold' }}>0</p>
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <div className="d-flex align-items-center">
+                      <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', backgroundColor: '#e6f7ff' }}>
+                        <i className="fas fa-calendar-alt text-primary"></i>
+                      </div>
+                      <div>
+                        <p className="text-muted mb-0">Member Since</p>
+                        <p className="mb-0 fw-bold">{new Date(user.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <div className="d-flex align-items-center">
+                      <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', backgroundColor: '#e6f7ff' }}>
+                        <i className="fas fa-user-shield text-primary"></i>
+                      </div>
+                      <div>
+                        <p className="text-muted mb-0">Account Type</p>
+                        <p className="mb-0 fw-bold">{user.isAdmin ? 'Administrator' : 'Standard User'}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Recent Activity Section */}
-          <div className="mt-4 mb-4">
-            <h3 style={{ color: '#007bff' }}>Recent Activity</h3>
-            <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
-              <div className="list-group">
-                <div className="list-group-item border-0" style={{ backgroundColor: 'transparent' }}>
+        {/* Account Statistics Section */}
+        <div className="mb-4">
+          <h3 style={{ color: '#007bff', fontWeight: '600' }}>
+            <i className="fas fa-chart-pie me-2"></i> Account Statistics
+          </h3>
+          <div className="row">
+            <div className="col-md-4 mb-3">
+              <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: '#e6f7ff' }}>
+                <div className="card-body text-center p-4">
+                  <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '60px', height: '60px', backgroundColor: '#007bff' }}>
+                    <i className="fas fa-paw fa-2x text-white"></i>
+                  </div>
+                  <h4 className="mb-1" style={{ color: '#007bff' }}>Pets</h4>
+                  <p className="fs-2 mb-0" style={{ color: '#00c4cc', fontWeight: 'bold' }}>{pets.length}</p>
+                  <p className="text-muted mb-0 mt-2">Registered pets</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4 mb-3">
+              <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffe6e6' }}>
+                <div className="card-body text-center p-4">
+                  <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '60px', height: '60px', backgroundColor: '#ff5733' }}>
+                    <i className="fas fa-calendar-check fa-2x text-white"></i>
+                  </div>
+                  <h4 className="mb-1" style={{ color: '#ff5733' }}>Appointments</h4>
+                  <p className="fs-2 mb-0" style={{ color: '#ff5733', fontWeight: 'bold' }}>0</p>
+                  <p className="text-muted mb-0 mt-2">Scheduled appointments</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4 mb-3">
+              <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: '#e6ffe6' }}>
+                <div className="card-body text-center p-4">
+                  <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '60px', height: '60px', backgroundColor: '#28a745' }}>
+                    <i className="fas fa-concierge-bell fa-2x text-white"></i>
+                  </div>
+                  <h4 className="mb-1" style={{ color: '#28a745' }}>Services</h4>
+                  <p className="fs-2 mb-0" style={{ color: '#28a745', fontWeight: 'bold' }}>0</p>
+                  <p className="text-muted mb-0 mt-2">Booked services</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity Section */}
+        <div className="mb-4">
+          <h3 style={{ color: '#007bff', fontWeight: '600' }}>
+            <i className="fas fa-history me-2"></i> Recent Activity
+          </h3>
+          <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+            <div className="card-body p-0">
+              <div className="list-group list-group-flush">
+                <div className="list-group-item border-0 p-3">
                   <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <i className="fas fa-user-plus text-primary me-2"></i>
-                      <span>Account created</span>
+                    <div className="d-flex align-items-center">
+                      <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', backgroundColor: '#e6f7ff' }}>
+                        <i className="fas fa-user-plus text-primary"></i>
+                      </div>
+                      <div>
+                        <p className="mb-0 fw-bold">Account created</p>
+                        <small className="text-muted">Welcome to PawTracker!</small>
+                      </div>
                     </div>
                     <small className="text-muted">{new Date(user.createdAt).toLocaleDateString()}</small>
                   </div>
                 </div>
                 {pets.length > 0 && (
-                  <div className="list-group-item border-0" style={{ backgroundColor: 'transparent' }}>
+                  <div className="list-group-item border-0 p-3">
                     <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <i className="fas fa-paw text-success me-2"></i>
-                        <span>Added {pets.length} pet{pets.length > 1 ? 's' : ''}</span>
+                      <div className="d-flex align-items-center">
+                        <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', backgroundColor: '#e6ffe6' }}>
+                          <i className="fas fa-paw text-success"></i>
+                        </div>
+                        <div>
+                          <p className="mb-0 fw-bold">Added {pets.length} pet{pets.length > 1 ? 's' : ''}</p>
+                          <small className="text-muted">Your furry friends are now registered</small>
+                        </div>
                       </div>
                       <small className="text-muted">Recently</small>
                     </div>
@@ -173,63 +319,145 @@ function Profile() {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Quick Actions Section */}
-          <div className="mt-4 mb-4">
-            <h3 style={{ color: '#007bff' }}>Quick Actions</h3>
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px', cursor: 'pointer' }} onClick={() => navigate('/add-pet')}>
+        {/* Quick Actions Section */}
+        <div className="mb-4">
+          <h3 style={{ color: '#007bff', fontWeight: '600' }}>
+            <i className="fas fa-bolt me-2"></i> Quick Actions
+          </h3>
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <div 
+                className="card h-100" 
+                style={{ 
+                  borderRadius: '15px', 
+                  border: 'none', 
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s'
+                }} 
+                onClick={() => navigate('/add-pet')}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 8px 15px rgba(0, 0, 0, 0.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                }}
+              >
+                <div className="card-body p-4">
                   <div className="d-flex align-items-center">
-                    <i className="fas fa-plus-circle text-primary me-3" style={{ fontSize: '1.5rem' }}></i>
+                    <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px', backgroundColor: '#e6f7ff' }}>
+                      <i className="fas fa-plus-circle fa-lg text-primary"></i>
+                    </div>
                     <div>
-                      <h5 className="mb-0">Add New Pet</h5>
-                      <small className="text-muted">Register a new pet to your profile</small>
+                      <h5 className="mb-1">Add New Pet</h5>
+                      <p className="text-muted mb-0">Register a new pet to your profile</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mb-3">
-                <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px', cursor: 'pointer' }} onClick={() => navigate('/my-pets')}>
+            </div>
+            <div className="col-md-6 mb-3">
+              <div 
+                className="card h-100" 
+                style={{ 
+                  borderRadius: '15px', 
+                  border: 'none', 
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s'
+                }} 
+                onClick={() => navigate('/my-pets')}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 8px 15px rgba(0, 0, 0, 0.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                }}
+              >
+                <div className="card-body p-4">
                   <div className="d-flex align-items-center">
-                    <i className="fas fa-list text-success me-3" style={{ fontSize: '1.5rem' }}></i>
+                    <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '50px', height: '50px', backgroundColor: '#e6ffe6' }}>
+                      <i className="fas fa-list fa-lg text-success"></i>
+                    </div>
                     <div>
-                      <h5 className="mb-0">View All Pets</h5>
-                      <small className="text-muted">See detailed information about your pets</small>
+                      <h5 className="mb-1">View All Pets</h5>
+                      <p className="text-muted mb-0">See detailed information about your pets</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <h3 className="mt-4" style={{ color: '#007bff' }}>My Pets</h3>
+        {/* My Pets Section */}
+        <div className="mb-4">
+          <h3 style={{ color: '#007bff', fontWeight: '600' }}>
+            <i className="fas fa-paw me-2"></i> My Pets
+          </h3>
           {pets.length === 0 ? (
-            <p>No pets added yet.</p>
+            <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+              <div className="card-body text-center p-5">
+                <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '80px', height: '80px', backgroundColor: '#e6f7ff' }}>
+                  <i className="fas fa-paw fa-2x text-primary"></i>
+                </div>
+                <h5 className="mb-2">No pets added yet</h5>
+                <p className="text-muted mb-3">Start by adding your first pet to your profile</p>
+                <Link to="/add-pet" className="btn btn-primary" style={{ borderRadius: '10px' }}>
+                  <i className="fas fa-plus-circle me-2"></i> Add Pet
+                </Link>
+              </div>
+            </div>
           ) : (
             <div className="row">
               {pets.map(pet => (
                 <div key={pet._id} className="col-md-4 mb-3">
-                  <div className="card" style={{ borderRadius: '10px' }}>
-                    {pet.petPhoto && (
-                      <img src={`http://localhost:5000${pet.petPhoto}`} alt={pet.petName} className="card-img-top" style={{ borderRadius: '10px 10px 0 0', maxHeight: '150px', objectFit: 'cover' }} />
+                  <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                    {pet.petPhoto ? (
+                      <img 
+                        src={`http://localhost:5000${pet.petPhoto}`} 
+                        alt={pet.petName} 
+                        className="card-img-top" 
+                        style={{ 
+                          borderRadius: '15px 15px 0 0', 
+                          height: '180px', 
+                          objectFit: 'cover' 
+                        }} 
+                      />
+                    ) : (
+                      <div 
+                        className="d-flex align-items-center justify-content-center" 
+                        style={{ 
+                          borderRadius: '15px 15px 0 0', 
+                          height: '180px', 
+                          backgroundColor: '#e9ecef' 
+                        }}
+                      >
+                        <i className="fas fa-paw fa-3x text-secondary"></i>
+                      </div>
                     )}
                     <div className="card-body">
-                      <h5 className="card-title">{pet.petName}</h5>
-                      <p className="card-text"><strong>Breed:</strong> {pet.breed}</p>
+                      <h5 className="card-title mb-2">{pet.petName}</h5>
+                      <p className="card-text mb-1"><strong>Breed:</strong> {pet.breed}</p>
+                      <p className="card-text mb-1"><strong>Age:</strong> {pet.age} years</p>
+                      <p className="card-text mb-1"><strong>Weight:</strong> {pet.weight} kg</p>
+                      {pet.specialConditions && (
+                        <p className="card-text mb-1">
+                          <strong>Special Conditions:</strong> {pet.specialConditions}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-          <div className="d-flex justify-content-between flex-wrap mt-4">
-            <Link to="/update-profile" className="btn btn-primary m-1" style={{ borderRadius: '10px' }}>Update Profile</Link>
-            <Link to="/add-pet" className="btn btn-success m-1" style={{ borderRadius: '10px' }}>Add Pet</Link>
-            <Link to="/my-pets" className="btn btn-info m-1" style={{ borderRadius: '10px' }}>My Pets</Link>
-            <button onClick={handleDownloadProfile} className="btn btn-success m-1" style={{ borderRadius: '10px' }}>Download Profile Details</button>
-            <button onClick={handleDeleteAccount} className="btn btn-danger m-1" style={{ borderRadius: '10px' }}>Delete Profile</button>
-          </div>
         </div>
       </div>
       <br></br>

@@ -68,106 +68,165 @@ function UpdateProfile() {
 
   return (
     <div className="container mt-5">
-      <div className="card shadow p-4" style={{ maxWidth: '500px', margin: '0 auto', borderRadius: '15px' }}>
-        <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Update Profile 🐾</h2>
+      <div className="card shadow-lg p-4" style={{ maxWidth: '600px', margin: '0 auto', borderRadius: '15px', border: 'none' }}>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Update Profile 🐾</h2>
+          <button 
+            className="btn btn-outline-primary" 
+            onClick={() => navigate('/profile')}
+            style={{ borderRadius: '10px' }}
+          >
+            <i className="fas fa-arrow-left me-2"></i> Back
+          </button>
+        </div>
+        
         <form onSubmit={handleSave}>
-          <div className="mb-3">
-            <label>First Name</label>
-            <input
-              type="text"
-              name="firstName"
-              className="form-control"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              style={{ borderRadius: '10px' }}
-            />
-            {errors.firstName && <small className="text-danger">{errors.firstName}</small>}
+          <div className="row">
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="text"
+                  name="firstName"
+                  className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="First Name"
+                />
+                <label>First Name</label>
+                {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
+              </div>
+            </div>
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="text"
+                  name="lastName"
+                  className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="Last Name"
+                />
+                <label>Last Name</label>
+                {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
+              </div>
+            </div>
           </div>
-          <div className="mb-3">
-            <label>Last Name</label>
-            <input
-              type="text"
-              name="lastName"
-              className="form-control"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              style={{ borderRadius: '10px' }}
-            />
-            {errors.lastName && <small className="text-danger">{errors.lastName}</small>}
+          
+          <div className="row">
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="text"
+                  name="username"
+                  className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="Username"
+                />
+                <label>Username</label>
+                {errors.username && <div className="invalid-feedback">{errors.username}</div>}
+              </div>
+            </div>
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="email"
+                  name="email"
+                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="Email"
+                />
+                <label>Email</label>
+                {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+              </div>
+            </div>
           </div>
-          <div className="mb-3">
-            <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              className="form-control"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              style={{ borderRadius: '10px' }}
-            />
-            {errors.username && <small className="text-danger">{errors.username}</small>}
+          
+          <div className="mb-4">
+            <div className="form-floating">
+              <input
+                type="tel"
+                name="phone"
+                className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                style={{ borderRadius: '10px', height: '50px' }}
+                placeholder="Phone Number"
+              />
+              <label>Phone Number</label>
+              {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
+            </div>
           </div>
-          <div className="mb-3">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              className="form-control"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              style={{ borderRadius: '10px' }}
-            />
-            {errors.email && <small className="text-danger">{errors.email}</small>}
+          
+          <div className="card mb-4" style={{ borderRadius: '10px', backgroundColor: '#f8f9fa' }}>
+            <div className="card-body">
+              <h5 className="card-title mb-3" style={{ color: '#007bff' }}>Change Password (Optional)</h5>
+              <div className="row">
+                <div className="col-md-6 mb-3">
+                  <div className="form-floating">
+                    <input
+                      type="password"
+                      name="password"
+                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                      value={formData.password}
+                      onChange={handleChange}
+                      style={{ borderRadius: '10px', height: '50px' }}
+                      placeholder="New Password"
+                    />
+                    <label>New Password</label>
+                    {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                  </div>
+                </div>
+                <div className="col-md-6 mb-3">
+                  <div className="form-floating">
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      style={{ borderRadius: '10px', height: '50px' }}
+                      placeholder="Confirm Password"
+                    />
+                    <label>Confirm Password</label>
+                    {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword}</div>}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="mb-3">
-            <label>Phone Number</label>
-            <input
-              type="tel"
-              name="phone"
-              className="form-control"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-              style={{ borderRadius: '10px' }}
-            />
-            {errors.phone && <small className="text-danger">{errors.phone}</small>}
-          </div>
-          <div className="mb-3">
-            <label>New Password (optional)</label>
-            <input
-              type="password"
-              name="password"
-              className="form-control"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter new password"
-              style={{ borderRadius: '10px' }}
-            />
-            {errors.password && <small className="text-danger">{errors.password}</small>}
-          </div>
-          <div className="mb-3">
-            <label>Confirm New Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              className="form-control"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm new password"
-              style={{ borderRadius: '10px' }}
-            />
-            {errors.confirmPassword && <small className="text-danger">{errors.confirmPassword}</small>}
-          </div>
-          <div className="d-flex justify-content-between">
-            <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>
-              Save
+          
+          <div className="d-flex justify-content-between mt-4">
+            <button 
+              type="submit" 
+              className="btn btn-primary px-4 py-2" 
+              style={{ 
+                backgroundColor: '#00c4cc', 
+                border: 'none', 
+                borderRadius: '10px',
+                fontWeight: '500',
+                boxShadow: '0 4px 6px rgba(0, 196, 204, 0.2)'
+              }}
+            >
+              <i className="fas fa-save me-2"></i> Save Changes
             </button>
-            <button type="button" className="btn btn-secondary" style={{ borderRadius: '10px' }} onClick={() => navigate('/profile')}>
-              Cancel
+            <button 
+              type="button" 
+              className="btn btn-outline-secondary px-4 py-2" 
+              style={{ borderRadius: '10px' }} 
+              onClick={() => navigate('/profile')}
+            >
+              <i className="fas fa-times me-2"></i> Cancel
             </button>
           </div>
         </form>
