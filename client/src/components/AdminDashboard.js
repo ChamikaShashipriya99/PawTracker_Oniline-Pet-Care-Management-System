@@ -265,57 +265,68 @@ function AdminDashboard() {
 
   return (
     <div className="container mt-5">
-      <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
-        <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Admin Dashboard 🐾</h2>
-        
-        <div className="d-flex justify-content-around mb-4">
-          <div 
-            className="text-center p-3" 
-            style={{ 
-              backgroundColor: '#e6f7ff', 
-              borderRadius: '10px', 
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)', 
-              width: '150px', 
-              border: '1px solid #007bff' 
-            }}
-          >
-            <h4 style={{ color: '#007bff', marginBottom: '10px' }}>Users</h4>
-            <p className="fs-3" style={{ color: '#00c4cc', fontWeight: 'bold' }}>{userCount}</p>
+      <div className="card shadow-lg p-4" style={{ borderRadius: '15px', border: 'none' }}>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Admin Dashboard 🐾</h2>
+          <button className="btn btn-outline-success" onClick={handleDownloadAllPDF} style={{ borderRadius: '10px' }}>
+            <i className="fas fa-download me-2"></i> Download Report
+          </button>
+        </div>
+
+        <div className="row mb-4">
+          <div className="col-md-6">
+            <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+              <div className="card-body text-center">
+                <div className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px', backgroundColor: '#e6f7ff', border: '3px solid #007bff' }}>
+                  <i className="fas fa-users fa-2x text-primary"></i>
+                </div>
+                <h3 className="mb-1" style={{ color: '#007bff' }}>{userCount}</h3>
+                <p className="text-muted mb-0">Total Users</p>
+              </div>
+            </div>
           </div>
-          <div 
-            className="text-center p-3" 
-            style={{ 
-              backgroundColor: '#ffe6e6', 
-              borderRadius: '10px', 
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)', 
-              width: '150px', 
-              border: '1px solid #ff5733' 
-            }}
-          >
-            <h4 style={{ color: '#007bff', marginBottom: '10px' }}>Admins</h4>
-            <p className="fs-3" style={{ color: '#ff5733', fontWeight: 'bold' }}>{adminCount}</p>
+          <div className="col-md-6">
+            <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+              <div className="card-body text-center">
+                <div className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px', backgroundColor: '#ffe6e6', border: '3px solid #ff5733' }}>
+                  <i className="fas fa-user-shield fa-2x" style={{ color: '#ff5733' }}></i>
+                </div>
+                <h3 className="mb-1" style={{ color: '#ff5733' }}>{adminCount}</h3>
+                <p className="text-muted mb-0">Total Admins</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mb-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search by username..."
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ borderRadius: '10px', maxWidth: '400px' }}
-          />
+        <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+          <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+            <h5 className="mb-0" style={{ color: '#007bff' }}>
+              <i className="fas fa-search me-2"></i> Search Users
+            </h5>
+          </div>
+          <div className="card-body">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search by username..."
+              value={searchTerm}
+              onChange={handleSearch}
+              style={{ borderRadius: '10px' }}
+            />
+            {searchError && <p className="text-danger mt-2">{searchError}</p>}
+          </div>
         </div>
 
-        <div className="mb-4">
-          <h3 style={{ color: '#007bff' }}>Search Result</h3>
-          {searchTerm === '' ? (
-            <p className="text-muted mt-2">Enter a username to search...</p>
-          ) : filteredUsers.length > 0 ? (
-            <div className="card shadow p-3" style={{ borderRadius: '10px', backgroundColor: '#f8f9fa' }}>
+        {searchTerm && (
+          <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+            <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+              <h5 className="mb-0" style={{ color: '#007bff' }}>
+                <i className="fas fa-list me-2"></i> Search Results
+              </h5>
+            </div>
+            <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-striped">
+                <table className="table table-hover">
                   <thead>
                     <tr>
                       <th>First Name</th>
@@ -335,21 +346,27 @@ function AdminDashboard() {
                         <td>{u.username}</td>
                         <td>{u.email}</td>
                         <td>{u.phone}</td>
-                        <td>{u.isAdmin ? 'Admin' : 'User'}</td>
+                        <td>
+                          <span className={`badge ${u.isAdmin ? 'bg-danger' : 'bg-primary'}`} style={{ borderRadius: '10px' }}>
+                            {u.isAdmin ? 'Admin' : 'User'}
+                          </span>
+                        </td>
                         <td>
                           <button
-                            className="btn btn-primary btn-sm me-2"
+                            className="btn btn-sm btn-outline-primary me-2"
                             onClick={() => handleEditUser(u)}
+                            data-bs-toggle="modal"
+                            data-bs-target="#editUserModal"
                             style={{ borderRadius: '10px' }}
                           >
-                            Edit
+                            <i className="fas fa-edit"></i>
                           </button>
                           <button
-                            className="btn btn-danger btn-sm"
+                            className="btn btn-sm btn-outline-danger"
                             onClick={() => handleDeleteUser(u._id)}
                             style={{ borderRadius: '10px' }}
                           >
-                            Delete
+                            <i className="fas fa-trash-alt"></i>
                           </button>
                         </td>
                       </tr>
@@ -358,72 +375,197 @@ function AdminDashboard() {
                 </table>
               </div>
             </div>
-          ) : (
-            <p className="text-danger mt-2">{searchError}</p>
-          )}
+          </div>
+        )}
+
+        <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+          <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+            <h5 className="mb-0" style={{ color: '#007bff' }}>
+              <i className="fas fa-users me-2"></i> All Users and Admins
+            </h5>
+          </div>
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(u => (
+                    <tr key={u._id}>
+                      <td>{u.firstName}</td>
+                      <td>{u.lastName}</td>
+                      <td>{u.username}</td>
+                      <td>{u.email}</td>
+                      <td>{u.phone}</td>
+                      <td>
+                        <span className={`badge ${u.isAdmin ? 'bg-danger' : 'bg-primary'}`} style={{ borderRadius: '10px' }}>
+                          {u.isAdmin ? 'Admin' : 'User'}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-outline-primary me-2"
+                          onClick={() => handleEditUser(u)}
+                          data-bs-toggle="modal"
+                          data-bs-target="#editUserModal"
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleDeleteUser(u._id)}
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <button className="btn btn-success mb-4" onClick={handleDownloadAllPDF} style={{ borderRadius: '10px' }}>
-          Download All Users and Admins as PDF
-        </button>
-
-        <h3 style={{ color: '#007bff' }}>All Users and Admins</h3>
-        <div className="table-responsive">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Role</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(u => (
-                <tr key={u._id}>
-                  <td>{u.firstName}</td>
-                  <td>{u.lastName}</td>
-                  <td>{u.username}</td>
-                  <td>{u.email}</td>
-                  <td>{u.phone}</td>
-                  <td>{u.isAdmin ? 'Admin' : 'User'}</td>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm me-2"
-                      onClick={() => handleEditUser(u)}
-                      style={{ borderRadius: '10px' }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDeleteUser(u._id)}
-                      style={{ borderRadius: '10px' }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Edit User Modal */}
+        <div className="modal fade" id="editUserModal" tabIndex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content" style={{ borderRadius: '15px', border: 'none' }}>
+              <div className="modal-header" style={{ borderBottom: '1px solid #e9ecef' }}>
+                <h5 className="modal-title" id="editUserModalLabel" style={{ color: '#007bff' }}>
+                  <i className="fas fa-user-edit me-2"></i> Edit User/Admin
+                </h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                {editUser && (
+                  <form onSubmit={handleUpdateUser}>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">First Name</label>
+                        <input 
+                          type="text" 
+                          name="firstName" 
+                          className={`form-control ${errors.firstName ? 'is-invalid' : ''}`} 
+                          value={editUser.firstName} 
+                          onChange={handleChangeEditUser} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Last Name</label>
+                        <input 
+                          type="text" 
+                          name="lastName" 
+                          className={`form-control ${errors.lastName ? 'is-invalid' : ''}`} 
+                          value={editUser.lastName} 
+                          onChange={handleChangeEditUser} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Username</label>
+                        <input 
+                          type="text" 
+                          name="username" 
+                          className={`form-control ${errors.username ? 'is-invalid' : ''}`} 
+                          value={editUser.username} 
+                          onChange={handleChangeEditUser} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.username && <div className="invalid-feedback">{errors.username}</div>}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Email</label>
+                        <input 
+                          type="email" 
+                          name="email" 
+                          className={`form-control ${errors.email ? 'is-invalid' : ''}`} 
+                          value={editUser.email} 
+                          onChange={handleChangeEditUser} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Phone</label>
+                        <input 
+                          type="tel" 
+                          name="phone" 
+                          className={`form-control ${errors.phone ? 'is-invalid' : ''}`} 
+                          value={editUser.phone} 
+                          onChange={handleChangeEditUser} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Role</label>
+                        <select 
+                          name="isAdmin" 
+                          className="form-control" 
+                          value={editUser.isAdmin} 
+                          onChange={handleChangeEditUser} 
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <option value={true}>Admin</option>
+                          <option value={false}>User</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="d-flex justify-content-end">
+                      <button type="button" className="btn btn-outline-secondary me-2" data-bs-dismiss="modal" style={{ borderRadius: '10px' }}>
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn btn-primary" style={{ borderRadius: '10px' }}>
+                        Update
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {editUser && (
-          <div className="mt-4">
-            <h3 style={{ color: '#007bff' }}>Edit User/Admin</h3>
-            <form onSubmit={handleUpdateUser}>
+        <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+          <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+            <h5 className="mb-0" style={{ color: '#007bff' }}>
+              <i className="fas fa-user-plus me-2"></i> Add New Admin
+            </h5>
+          </div>
+          <div className="card-body">
+            <form onSubmit={handleAddAdmin}>
               <div className="row">
                 <div className="col-md-6 mb-3">
                   <input 
                     type="text" 
                     name="firstName" 
                     className={`form-control ${errors.firstName ? 'is-invalid' : ''}`} 
-                    value={editUser.firstName} 
-                    onChange={handleChangeEditUser} 
+                    placeholder="First Name" 
+                    value={newAdmin.firstName} 
+                    onChange={handleChangeNewAdmin} 
                     required 
                     style={{ borderRadius: '10px' }} 
                   />
@@ -434,8 +576,9 @@ function AdminDashboard() {
                     type="text" 
                     name="lastName" 
                     className={`form-control ${errors.lastName ? 'is-invalid' : ''}`} 
-                    value={editUser.lastName} 
-                    onChange={handleChangeEditUser} 
+                    placeholder="Last Name" 
+                    value={newAdmin.lastName} 
+                    onChange={handleChangeNewAdmin} 
                     required 
                     style={{ borderRadius: '10px' }} 
                   />
@@ -448,8 +591,9 @@ function AdminDashboard() {
                     type="text" 
                     name="username" 
                     className={`form-control ${errors.username ? 'is-invalid' : ''}`} 
-                    value={editUser.username} 
-                    onChange={handleChangeEditUser} 
+                    placeholder="Username" 
+                    value={newAdmin.username} 
+                    onChange={handleChangeNewAdmin} 
                     required 
                     style={{ borderRadius: '10px' }} 
                   />
@@ -460,8 +604,9 @@ function AdminDashboard() {
                     type="email" 
                     name="email" 
                     className={`form-control ${errors.email ? 'is-invalid' : ''}`} 
-                    value={editUser.email} 
-                    onChange={handleChangeEditUser} 
+                    placeholder="Email" 
+                    value={newAdmin.email} 
+                    onChange={handleChangeNewAdmin} 
                     required 
                     style={{ borderRadius: '10px' }} 
                   />
@@ -474,120 +619,36 @@ function AdminDashboard() {
                     type="tel" 
                     name="phone" 
                     className={`form-control ${errors.phone ? 'is-invalid' : ''}`} 
-                    value={editUser.phone} 
-                    onChange={handleChangeEditUser} 
+                    placeholder="Phone" 
+                    value={newAdmin.phone} 
+                    onChange={handleChangeNewAdmin} 
                     required 
                     style={{ borderRadius: '10px' }} 
                   />
                   {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
                 </div>
                 <div className="col-md-6 mb-3">
-                  <select 
-                    name="isAdmin" 
-                    className="form-control" 
-                    value={editUser.isAdmin} 
-                    onChange={handleChangeEditUser} 
-                    style={{ borderRadius: '10px' }}
-                  >
-                    <option value={true}>Admin</option>
-                    <option value={false}>User</option>
-                  </select>
+                  <input 
+                    type="password" 
+                    name="password" 
+                    className={`form-control ${errors.password ? 'is-invalid' : ''}`} 
+                    placeholder="Password" 
+                    value={newAdmin.password} 
+                    onChange={handleChangeNewAdmin} 
+                    required 
+                    style={{ borderRadius: '10px' }} 
+                  />
+                  {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                 </div>
               </div>
-              <button type="submit" className="btn btn-primary me-2" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>Update</button>
-              <button type="button" className="btn btn-secondary" onClick={() => setEditUser(null)} style={{ borderRadius: '10px' }}>Cancel</button>
+              <div className="d-flex justify-content-end">
+                <button type="submit" className="btn btn-primary" style={{ borderRadius: '10px' }}>
+                  Add Admin
+                </button>
+              </div>
             </form>
           </div>
-        )}
-
-        <h3 style={{ color: '#007bff', marginTop: '30px' }}>Add New Admin</h3>
-        <form onSubmit={handleAddAdmin}>
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <input 
-                type="text" 
-                name="firstName" 
-                className={`form-control ${errors.firstName ? 'is-invalid' : ''}`} 
-                placeholder="First Name" 
-                value={newAdmin.firstName} 
-                onChange={handleChangeNewAdmin} 
-                required 
-                style={{ borderRadius: '10px' }} 
-              />
-              {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
-            </div>
-            <div className="col-md-6 mb-3">
-              <input 
-                type="text" 
-                name="lastName" 
-                className={`form-control ${errors.lastName ? 'is-invalid' : ''}`} 
-                placeholder="Last Name" 
-                value={newAdmin.lastName} 
-                onChange={handleChangeNewAdmin} 
-                required 
-                style={{ borderRadius: '10px' }} 
-              />
-              {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <input 
-                type="text" 
-                name="username" 
-                className={`form-control ${errors.username ? 'is-invalid' : ''}`} 
-                placeholder="Username" 
-                value={newAdmin.username} 
-                onChange={handleChangeNewAdmin} 
-                required 
-                style={{ borderRadius: '10px' }} 
-              />
-              {errors.username && <div className="invalid-feedback">{errors.username}</div>}
-            </div>
-            <div className="col-md-6 mb-3">
-              <input 
-                type="email" 
-                name="email" 
-                className={`form-control ${errors.email ? 'is-invalid' : ''}`} 
-                placeholder="Email" 
-                value={newAdmin.email} 
-                onChange={handleChangeNewAdmin} 
-                required 
-                style={{ borderRadius: '10px' }} 
-              />
-              {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <input 
-                type="tel" 
-                name="phone" 
-                className={`form-control ${errors.phone ? 'is-invalid' : ''}`} 
-                placeholder="Phone" 
-                value={newAdmin.phone} 
-                onChange={handleChangeNewAdmin} 
-                required 
-                style={{ borderRadius: '10px' }} 
-              />
-              {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
-            </div>
-            <div className="col-md-6 mb-3">
-              <input 
-                type="password" 
-                name="password" 
-                className={`form-control ${errors.password ? 'is-invalid' : ''}`} 
-                placeholder="Password" 
-                value={newAdmin.password} 
-                onChange={handleChangeNewAdmin} 
-                required 
-                style={{ borderRadius: '10px' }} 
-              />
-              {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-            </div>
-          </div>
-          <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>Add Admin</button>
-        </form>
+        </div>
       </div>
       <br></br>
     </div>
