@@ -10,11 +10,33 @@ function UpdateProfile() {
     password: '', // New password field (optional)
     confirmPassword: '' // Confirm password field (optional)
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(user.profilePhoto ? `http://localhost:5000${user.profilePhoto}` : null);
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: '' }); // Clear error on change
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePhoto(file);
+      // Create a preview URL for the selected image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setErrors({ ...errors, profilePhoto: 'Only image files are allowed.' });
+      } else {
+        setErrors({ ...errors, profilePhoto: '' });
+      }
+    }
   };
 
   const validateForm = () => {
@@ -57,7 +79,23 @@ function UpdateProfile() {
     }
 
     try {
-      const res = await axios.put(`http://localhost:5000/api/users/${user._id}`, dataToSend);
+      // Create FormData object for multipart/form-data submission
+      const formDataToSend = new FormData();
+      
+      // Append all text fields
+      Object.keys(dataToSend).forEach(key => {
+        formDataToSend.append(key, dataToSend[key]);
+      });
+      
+      // Append profile photo if selected
+      if (profilePhoto) {
+        formDataToSend.append('profilePhoto', profilePhoto);
+      }
+      
+      const res = await axios.put(`http://localhost:5000/api/users/${user._id}`, formDataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
       localStorage.setItem('user', JSON.stringify(res.data));
       alert('Profile updated successfully!');
       navigate('/profile');
@@ -81,6 +119,51 @@ function UpdateProfile() {
         </div>
         
         <form onSubmit={handleSave}>
+          <div className="card mb-4" style={{ borderRadius: '10px', backgroundColor: '#f8f9fa' }}>
+            <div className="card-body text-center">
+              <h5 className="card-title mb-3" style={{ color: '#007bff' }}>Profile Photo</h5>
+              <div className="mb-3">
+                {photoPreview ? (
+                  <img 
+                    src={photoPreview} 
+                    alt="Profile Preview" 
+                    className="img-fluid rounded-circle mb-3" 
+                    style={{ 
+                      width: '150px', 
+                      height: '150px', 
+                      objectFit: 'cover', 
+                      border: '3px solid #007bff',
+                      boxShadow: '0 4px 8px rgba(0, 123, 255, 0.2)'
+                    }} 
+                  />
+                ) : (
+                  <div 
+                    className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                    style={{ 
+                      width: '150px', 
+                      height: '150px', 
+                      backgroundColor: '#e9ecef',
+                      border: '3px solid #007bff'
+                    }}
+                  >
+                    <i className="fas fa-user fa-4x text-secondary"></i>
+                  </div>
+                )}
+                <div className="mb-3">
+                  <input
+                    type="file"
+                    name="profilePhoto"
+                    className={`form-control ${errors.profilePhoto ? 'is-invalid' : ''}`}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    style={{ borderRadius: '10px' }}
+                  />
+                  {errors.profilePhoto && <div className="invalid-feedback">{errors.profilePhoto}</div>}
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div className="row">
             <div className="col-md-6 mb-4">
               <div className="form-floating">

@@ -41,7 +41,7 @@ const createTestAccount = async () => {
       host: 'smtp.ethereal.email',
       port: 587,
       secure: false,
-      auth: {
+  auth: {
         user: testAccount.user,
         pass: testAccount.pass
       }
@@ -350,7 +350,7 @@ router.post('/admin/add', async (req, res) => {
 });
 
 // Update user (admin or self, with password update)
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('profilePhoto'), async (req, res) => {
   const { password, ...otherFields } = req.body; // Separate password from other fields
   try {
     const updateData = { ...otherFields };
@@ -360,15 +360,23 @@ router.put('/:id', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData.password = hashedPassword;
     }
-
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!user) {
+    
+    // If a new profile photo was uploaded, update the profilePhoto field
+    if (req.file) {
+      updateData.profilePhoto = `/uploads/${req.file.filename}`;
+    }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, select: '-password -verificationCode -verificationCodeExpiry -resetToken -resetTokenExpiry' }
+    );
+    
+    if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Return user data without the password
-    const { password: _, ...userWithoutPassword } = user.toObject();
-    res.json(userWithoutPassword);
+    res.json(updatedUser);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
