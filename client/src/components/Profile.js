@@ -179,7 +179,7 @@ function Profile() {
                   <i className="fas fa-address-card me-2"></i> Contact Information
                 </h5>
               </div>
-              <div className="card-body">
+        <div className="card-body">
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <div className="d-flex align-items-center">
@@ -314,8 +314,8 @@ function Profile() {
                       </div>
                       <small className="text-muted">Recently</small>
                     </div>
-                  </div>
-                )}
+            </div>
+          )}
               </div>
             </div>
           </div>
