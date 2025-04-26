@@ -16,6 +16,8 @@ import CreateAdvertisement from './components/CreateAdvertisement';
 import AdvertisementDashboard from './components/AdvertistmentDashboard';
 import MyAdvertisement from './components/MyAdvertisement';
 import ShowAdvertisement from './components/ShowAdvertisement';
+import DeleteAdvertisement from './components/DeleteAdvertisement';
+import EditAdvertisement from './components/EditAdvertisement';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -169,6 +171,8 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
               <Route path="/advertising" element={<CreateAdvertisement/>}/>
               <Route path="/show-add" element={<ShowAdvertisement/>}/>
+              <Route path="/delete-add" element={<DeleteAdvertisement/>}/>
+              <Route path="/edit-add" element={<EditAdvertisement/>}/>
             
             </>
           )}

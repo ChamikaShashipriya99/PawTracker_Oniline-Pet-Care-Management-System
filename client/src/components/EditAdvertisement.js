@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
-import { useSnackbar } from "notistack";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
+import { useSnackbar } from "notistack";
 import "./Advertisement.css";
 
-const CreateAdvertisement = () => {
+const EditAdvertisement = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [contactNumber, setContactNumber] = useState("");
@@ -16,9 +16,32 @@ const CreateAdvertisement = () => {
   const [uploadImage, setUploadImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { id } = useParams();
   const { enqueueSnackbar } = useSnackbar();
 
-  const handleSaveAdvertisement = () => {
+  useEffect(() => {
+    setLoading(true);
+    axios
+      .get(`http://localhost:5000/advertisements/details/${id}`)
+      .then((response) => {
+        const ad = response.data;
+        setName(ad.name);
+        setEmail(ad.email);
+        setContactNumber(ad.contactNumber);
+        setAdvertisementType(ad.advertisementType);
+        setPetType(ad.petType || "");
+        setHeading(ad.heading);
+        setDescription(ad.description);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error("Error fetching advertisement:", error);
+        enqueueSnackbar("Error loading advertisement", { variant: "error" });
+      });
+  }, [id]);
+
+  const handleEditAdvertisement = () => {
     if (!/^[A-Za-z\s]+$/.test(name)) {
       enqueueSnackbar("Please enter a valid name (letters and spaces only)", { variant: "error" });
       return;
@@ -59,32 +82,24 @@ const CreateAdvertisement = () => {
     }
 
     setLoading(true);
-
     axios
-      .post("http://localhost:5000/advertisements", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      .put(`http://localhost:5000/advertisements/edit/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
       .then(() => {
         setLoading(false);
-        enqueueSnackbar("Advertisement Created Successfully", { variant: "success" });
-        setTimeout(() => {
-          navigate("/advertisements/my-ads");
-        }, 500);
+        enqueueSnackbar("Advertisement Updated Successfully", { variant: "success" });
+        navigate("/advertisements/my-ads");
       })
       .catch((error) => {
         setLoading(false);
-        console.error("Submission Error:", error.response?.data || error.message);
-        enqueueSnackbar(
-          error.response?.data?.message || "Error creating advertisement",
-          { variant: "error" }
-        );
+        console.error("Error updating advertisement:", error);
+        enqueueSnackbar("Error updating advertisement", { variant: "error" });
       });
   };
 
   // Inline BackButton component
-  const BackButton = ({ destination = "/ad-dashboard" }) => (
+  const BackButton = ({ destination = "/advertisements/my-ads" }) => (
     <div className="back-button fade-in">
       <Link to={destination} className="back-btn">
         <BsArrowLeft style={{ marginRight: "8px", fontSize: "1.5rem" }} />
@@ -104,8 +119,8 @@ const CreateAdvertisement = () => {
     <div className="home-container">
       <section className="hero-section">
         <div className="hero-content fade-in">
-          <h1 className="hero-title">Create Pet Advertisement 🐾</h1>
-          <p className="hero-subtitle">Share your pet ad with the PawTracker community.</p>
+          <h1 className="hero-title">Edit Pet Advertisement 🐾</h1>
+          <p className="hero-subtitle">Update your pet ad with the PawTracker community.</p>
         </div>
       </section>
 
@@ -121,8 +136,8 @@ const CreateAdvertisement = () => {
               <div className="col-md-8">
                 <div className="card hover-card">
                   <div className="card-body">
-                    <h2 className="card-title">Add New Advertisement</h2>
-                    <form className="session-form" onSubmit={(e) => { e.preventDefault(); handleSaveAdvertisement(); }}>
+                    <h2 className="card-title">Edit Advertisement</h2>
+                    <form className="session-form" onSubmit={(e) => { e.preventDefault(); handleEditAdvertisement(); }}>
                       <div className="form-group">
                         <label htmlFor="name">Name</label>
                         <input
@@ -234,7 +249,7 @@ const CreateAdvertisement = () => {
                       </div>
 
                       <div className="form-group">
-                        <label htmlFor="uploadImage">Upload Image</label>
+                        <label htmlFor="uploadImage">Upload New Image (optional)</label>
                         <input
                           type="file"
                           id="uploadImage"
@@ -251,12 +266,12 @@ const CreateAdvertisement = () => {
                           className="submit-button"
                           disabled={loading}
                         >
-                          {loading ? "Submitting..." : "Add Advertisement"}
+                          {loading ? "Saving..." : "Save Changes"}
                         </button>
                         <button
                           type="button"
                           className="cancel-button"
-                          onClick={() => navigate("/advertising")}
+                          onClick={() => navigate("/advertisements/my-ads")}
                         >
                           Cancel
                         </button>
@@ -273,4 +288,4 @@ const CreateAdvertisement = () => {
   );
 };
 
-export default CreateAdvertisement;
+export default EditAdvertisement;
