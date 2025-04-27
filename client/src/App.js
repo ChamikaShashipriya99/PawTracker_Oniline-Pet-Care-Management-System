@@ -106,6 +106,20 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   </>
                 ) : (
                   <>
+                  <li className="nav-item me-2">
+                      <a className="nav-link position-relative" href="#" onClick={(e) => e.preventDefault()}>
+                        <i className="fas fa-bell fa-lg"></i>
+                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                          3
+                          <span className="visually-hidden">unread notifications</span>
+                        </span>
+                      </a>
+                    </li>
+                    <li className="nav-item me-2">
+                      <Link className="nav-link" to="/profile">
+                        <i className="fas fa-user-circle fa-lg"></i>
+                      </Link>
+                    </li>
                     <li className="nav-item dropdown">
                       <a className="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
                         Profile

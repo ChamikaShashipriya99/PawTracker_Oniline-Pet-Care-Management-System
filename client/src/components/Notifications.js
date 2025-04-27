@@ -1,67 +1,26 @@
 import React, { useEffect } from 'react';
+import { useNotifications } from '../context/NotificationContext';
+import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 
-const Notifications = ({ recipient }) => {
-  const [notifications, setNotifications] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+const Notifications = () => {
+  const { notifications, markAllAsRead, loading } = useNotifications();
 
   useEffect(() => {
-    // Fetch notifications from API
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/notifications/${recipient}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
-        setNotifications(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchNotifications();
-  }, [recipient]);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  };
-
-  const markAsRead = async (id) => {
-    try {
-      await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      // Update local state
-      setNotifications(notifications.map(notification => 
-        notification._id === id ? { ...notification, isRead: true } : notification
-      ));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+    // Mark all notifications as read when viewing the page
+    if (notifications.some(n => !n.isRead)) {
+      markAllAsRead();
     }
-  };
+  }, [notifications, markAllAsRead]);
 
-  const markAllAsRead = async () => {
-    try {
-      await fetch(`http://localhost:5000/api/notifications/${recipient}/read-all`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      // Update local state
-      setNotifications(notifications.map(notification => ({ ...notification, isRead: true })));
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'appointment':
+        return '📅';
+      case 'reminder':
+        return '⏰';
+      default:
+        return '🔔';
     }
   };
 
@@ -82,16 +41,8 @@ const Notifications = ({ recipient }) => {
       <div className="row">
         <div className="col-md-8 mx-auto">
           <div className="card">
-            <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div className="card-header bg-primary text-white">
               <h4 className="mb-0">Notifications</h4>
-              {notifications.some(n => !n.isRead) && (
-                <button 
-                  className="btn btn-sm btn-light" 
-                  onClick={markAllAsRead}
-                >
-                  Mark All as Read
-                </button>
-              )}
             </div>
             <div className="card-body">
               {notifications.length === 0 ? (
@@ -107,19 +58,18 @@ const Notifications = ({ recipient }) => {
                     >
                       <div className="d-flex align-items-start">
                         <div className="me-3">
-                          {notification.type === 'appointment' ? '📅' : 
-                           notification.type === 'reminder' ? '⏰' : '🔔'}
+                          {getNotificationIcon(notification.type)}
                         </div>
                         <div className="flex-grow-1">
                           <h6 className="mb-1">{notification.title}</h6>
                           <p className="mb-1">{notification.message}</p>
                           <small className="text-muted">
-                            {formatDate(notification.createdAt)}
+                            {format(new Date(notification.createdAt), 'MMM d, yyyy h:mm a')}
                           </small>
                           {notification.appointmentId && (
                             <div className="mt-2">
                               <Link 
-                                to={`/view-appointment/${notification.appointmentId}`} 
+                                to={`/my-appointments`} 
                                 className="btn btn-sm btn-outline-primary"
                               >
                                 View Appointment
@@ -127,14 +77,6 @@ const Notifications = ({ recipient }) => {
                             </div>
                           )}
                         </div>
-                        {!notification.isRead && (
-                          <button 
-                            className="btn btn-sm btn-link text-primary" 
-                            onClick={() => markAsRead(notification._id)}
-                          >
-                            Mark as Read
-                          </button>
-                        )}
                       </div>
                     </div>
                   ))}
