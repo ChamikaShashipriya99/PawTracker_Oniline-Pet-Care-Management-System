@@ -7,6 +7,16 @@ const multer = require('multer');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const {
+  signupValidation,
+  loginValidation,
+  adminSignupValidation,
+  updateProfileValidation,
+  addPetValidation,
+  contactValidation,
+  resetPasswordValidation,
+  forgotPasswordValidation
+} = require('../middleware/validators');
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -57,7 +67,7 @@ const createTestAccount = async () => {
 createTestAccount();
 
 // Regular user signup with photo
-router.post('/signup', upload.single('profilePhoto'), async (req, res) => {
+router.post('/signup', upload.single('profilePhoto'), signupValidation, async (req, res) => {
   const { firstName, lastName, username, email, phone, password } = req.body;
   const profilePhoto = req.file ? `/uploads/${req.file.filename}` : null;
   
@@ -73,8 +83,8 @@ router.post('/signup', upload.single('profilePhoto'), async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Generate verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
-    const verificationCodeExpiry = Date.now() + 3600000; // 1 hour expiry
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCodeExpiry = Date.now() + 3600000;
     
     const user = new User({ 
       firstName, 
@@ -114,47 +124,72 @@ router.post('/signup', upload.single('profilePhoto'), async (req, res) => {
       const info = await transporter.sendMail(mailOptions);
       console.log('Verification email sent successfully to:', email);
       
-      // Return user data without sensitive information
-      const userResponse = { 
-        ...user.toObject(), 
-        password: undefined,
-        verificationCode: undefined
-      };
-      
       res.status(201).json({ 
-        message: 'User created. Please verify your email.', 
-        user: userResponse,
+        message: 'User created successfully. Please verify your email.',
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          isAdmin: user.isAdmin,
+          profilePhoto: user.profilePhoto,
+          isVerified: user.isVerified,
+          createdAt: user.createdAt
+        },
         previewUrl: nodemailer.getTestMessageUrl(info)
       });
     } catch (emailError) {
       console.error('Error sending verification email:', emailError);
-      // Still create the user, but inform about email sending failure
       res.status(201).json({ 
-        message: 'User created but verification email could not be sent. Please contact support.', 
-        user: { ...user.toObject(), password: undefined, verificationCode: undefined }
+        message: 'User created successfully but could not send verification email. Please try logging in to resend the verification email.',
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          isAdmin: user.isAdmin,
+          profilePhoto: user.profilePhoto,
+          isVerified: user.isVerified,
+          createdAt: user.createdAt
+        }
       });
     }
   } catch (error) {
-    console.error('Error during signup:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Admin signup (no photo for simplicity)
-router.post('/admin/signup', async (req, res) => {
+// Admin signup
+router.post('/admin/signup', adminSignupValidation, async (req, res) => {
   const { firstName, lastName, username, email, phone, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, isAdmin: true });
     await user.save();
-    res.status(201).json({ message: 'Admin created' });
+    res.status(201).json({ 
+      message: 'Admin created',
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        createdAt: user.createdAt
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Regular user login
-router.post('/login', async (req, res) => {
+router.post('/login', loginValidation, async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -165,8 +200,8 @@ router.post('/login', async (req, res) => {
     // Check if user is verified
     if (!user.isVerified) {
       // Generate a new verification code
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
-      const verificationCodeExpiry = Date.now() + 3600000; // 1 hour expiry
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const verificationCodeExpiry = Date.now() + 3600000;
       
       user.verificationCode = verificationCode;
       user.verificationCodeExpiry = verificationCodeExpiry;
@@ -221,7 +256,8 @@ router.post('/login', async (req, res) => {
         phone: user.phone, 
         isAdmin: user.isAdmin, 
         profilePhoto: user.profilePhoto,
-        isVerified: user.isVerified
+        isVerified: user.isVerified,
+        createdAt: user.createdAt
       } 
     });
   } catch (error) {
@@ -230,97 +266,148 @@ router.post('/login', async (req, res) => {
 });
 
 // Admin login
-router.post('/admin/login', async (req, res) => {
+router.post('/admin/login', loginValidation, async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email, isAdmin: true });
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
-    res.json({ user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, username: user.username, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto } });
+    res.json({ 
+      user: { 
+        _id: user._id, 
+        firstName: user.firstName, 
+        lastName: user.lastName, 
+        username: user.username, 
+        email: user.email, 
+        phone: user.phone, 
+        isAdmin: user.isAdmin, 
+        profilePhoto: user.profilePhoto,
+        createdAt: user.createdAt
+      } 
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Forgot Password
-router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
-  console.log('Forgot password request for email:', email);
-  
+// Update user
+router.put('/:id', upload.single('profilePhoto'), updateProfileValidation, async (req, res) => {
+  const { password, ...otherFields } = req.body;
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log('User not found with email:', email);
-      return res.status(404).json({ message: 'User not found' });
+    const updateData = { ...otherFields };
+    
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
     }
-    console.log('User found:', user._id);
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenExpiry = Date.now() + 3600000;
-
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = resetTokenExpiry;
-    await user.save();
-    console.log('Reset token saved for user:', user._id);
-
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
-    const mailOptions = {
-      from: '"PawTracker" <noreply@pawtracker.com>',
-      to: email,
-      subject: 'Password Reset Request',
-      html: `
-        <p>You requested a password reset for your Online Pet Care account.</p>
-        <p>Click this <a href="${resetUrl}">link</a> to reset your password.</p>
-        <p>If you did not request this, please ignore this email. The link expires in 1 hour.</p>
-      `
-    };
-
-    console.log('Attempting to send email to:', email);
-    try {
-      if (!transporter) {
-        console.log('Transporter not initialized yet, waiting...');
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for transporter to initialize
-      }
-      
-      const info = await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully to:', email);
-      console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
-      
-      res.json({ 
-        message: 'Reset link sent to your email',
-        previewUrl: nodemailer.getTestMessageUrl(info) // Include the preview URL in the response
-      });
-    } catch (emailError) {
-      console.error('Email error details:', emailError);
-      res.status(500).json({ message: 'Failed to send email', error: emailError.message });
+    
+    if (req.file) {
+      updateData.profilePhoto = `/uploads/${req.file.filename}`;
     }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, select: '-password -verificationCode -verificationCodeExpiry -resetToken -resetTokenExpiry' }
+    );
+    
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Ensure createdAt is included in the response
+    const userResponse = updatedUser.toObject();
+    userResponse.createdAt = updatedUser.createdAt;
+    
+    res.json(userResponse);
   } catch (error) {
-    console.error('Server error details:', error);
-    res.status(500).json({ message: 'An error occurred', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Reset Password
-router.post('/reset-password/:token', async (req, res) => {
-  const { token } = req.params;
-  const { password } = req.body;
+// Add pet
+router.post('/pets', upload.single('petPhoto'), addPetValidation, async (req, res) => {
+  try {
+    const pet = new Pet({
+      ...req.body,
+      petPhoto: req.file ? `/uploads/${req.file.filename}` : null,
+      owner: req.body.owner
+    });
+    await pet.save();
+    res.status(201).json(pet);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Contact form
+router.post('/contact', contactValidation, async (req, res) => {
+  try {
+    // Here you would typically save the contact form data to a database
+    // and/or send an email notification
+    res.status(200).json({ message: 'Message sent successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Reset password
+router.post('/reset-password/:token', resetPasswordValidation, async (req, res) => {
   try {
     const user = await User.findOne({
-      resetToken: token,
+      resetToken: req.params.token,
       resetTokenExpiry: { $gt: Date.now() }
     });
+
     if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
     user.password = hashedPassword;
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
     await user.save();
 
-    res.json({ message: 'Password reset successfully' });
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Forgot password
+router.post('/forgot-password', forgotPasswordValidation, async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    const mailOptions = {
+      from: '"PawTracker" <noreply@pawtracker.com>',
+      to: user.email,
+      subject: 'Password Reset Request',
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>You requested a password reset. Click the link below to reset your password:</p>
+        <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+        <p>If you did not request this, please ignore this email.</p>
+        <p>This link will expire in 1 hour.</p>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    res.json({ 
+      message: 'Password reset email sent',
+      previewUrl: nodemailer.getTestMessageUrl(info)
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -349,57 +436,11 @@ router.post('/admin/add', async (req, res) => {
   }
 });
 
-// Update user (admin or self, with password update)
-router.put('/:id', upload.single('profilePhoto'), async (req, res) => {
-  const { password, ...otherFields } = req.body; // Separate password from other fields
-  try {
-    const updateData = { ...otherFields };
-    
-    // If password is provided, hash it and add to update data
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updateData.password = hashedPassword;
-    }
-    
-    // If a new profile photo was uploaded, update the profilePhoto field
-    if (req.file) {
-      updateData.profilePhoto = `/uploads/${req.file.filename}`;
-    }
-    
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, select: '-password -verificationCode -verificationCodeExpiry -resetToken -resetTokenExpiry' }
-    );
-    
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    res.json(updatedUser);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // Delete user (admin only)
 router.delete('/:id', async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: 'User deleted' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Add pet with photo
-router.post('/pets', upload.single('petPhoto'), async (req, res) => {
-  const { userId, petName, breed, birthday, age, weight, specialConditions } = req.body;
-  const petPhoto = req.file ? `/uploads/${req.file.filename}` : null;
-  try {
-    const pet = new Pet({ userId, petName, breed, birthday, age, weight, specialConditions, petPhoto });
-    await pet.save();
-    res.status(201).json({ message: 'Pet added', pet });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

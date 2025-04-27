@@ -212,7 +212,9 @@ function Profile() {
                       </div>
                       <div>
                         <p className="text-muted mb-0">Member Since</p>
-                        <p className="mb-0 fw-bold">{new Date(user.createdAt).toLocaleDateString()}</p>
+                        <p className="mb-0 fw-bold">
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -297,7 +299,9 @@ function Profile() {
                         <small className="text-muted">Welcome to PawTracker!</small>
                       </div>
                     </div>
-                    <small className="text-muted">{new Date(user.createdAt).toLocaleDateString()}</small>
+                    <small className="text-muted">
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                    </small>
                   </div>
                 </div>
                 {pets.length > 0 && (
@@ -312,10 +316,12 @@ function Profile() {
                           <small className="text-muted">Your furry friends are now registered</small>
                         </div>
                       </div>
-                      <small className="text-muted">Recently</small>
+                      <small className="text-muted">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                      </small>
                     </div>
-            </div>
-          )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
