@@ -12,50 +12,43 @@ import AddPet from './components/AddPet';
 import MyPets from './components/MyPets';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import PetGrooming from './components/PetGrooming';
+import VetService from './components/VetService';
+import PetTraining from './components/PetTraining';
+import MyAppointments from './components/MyAppointments';
+import BookAppointment from './components/BookAppointment';
+import EditAppointment from './components/EditAppointment';
+import ViewAppointment from './components/ViewAppointment';
+import AdminAppointments from './components/AdminAppointments';
+import Notification from './components/Notification';
+import Notifications from './components/Notifications';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    try {
-      const userStr = localStorage.getItem('user');
-      const user = userStr ? JSON.parse(userStr) : null;
-      localStorage.removeItem('user');
-      setIsLoggedIn(false);
-      setIsAdmin(false);
-      setTimeout(() => {
-        if (user && user.isAdmin) {
-          navigate('/admin/login');
-        } else {
-          navigate('/login');
-        }
-      }, 0);
-    } catch (error) {
-      console.error('Error during logout:', error);
-      localStorage.removeItem('user');
-      setIsLoggedIn(false);
-      setIsAdmin(false);
-      navigate('/login');
-    }
+    const user = JSON.parse(localStorage.getItem('user'));
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    setTimeout(() => {
+      if (user && user.isAdmin) {
+        navigate('/admin/login');
+      } else {
+        navigate('/login');
+      }
+    }, 0);
   };
 
   useEffect(() => {
-    try {
-      const userStr = localStorage.getItem('user');
-      const user = userStr ? JSON.parse(userStr) : null;
-      if (user) {
-        setIsLoggedIn(true);
-        setIsAdmin(user.isAdmin);
-        if (user.isAdmin && window.location.pathname === '/') {
-          navigate('/admin/dashboard');
-        }
-      } else {
-        setIsLoggedIn(false);
-        setIsAdmin(false);
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      setIsLoggedIn(true);
+      setIsAdmin(user.isAdmin);
+      if (user.isAdmin && window.location.pathname === '/') {
+        navigate('/admin/dashboard');
       }
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      localStorage.removeItem('user');
+    } else {
       setIsLoggedIn(false);
       setIsAdmin(false);
     }
@@ -87,9 +80,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                         Services
                       </a>
                       <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
-                        <li><Link className="dropdown-item" to="/services/veterinary">Veterinary Service</Link></li>
-                        <li><Link className="dropdown-item" to="/services/grooming">Grooming</Link></li>
-                        <li><Link className="dropdown-item" to="/services/training">Pet Training</Link></li>
+                        <li><Link className="dropdown-item" to="/vet-service">Veterinary Service</Link></li>
+                        <li><Link className="dropdown-item" to="/pet-grooming">Grooming</Link></li>
+                        <li><Link className="dropdown-item" to="/pet-training">Pet Training</Link></li>
                       </ul>
                     </li>
                     <li className="nav-item">
@@ -113,20 +106,6 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   </>
                 ) : (
                   <>
-                    <li className="nav-item me-2">
-                      <a className="nav-link position-relative" href="#" onClick={(e) => e.preventDefault()}>
-                        <i className="fas fa-bell fa-lg"></i>
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                          3
-                          <span className="visually-hidden">unread notifications</span>
-                        </span>
-                      </a>
-                    </li>
-                    <li className="nav-item me-2">
-                      <Link className="nav-link" to="/profile">
-                        <i className="fas fa-user-circle fa-lg"></i>
-                      </Link>
-                    </li>
                     <li className="nav-item dropdown">
                       <a className="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
                         Profile
@@ -164,6 +143,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/admin-appointments">Appointments</Link>
+                </li>
+                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
@@ -186,13 +168,21 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/add-pet" element={<AddPet />} />
               <Route path="/my-pets" element={<MyPets />} />
               <Route path="/store" element={<div>Store Page</div>} />
-              <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
-              <Route path="/services/grooming" element={<div>Grooming Page</div>} />
-              <Route path="/services/training" element={<div>Pet Training Page</div>} />
+              <Route path="/vet-service" element={<VetService />} />
+              <Route path="/pet-grooming" element={<PetGrooming />} />
+              <Route path="/pet-training" element={<PetTraining />} />
               <Route path="/advertising" element={<div>Advertising Page</div>} />
-              <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
+              <Route path="/faq" element={<div>FAQ Page</div>} />
+              <Route path="/my-appointments" element={<MyAppointments />} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
+              <Route path="/book-appointment" element={<BookAppointment />} />
+              <Route path="/edit-appointment/:id" element={<EditAppointment />} />
+              <Route path="/view-appointment/:id" element={<ViewAppointment />} />
+              <Route path="/admin-appointments" element={<AdminAppointments />} />
+              <Route path="/notification" element={<Notification />} />
+              <Route path="/notifications" element={<Notifications recipient="admin" />} />
+              <Route path="/notifications/:recipient" element={<Notifications recipient="petOwner" />} />
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
@@ -260,11 +250,11 @@ export default function App() {
 
   return (
     <Router>
-      <AppContent 
-        isLoggedIn={isLoggedIn} 
-        setIsLoggedIn={setIsLoggedIn} 
-        isAdmin={isAdmin} 
-        setIsAdmin={setIsAdmin} 
+      <AppContent
+        isLoggedIn={isLoggedIn}
+        setIsLoggedIn={setIsLoggedIn}
+        isAdmin={isAdmin}
+        setIsAdmin={setIsAdmin}
       />
     </Router>
   );

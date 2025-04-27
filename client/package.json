@@ -10,6 +10,7 @@
     "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
     "client": "file:",
+    "date-fns": "^4.1.0",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "react": "^19.0.0",
