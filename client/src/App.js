@@ -20,28 +20,45 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    localStorage.removeItem('user');
-    setIsLoggedIn(false);
-    setIsAdmin(false);
-    setTimeout(() => {
-      if (user && user.isAdmin) {
-        navigate('/admin/login');
-      } else {
-        navigate('/login');
-      }
-    }, 0);
+    try {
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      localStorage.removeItem('user');
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      setTimeout(() => {
+        if (user && user.isAdmin) {
+          navigate('/admin/login');
+        } else {
+          navigate('/login');
+        }
+      }, 0);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      localStorage.removeItem('user');
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      navigate('/login');
+    }
   };
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user) {
-      setIsLoggedIn(true);
-      setIsAdmin(user.isAdmin);
-      if (user.isAdmin && window.location.pathname === '/') {
-        navigate('/admin/dashboard');
+    try {
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      if (user) {
+        setIsLoggedIn(true);
+        setIsAdmin(user.isAdmin);
+        if (user.isAdmin && window.location.pathname === '/') {
+          navigate('/admin/dashboard');
+        }
+      } else {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
       }
-    } else {
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      localStorage.removeItem('user');
       setIsLoggedIn(false);
       setIsAdmin(false);
     }
