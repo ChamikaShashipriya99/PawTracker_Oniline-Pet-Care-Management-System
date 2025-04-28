@@ -1,10 +1,9 @@
-// client/src/BookAppointment.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Service.css';
 
-axios.defaults.baseURL = 'http://localhost:5000'; // Updated to port 5000
+axios.defaults.baseURL = 'http://localhost:5000';
 
 function BookAppointment() {
     const navigate = useNavigate();
@@ -25,6 +24,8 @@ function BookAppointment() {
     });
     const [amount, setAmount] = useState(0);
     const [errors, setErrors] = useState({});
+    const [notification, setNotification] = useState({ message: '', type: '' });
+    const [forceUpdate, setForceUpdate] = useState(0);
 
     useEffect(() => {
         calculateAmount(formData.serviceType, formData.trainingType);
@@ -56,6 +57,7 @@ function BookAppointment() {
             ...(name === 'serviceType' && value !== 'Pet Training' ? { trainingType: 'N/A' } : {})
         }));
         setErrors(prev => ({ ...prev, [name]: '' }));
+        setNotification({ message: '', type: '' });
     };
 
     const validateForm = () => {
@@ -99,53 +101,37 @@ function BookAppointment() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         try {
-            const formattedDate = new Date(formData.date).toISOString();
-
             const appointmentData = {
                 ...formData,
-                date: formattedDate,
-                amount: Number(amount)
+                date: formData.date ? new Date(formData.date) : undefined,
+                amount: amount
             };
-
-            console.log('Sending data:', appointmentData);
-
+            console.log('Sending formData to /api/appointment:', appointmentData);
             const response = await axios.post('/api/appointment', appointmentData);
-            console.log('Response:', response.data);
-
-            if (response.data && response.status === 201) {
-                setFormData({
-                    petOwner: '',
-                    petName: '',
-                    serviceType: '',
-                    trainingType: 'N/A',
-                    date: '',
-                    time: '',
-                    notes: ''
-                });
-                alert('Appointment booked successfully!');
+            console.log('API Response:', response);
+            setNotification({ message: response.data.message, type: 'success' });
+            setForceUpdate(prev => prev + 1);
+            setTimeout(() => {
                 navigate('/my-appointments');
-            } else {
-                throw new Error('Failed to book appointment');
-            }
+            }, 2000);
         } catch (error) {
-            console.error('Error details:', error);
-            alert('Failed to book appointment: ' + (error.response?.data?.message || error.message));
+            console.error('Error booking appointment:', error);
+            setNotification({
+                message: error.response?.data?.message || 'Failed to book appointment',
+                type: 'error',
+            });
         }
     };
 
     return (
         <div className="service-container">
-            {/* Hero Section */}
             <section className="hero-section">
                 <div className="hero-content fade-in">
                     <h1 className="hero-title">Book an Appointment 🐾</h1>
-                    <p className="hero-subtitle">Schedule a service for your pet with ease.</p>
+                    <p className="hero-subtitle">Schedule a visit for your furry friend.</p>
                 </div>
             </section>
 
@@ -153,6 +139,11 @@ function BookAppointment() {
                 <div className="container">
                     <div className="card hover-card">
                         <div className="card-body">
+                            {notification.message && (
+                                <div className={`alert alert-${notification.type === 'success' ? 'success' : 'danger'}`}>
+                                    {notification.message}
+                                </div>
+                            )}
                             <form className="appointment-form" onSubmit={handleSubmit}>
                                 <div className="form-group">
                                     <label htmlFor="petOwner">Your Name</label>
@@ -251,7 +242,7 @@ function BookAppointment() {
                                     ></textarea>
                                 </div>
 
-                                <div className="amount-display">Total Amount: Rs.{amount}</div>
+                                <div className="amount-display">Total Amount: Rs.{amount ?? 'N/A'}</div>
                                 <button type="submit" className="hero-btn submit-button">Confirm Appointment</button>
                             </form>
                         </div>

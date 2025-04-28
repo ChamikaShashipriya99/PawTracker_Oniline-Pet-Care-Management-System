@@ -32,7 +32,7 @@ function Signup({ setIsLoggedIn }) {
     if (!user.phone.match(/^\d{10}$/)) newErrors.phone = "Phone number must be 10 digits.";
     if (user.password.length < 6) newErrors.password = "Password must be at least 6 characters long.";
     if (profilePhoto && !profilePhoto.type.startsWith('image/')) newErrors.profilePhoto = "Only image files are allowed.";
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

@@ -1,36 +1,25 @@
-/* client/src/Service.css */
-
-/* Import Google Font (matching Home.css) */
-@import url('https://fonts.googleapis.com/css2?family=Arial:wght@300;400;500;600;700&display=swap');
-
-/* General Styles */
+/* Existing styles for MyAppointments.js */
 .service-container {
     font-family: 'Arial', sans-serif;
     color: #333;
+    min-height: 100vh;
 }
 
-/* Hero Section (matching Home.js) */
 .hero-section {
     background: linear-gradient(135deg, #00c4cc, #007bff);
     /* Teal to blue gradient */
-    color: white;
-    padding: 100px 0;
+    padding: 60px 0;
     text-align: center;
-}
-
-.hero-content {
-    max-width: 800px;
-    margin: 0 auto;
+    color: white;
 }
 
 .hero-title {
-    font-size: 3rem;
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
 }
 
 .hero-subtitle {
-    font-size: 1.5rem;
-    margin-bottom: 30px;
+    font-size: 1.2rem;
 }
 
 .hero-btn {
@@ -53,117 +42,110 @@
     transform: translateY(-3px);
 }
 
-/* Content Sections */
-.content-section {
-    padding: 60px 0;
-}
-
-.section-title {
-    text-align: center;
-    font-size: 2.5rem;
-    color: #007bff;
-    /* Blue headings */
-    margin-bottom: 40px;
-}
-
-/* Cards (matching Home.js) */
-.card {
+.appointments-list .card {
     border: none;
-    border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.hover-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.card-body {
-    padding: 20px;
-}
-
-.card-body h3 {
-    font-size: 1.5rem;
-    color: #00c4cc;
-    /* Teal card titles */
-    margin-bottom: 15px;
-}
-
-.card-body p {
-    font-size: 1rem;
-    color: #555;
-    /* Gray text */
-}
-
-.card-body h4 {
-    font-size: 1.1rem;
-    color: #007bff;
-    /* Blue for testimonial names */
-}
-
-/* Card Images (matching Home.js) */
-.card-img-top {
+.appointments-table {
     width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    border-collapse: collapse;
+    margin-top: 20px;
 }
 
-/* Links (matching Home.js) */
-.card-link {
-    color: #007bff;
-    /* Blue links */
-    text-decoration: none;
+.appointments-table th,
+.appointments-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.appointments-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.appointment-row:hover {
+    background-color: #f9f9f9;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.hero-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.view-button {
+    background-color: #2196F3;
+    color: white;
+}
+
+.view-button:hover {
+    background-color: #1976D2;
+}
+
+.edit-button {
+    background-color: #FFC107;
+    color: black;
+}
+
+.edit-button:hover {
+    background-color: #FFB300;
+}
+
+.delete-button {
+    background-color: #F44336;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #D32F2F;
+}
+
+.pay-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.pay-button:hover {
+    background-color: #388E3C;
+}
+
+.download-button {
+    background-color: #9C27B0;
+    color: white;
+}
+
+.download-button:hover {
+    background-color: #7B1FA2;
+}
+
+.status-pending {
+    color: #FFC107;
     font-weight: bold;
 }
 
-.card-link:hover {
-    text-decoration: underline;
+.status-approved {
+    color: #4CAF50;
+    font-weight: bold;
 }
 
-/* Tables (for pricing sections) */
-.table {
-    width: 100%;
-    border-collapse: collapse;
+.status-completed {
+    color: #2196F3;
+    font-weight: bold;
 }
 
-.table thead th {
-    background-color: #007bff;
-    /* Blue table header */
-    color: #FFFFFF;
-    padding: 15px;
-    text-align: center;
-}
-
-.table td {
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid #E5E7EB;
-}
-
-.table tbody tr:nth-child(even) {
-    background-color: #F9FAFB;
-}
-
-.table tbody tr:hover {
-    background-color: #E5E7EB;
-}
-
-/* Animations (matching Home.js) */
-.fade-in {
-    animation: fadeIn 1s ease-in;
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
+.status-cancelled {
+    color: #F44336;
+    font-weight: bold;
 }
 
 /* Footer (consistent with previous service pages) */
@@ -173,553 +155,48 @@
     color: #FFFFFF;
 }
 
-/* Responsive Adjustments (matching Home.js) */
-@media (max-width: 768px) {
-    .hero-title {
-        font-size: 2rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1rem;
-    }
-
-    .hero-btn {
-        font-size: 1rem;
-        padding: 10px 25px;
-    }
-
-    .section-title {
-        font-size: 2rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-title {
-        font-size: 1.8rem;
-    }
-
-    .hero-subtitle {
-        font-size: 0.9rem;
-    }
-
-    .hero-btn {
-        font-size: 0.9rem;
-        padding: 8px 20px;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
-    }
-
-    .card-body h3 {
-        font-size: 1.3rem;
-    }
-
-    .table th,
-    .table td {
-        padding: 10px;
-        font-size: 0.85rem;
-    }
-}
-
-/* Additional styles for BookAppointment.js */
-
-/* Form Styling */
-.appointment-form {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 1.1rem;
-    color: #007bff;
-    /* Blue labels */
+/* New styles for filtering/sorting and admin page */
+.form-label {
+    font-weight: bold;
     margin-bottom: 5px;
-    font-weight: bold;
 }
 
-.form-control,
 .form-select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
     width: 100%;
-    padding: 10px;
-    font-size: 1rem;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.form-control:focus,
-.form-select:focus {
+.status-select {
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.status-select:focus {
     outline: none;
-    border-color: #00c4cc;
-    /* Teal border on focus */
-    box-shadow: 0 0 5px rgba(0, 196, 204, 0.3);
-}
-
-.form-group textarea {
-    resize: vertical;
-}
-
-.service-options {
-    margin-top: 10px;
-}
-
-.error {
-    display: block;
-    color: #F44336;
-    /* Red for errors */
-    font-size: 0.9rem;
-    margin-top: 5px;
-}
-
-.amount-display {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #00c4cc;
-    /* Teal for total amount */
-    text-align: center;
-    margin: 20px 0;
-}
-
-.submit-button {
-    display: block;
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
-}
-
-/* Responsive Adjustments for Form */
-@media (max-width: 768px) {
-    .form-group label {
-        font-size: 1rem;
-    }
-
-    .form-control,
-    .form-select {
-        font-size: 0.9rem;
-        padding: 8px;
-    }
-
-    .amount-display {
-        font-size: 1.1rem;
-    }
-
-    .submit-button {
-        font-size: 1rem;
-        padding: 10px 25px;
-    }
-}
-
-@media (max-width: 480px) {
-    .form-group label {
-        font-size: 0.9rem;
-    }
-
-    .form-control,
-    .form-select {
-        font-size: 0.85rem;
-        padding: 6px;
-    }
-
-    .amount-display {
-        font-size: 1rem;
-    }
-
-    .submit-button {
-        font-size: 0.9rem;
-        padding: 8px 20px;
-    }
-}
-
-/* Additional styles for EditAppointment.js */
-
-/* Service Info Text */
-.service-info {
-    font-size: 1rem;
-    color: #555;
-    /* Gray text, matching card body text */
-    margin: 5px 0;
-}
-
-/* Action Buttons for Form */
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
-
-.submit-button {
-    background-color: #ff5733;
-    /* Orange */
-    border-color: #ff5733;
-}
-
-.cancel-button {
-    background-color: #F44336;
-    /* Red */
-    border-color: #F44336;
-}
-
-.submit-button:hover,
-.cancel-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-/* Responsive Adjustments for Buttons */
-@media (max-width: 480px) {
-    .action-buttons {
-        flex-direction: column;
-    }
-
-    .submit-button,
-    .cancel-button {
-        width: 100%;
-        margin-bottom: 5px;
-    }
-}
-
-/* Additional styles for ViewAppointment.js */
-
-/* Appointment Details */
-.detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #E5E7EB;
-}
-
-.detail-label {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #007bff;
-    /* Blue labels */
-}
-
-.detail-value {
-    font-size: 1rem;
-    color: #00c4cc;
-    /* Teal values */
-}
-
-.status-pending {
-    color: #FF9800;
-    /* Orange for Pending */
-    font-weight: bold;
-}
-
-.status-approved {
-    color: #4CAF50;
-    /* Green for Approved */
-    font-weight: bold;
-}
-
-.status-cancelled {
-    color: #F44336;
-    /* Red for Cancelled */
-    font-weight: bold;
-}
-
-/* Card Footer */
-.card-footer {
-    padding: 15px;
-    text-align: center;
-    background-color: #F9FAFB;
-    /* Light gray background */
-    border-top: 1px solid #E5E7EB;
-}
-
-.back-button {
-    background-color: #ff5733;
-    /* Orange */
-    border-color: #ff5733;
-}
-
-.back-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-/* Responsive Adjustments for Details */
-@media (max-width: 768px) {
-
-    .detail-label,
-    .detail-value {
-        font-size: 0.95rem;
-    }
-
-    .detail-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-}
-
-@media (max-width: 480px) {
-
-    .detail-label,
-    .detail-value {
-        font-size: 0.9rem;
-    }
-
-    .back-button {
-        width: 100%;
-    }
-}
-
-/* Additional styles for MyAppointments.js */
-
-/* Table and Row Styling */
-.appointments-list {
-    max-width: 100%;
-    overflow-x: auto;
-}
-
-.appointments-table {
-    width: 100%;
-    border-collapse: collapse;
-    border-radius: 15px;
-    overflow: hidden;
+    border-color: #4CAF50;
 }
 
 .appointments-table th,
 .appointments-table td {
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid #E5E7EB;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.appointments-table thead th {
-    background-color: #007bff;
-    /* Blue header */
-    color: #FFFFFF;
-    font-weight: bold;
-}
-
-.appointment-row:hover {
-    background-color: #E5E7EB;
-    /* Light gray hover */
-}
-
-.status-pending {
-    color: #FF9800;
-    /* Orange for Pending */
-    font-weight: bold;
-}
-
-.status-approved {
-    color: #4CAF50;
-    /* Green for Approved */
-    font-weight: bold;
-}
-
-.status-cancelled {
-    color: #F44336;
-    /* Red for Cancelled */
-    font-weight: bold;
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.view-button {
-    background-color: #00c4cc;
-    /* Teal */
-    border-color: #00c4cc;
-}
-
-.edit-button {
-    background-color: #FFCA28;
-    /* Yellow */
-    border-color: #FFCA28;
-}
-
-.delete-button {
-    background-color: #F44336;
-    /* Red */
-    border-color: #F44336;
-}
-
-.pay-button {
-    background-color: #4CAF50;
-    /* Green */
-    border-color: #4CAF50;
-}
-
-.download-button {
-    background-color: #9C27B0;
-    /* Purple */
-    border-color: #9C27B0;
-}
-
-.view-button:hover,
-.edit-button:hover,
-.delete-button:hover,
-.pay-button:hover,
-.download-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-/* Responsive Adjustments for Table */
 @media (max-width: 768px) {
-
-    .appointments-table th,
-    .appointments-table td {
-        padding: 10px;
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 480px) {
-
-    .appointments-table th,
-    .appointments-table td {
-        padding: 8px;
-        font-size: 0.85rem;
-    }
-
     .action-buttons {
         flex-direction: column;
+        gap: 4px;
     }
 
-    .hero-btn {
-        width: 100%;
-        margin-bottom: 5px;
-    }
-
-    /* Additional styles for AdminAppointments.js */
-
-    /* Approve and Reject Buttons */
-    .approve-button {
-        background-color: #4CAF50;
-        /* Green */
-        border-color: #4CAF50;
-    }
-
-    .reject-button {
-        background-color: #F44336;
-        /* Red */
-        border-color: #F44336;
-    }
-
-    .download-button {
-        background-color: #2196F3;
-        /* Blue */
-        border-color: #2196F3;
-    }
-
-    .download-all-button {
-        background-color: #FF9800;
-        /* Orange-Yellow */
-        border-color: #FF9800;
-        margin-bottom: 20px;
-    }
-
-    .approve-button:hover,
-    .reject-button:hover,
-    .download-button:hover,
-    .download-all-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Responsive Adjustments for Buttons */
-    @media (max-width: 480px) {
-        .download-all-button {
-            width: 100%;
-        }
-    }
-
-    /* Notification Styles */
-    .notification {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 20px;
-        margin: 15px auto;
-        max-width: 600px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        font-size: 1rem;
-        font-weight: 500;
-        color: #fff;
-        position: relative;
-        transition: opacity 0.3s ease, transform 0.3s ease;
-        /* For fade-out */
-    }
-
-    .notification-success {
-        background-color: #4CAF50;
-        /* Green, matches Approve button */
-    }
-
-    .notification-error {
-        background-color: #F44336;
-        /* Red, matches error messages */
-    }
-
-    .notification-info {
-        background-color: #2196F3;
-        /* Blue, matches Download button */
-    }
-
-    .notification-warning {
-        background-color: #FF9800;
-        /* Orange, matches Download All button */
-    }
-
-    .notification-message {
-        flex: 1;
-    }
-
-    .notification-close {
-        background: none;
-        border: none;
-        color: #fff;
-        font-size: 1.2rem;
-        font-weight: bold;
-        cursor: pointer;
-        padding: 0 5px;
-        margin-left: 10px;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .notification-close:hover {
-        transform: scale(1.2);
-        opacity: 0.8;
-    }
-
-    /* Fade-Out Animation */
-    .fade-out {
-        opacity: 0;
-        transform: translateY(10px);
-        /* Slight slide down effect */
-    }
-
-    /* Responsive Adjustments for Notification */
-    @media (max-width: 480px) {
-        .notification {
-            margin: 10px;
-            padding: 10px 15px;
-            font-size: 0.9rem;
-        }
-
-        .notification-close {
-            font-size: 1rem;
-        }
+    .appointments-table th,
+    .appointments-table td {
+        font-size: 0.9rem;
+        padding: 8px;
     }
 }

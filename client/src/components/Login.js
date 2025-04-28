@@ -40,7 +40,7 @@ function Login({ setIsLoggedIn }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     try {
       const res = await axios.post('http://localhost:5000/api/users/login', formData);
       localStorage.setItem('user', JSON.stringify(res.data.user));
@@ -59,28 +59,28 @@ function Login({ setIsLoggedIn }) {
         <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Login 🐾</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <input 
-              type="email" 
-              name="email" 
-              className="form-control" 
-              placeholder="Email" 
-              value={formData.email} 
-              onChange={handleChange} 
-              required 
-              style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }} 
+            <input
+              type="email"
+              name="email"
+              className="form-control"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }}
             />
             {errors.email && <small className="text-danger">{errors.email}</small>}
           </div>
           <div className="mb-3">
-            <input 
-              type="password" 
-              name="password" 
-              className="form-control" 
-              placeholder="Password" 
-              value={formData.password} 
-              onChange={handleChange} 
-              required 
-              style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }} 
+            <input
+              type="password"
+              name="password"
+              className="form-control"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }}
             />
             {errors.password && <small className="text-danger">{errors.password}</small>}
           </div>

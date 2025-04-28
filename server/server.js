@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 // const express = require('express');
 // const mongoose = require('mongoose');
 // const cors = require('cors');
@@ -26,6 +28,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+// const authRoutes = require('./routes/authRoutes');
+const notificationController = require('./Controllers/notificationController');
+// const { protect } = require('./middleware/auth');
 
 const app = express();
 
@@ -44,7 +49,9 @@ mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mong
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/appointment', appointmentRoutes);
+app.get('/api/notifications', notificationController.getNotifications);
+// app.use('/api/auth', authRoutes);
 
-
+// Start the Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

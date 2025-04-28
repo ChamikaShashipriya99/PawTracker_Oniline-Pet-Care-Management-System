@@ -1,15 +1,24 @@
-// client/src/MyAppointments.js
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'; // Added import for table support
 import Notification from '../components/Notification';
-import './Service.css'; // Use Service.css instead of appointment.css
+import './Service.css';
+
+axios.defaults.baseURL = 'http://localhost:5000';
 
 function MyAppointments() {
     const [appointments, setAppointments] = useState([]);
+    const [filteredAppointments, setFilteredAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState('');
+    const [error, setError] = useState('');
+    const [serviceFilter, setServiceFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('date');
+    const [sortOrder, setSortOrder] = useState('asc');
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -23,14 +32,55 @@ function MyAppointments() {
     const fetchAppointments = async () => {
         try {
             const response = await axios.get('/api/appointment');
+            console.log('Fetched appointments:', response.data);
+            response.data.forEach(appointment => {
+                console.log(`Appointment ${appointment._id} amount:`, appointment.amount);
+            });
             setAppointments(response.data);
+            setFilteredAppointments(response.data);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching appointments:', error);
-            setNotification('Error: Could not fetch appointments.');
+            setError(error.response?.data?.message || 'Failed to fetch appointments');
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        let updatedAppointments = [...appointments];
+
+        if (serviceFilter) {
+            updatedAppointments = updatedAppointments.filter(
+                appointment => appointment.serviceType === serviceFilter
+            );
+        }
+
+        if (statusFilter) {
+            updatedAppointments = updatedAppointments.filter(
+                appointment => appointment.status === statusFilter
+            );
+        }
+
+        if (searchQuery) {
+            updatedAppointments = updatedAppointments.filter(
+                appointment =>
+                    appointment.petOwner.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    appointment.petName.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        updatedAppointments.sort((a, b) => {
+            let comparison = 0;
+            if (sortBy === 'serviceType') {
+                comparison = a.serviceType.localeCompare(b.serviceType);
+            } else if (sortBy === 'date') {
+                comparison = new Date(a.date) - new Date(b.date);
+            }
+            return sortOrder === 'asc' ? comparison : -comparison;
+        });
+
+        setFilteredAppointments(updatedAppointments);
+    }, [appointments, serviceFilter, statusFilter, searchQuery, sortBy, sortOrder]);
 
     const handleViewAppointment = (id) => navigate(`/view-appointment/${id}`);
     const handleEditAppointment = (id) => navigate(`/edit-appointment/${id}`);
@@ -48,8 +98,9 @@ function MyAppointments() {
     };
 
     const handleProceedToPay = (appointment) => {
-        console.log(`Proceeding to pay for appointment ${appointment._id} - Amount: Rs.${appointment.amount}`);
-        alert(`Proceed to pay Rs.${appointment.amount} for ${appointment.serviceType}`);
+        const amount = appointment.amount ?? 0;
+        console.log(`Proceeding to pay for appointment ${appointment._id} - Amount: Rs.${amount}`);
+        alert(`Proceed to pay Rs.${amount} for ${appointment.serviceType}`);
     };
 
     const formatDate = (dateString) => {
@@ -59,72 +110,60 @@ function MyAppointments() {
     const downloadPDF = (appointment) => {
         const doc = new jsPDF();
 
-        // Header
-        doc.setFillColor(76, 175, 80); // Green background
-        doc.rect(0, 0, 210, 20, 'F'); // Full-width header
+        // Title
         doc.setFontSize(18);
-        doc.setTextColor(255, 255, 255); // White text
-        doc.text('Paw-Tracker Appointment', 20, 13);
+        doc.setTextColor(255, 87, 51); // Orange #ff5733
+        doc.text('Paw-Tracker Appointment', 105, 20, { align: 'center' });
 
-        // Reset for content
-        doc.setTextColor(0, 0, 0); // Black text
+        // Subtitle
         doc.setFontSize(12);
+        doc.setTextColor(85, 85, 85); // Gray #555
+        doc.text('Appointment Details', 105, 30, { align: 'center' });
 
-        // Content
-        const startY = 30;
-        doc.setFont('helvetica', 'bold');
-        doc.text('Service:', 20, startY);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${appointment.serviceType}${appointment.trainingType !== 'N/A' ? ` (${appointment.trainingType})` : ''}`, 50, startY);
+        // Table
+        const tableData = [[
+            `${appointment.serviceType}${appointment.trainingType !== 'N/A' ? ` (${appointment.trainingType})` : ''}`,
+            `${formatDate(appointment.date)} at ${appointment.time}`,
+            appointment.status,
+            `Rs.${appointment.amount ?? 'N/A'}`,
+            appointment.petOwner,
+            appointment.petName,
+            appointment.notes || 'N/A'
+        ]];
 
-        doc.setFont('helvetica', 'bold');
-        doc.text('Date & Time:', 20, startY + 10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${formatDate(appointment.date)} at ${appointment.time}`, 50, startY + 10);
-
-        doc.setFont('helvetica', 'bold');
-        doc.text('Status:', 20, startY + 20);
-        doc.setFont('helvetica', 'normal');
-        doc.text(appointment.status, 50, startY + 20);
-
-        doc.setFont('helvetica', 'bold');
-        doc.text('Amount:', 20, startY + 30);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Rs.${appointment.amount}`, 50, startY + 30);
-
-        doc.setFont('helvetica', 'bold');
-        doc.text('Pet Owner:', 20, startY + 40);
-        doc.setFont('helvetica', 'normal');
-        doc.text(appointment.petOwner, 50, startY + 40);
-
-        doc.setFont('helvetica', 'bold');
-        doc.text('Pet Name:', 20, startY + 50);
-        doc.setFont('helvetica', 'normal');
-        doc.text(appointment.petName, 50, startY + 50);
-
-        if (appointment.notes) {
-            doc.setFont('helvetica', 'bold');
-            doc.text('Notes:', 20, startY + 60);
-            doc.setFont('helvetica', 'normal');
-            doc.text(appointment.notes, 50, startY + 60, { maxWidth: 140 }); // Wrap long notes
-        }
-
-        // Separator Line
-        doc.setLineWidth(0.5);
-        doc.setDrawColor(76, 175, 80); // Green line
-        doc.line(20, startY + (appointment.notes ? 80 : 60), 190, startY + (appointment.notes ? 80 : 60));
+        autoTable(doc, {
+            startY: 40,
+            head: [['Service', 'Date & Time', 'Status', 'Amount', 'Pet Owner', 'Pet Name', 'Notes']],
+            body: tableData,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 3 },
+            headStyles: { fillColor: [255, 87, 51], textColor: [255, 255, 255] }, // Orange header
+            alternateRowStyles: { fillColor: [249, 250, 251] }, // Light gray #F9FAFB
+        });
 
         // Footer
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100); // Gray text
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 280);
+        doc.setFontSize(8);
+        doc.setTextColor(85, 85, 85); // Gray #555
+        doc.text(
+            'Generated by Online Pet Care System',
+            105,
+            doc.internal.pageSize.height - 10,
+            { align: 'center' }
+        );
 
         doc.save(`appointment_${appointment._id}.pdf`);
     };
 
+    const handleResetFilters = () => {
+        setServiceFilter('');
+        setStatusFilter('');
+        setSearchQuery('');
+        setSortBy('date');
+        setSortOrder('asc');
+    };
+
     return (
         <div className="service-container">
-            {/* Hero Section */}
             <section className="hero-section">
                 <div className="hero-content fade-in">
                     <h1 className="hero-title">My Appointments 🐾</h1>
@@ -133,15 +172,91 @@ function MyAppointments() {
             </section>
 
             {notification && <Notification message={notification} onClose={() => setNotification('')} />}
+            {error && <div className="alert alert-danger">{error}</div>}
             {loading ? (
                 <p className="text-center py-5 fade-in">Loading appointments...</p>
             ) : (
                 <>
-                    <div className="appointment-count text-center py-3 fade-in" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#007bff' }}>
-                        Total Appointments: {appointments.length}
+                    <div className="container py-3">
+                        <div className="row mb-3">
+                            <div className="col-md-3">
+                                <label htmlFor="serviceFilter" className="form-label">Filter by Service:</label>
+                                <select
+                                    id="serviceFilter"
+                                    className="form-select"
+                                    value={serviceFilter}
+                                    onChange={(e) => setServiceFilter(e.target.value)}
+                                >
+                                    <option value="">All Services</option>
+                                    <option value="Vet Service">Vet Service</option>
+                                    <option value="Pet Training">Pet Training</option>
+                                    <option value="Pet Grooming">Pet Grooming</option>
+                                </select>
+                            </div>
+                            <div className="col-md-3">
+                                <label htmlFor="statusFilter" className="form-label">Filter by Status:</label>
+                                <select
+                                    id="statusFilter"
+                                    className="form-select"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                >
+                                    <option value="">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div className="col-md-3">
+                                <label htmlFor="searchQuery" className="form-label">Search by Owner or Pet:</label>
+                                <input
+                                    id="searchQuery"
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Search..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <div className="col-md-2">
+                                <label htmlFor="sortBy" className="form-label">Sort By:</label>
+                                <select
+                                    id="sortBy"
+                                    className="form-select"
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                >
+                                    <option value="date">Date</option>
+                                    <option value="serviceType">Service Type</option>
+                                </select>
+                            </div>
+                            <div className="col-md-1">
+                                <label htmlFor="sortOrder" className="form-label">Order:</label>
+                                <select
+                                    id="sortOrder"
+                                    className="form-select"
+                                    value={sortOrder}
+                                    onChange={(e) => setSortOrder(e.target.value)}
+                                >
+                                    <option value="asc">Asc</option>
+                                    <option value="desc">Desc</option>
+                                </select>
+                                <br></br>
+                            </div>
+                            <div className="col-md-2 d-flex align-items-end">
+                                <button className="btn btn-secondary w-100" onClick={handleResetFilters}>
+                                    Reset Filters
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    {appointments.length === 0 ? (
-                        <p className="text-center py-5 fade-in">You don't have any appointments yet.</p>
+
+                    <div className="appointment-count text-center py-3 fade-in" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#007bff' }}>
+                        Total Appointments: {filteredAppointments.length}
+                    </div>
+                    {filteredAppointments.length === 0 ? (
+                        <p className="text-center py-5 fade-in">No appointments match your filters.</p>
                     ) : (
                         <div className="appointments-list container py-5">
                             <div className="card hover-card">
@@ -150,6 +265,8 @@ function MyAppointments() {
                                         <thead>
                                             <tr>
                                                 <th>Service</th>
+                                                <th>Pet Owner</th>
+                                                <th>Pet Name</th>
                                                 <th>Date & Time</th>
                                                 <th>Status</th>
                                                 <th>Amount</th>
@@ -157,15 +274,17 @@ function MyAppointments() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {appointments.map((appointment) => (
+                                            {filteredAppointments.map((appointment) => (
                                                 <tr key={appointment._id} className="appointment-row">
                                                     <td>
                                                         {appointment.serviceType}
                                                         {appointment.trainingType !== 'N/A' && ` (${appointment.trainingType})`}
                                                     </td>
+                                                    <td>{appointment.petOwner}</td>
+                                                    <td>{appointment.petName}</td>
                                                     <td>{formatDate(appointment.date)} at {appointment.time}</td>
                                                     <td className={`status-${appointment.status.toLowerCase()}`}>{appointment.status}</td>
-                                                    <td>Rs.{appointment.amount}</td>
+                                                    <td>Rs.{appointment.amount ?? 'N/A'}</td>
                                                     <td>
                                                         <div className="action-buttons">
                                                             <button className="hero-btn view-button" onClick={() => handleViewAppointment(appointment._id)}>

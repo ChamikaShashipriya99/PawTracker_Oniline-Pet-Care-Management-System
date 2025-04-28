@@ -1,3 +1,4 @@
+// client/src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Home from './components/Home';
@@ -10,8 +11,8 @@ import AdminDashboard from './components/AdminDashboard';
 import AdminSignup from './components/AdminSignup';
 import AddPet from './components/AddPet';
 import MyPets from './components/MyPets';
-import ForgotPassword from './components/ForgotPassword'; // New import
-import ResetPassword from './components/ResetPassword'; // New import
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import PetGrooming from './components/PetGrooming';
 import VetService from './components/VetService';
 import PetTraining from './components/PetTraining';
@@ -21,6 +22,7 @@ import EditAppointment from './components/EditAppointment';
 import ViewAppointment from './components/ViewAppointment';
 import AdminAppointments from './components/AdminAppointments';
 import Notification from './components/Notification';
+import Notifications from './components/Notifications';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -142,6 +144,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/admin-appointments">Appointments</Link> {/* New Appointments tab */}
+                </li>
+                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
@@ -155,8 +160,8 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
           <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} /> {/* New route */}
-          <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} /> {/* New route */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} />
           {isLoggedIn && (
             <>
               <Route path="/profile" element={<Profile />} />
@@ -177,6 +182,8 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/view-appointment/:id" element={<ViewAppointment />} />
               <Route path="/admin-appointments" element={<AdminAppointments />} />
               <Route path="/notification" element={<Notification />} />
+              <Route path="/notifications" element={<Notifications recipient="admin" />} /> {/* Pass recipient as "admin" */}
+              <Route path="/notifications/:recipient" element={<Notifications recipient="petOwner" />} /> {/* Pass recipient as "petOwner" */}
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />

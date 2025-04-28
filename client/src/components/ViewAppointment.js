@@ -1,11 +1,10 @@
-// client/src/ViewAppointment.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Notification from '../components/Notification';
 import './Service.css';
 
-axios.defaults.baseURL = 'http://localhost:5000'; // Updated to port 5000
+axios.defaults.baseURL = 'http://localhost:5000';
 
 function ViewAppointment() {
     const [appointment, setAppointment] = useState(null);
@@ -13,24 +12,38 @@ function ViewAppointment() {
     const [error, setError] = useState(null);
     const { id } = useParams();
     const navigate = useNavigate();
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const fetchAppointment = async () => {
-            try {
-                const response = await axios.get(`/api/appointment/${id}`);
-                if (!response.data) {
-                    throw new Error('No appointment data returned');
-                }
-                setAppointment(response.data);
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching appointment:', err);
-                setError(err.response?.data?.message || 'Failed to fetch appointment details');
-                setLoading(false);
-            }
-        };
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+
         fetchAppointment();
     }, [id]);
+
+    const fetchAppointment = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`/api/appointment/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.data) {
+                throw new Error('No appointment data returned');
+            }
+            console.log('Fetched appointment:', response.data);
+            console.log('Appointment amount:', response.data.amount);
+            setAppointment(response.data);
+            setLoading(false);
+        } catch (err) {
+            console.error('Error fetching appointment:', err);
+            setError(err.response?.data?.message || 'Failed to fetch appointment details');
+            setLoading(false);
+        }
+    };
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
@@ -46,7 +59,35 @@ function ViewAppointment() {
                 <section className="hero-section">
                     <div className="hero-content fade-in">
                         <h1 className="hero-title">View Appointment 🐾</h1>
-                        <p className="hero-subtitle">See the details of your pet's appointment.</p>
+                        {user && (
+                            <button
+                                className="btn btn-secondary mb-3"
+                                onClick={() => {
+                                    localStorage.removeItem('token');
+                                    localStorage.removeItem('user');
+                                    setUser(null);
+                                    navigate('/login');
+                                }}
+                            >
+                                Logout
+                            </button>
+                        )}
+                        {user ? (
+                            <div className="profile-photo-container">
+                                <img
+                                    src={user.profilePhoto ? `${axios.defaults.baseURL}${user.profilePhoto}` : 'https://placehold.co/100x100?text=Profile'}
+                                    alt="Profile"
+                                    className="profile-photo"
+                                    onError={(e) => {
+                                        if (e.target.src !== 'https://placehold.co/100x100?text=Profile') {
+                                            e.target.src = 'https://placehold.co/100x100?text=Profile';
+                                        }
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <p className="hero-subtitle">See the details of your pet's appointment.</p>
+                        )}
                     </div>
                 </section>
                 <p className="text-center py-5 fade-in">Loading appointment details...</p>
@@ -60,7 +101,35 @@ function ViewAppointment() {
                 <section className="hero-section">
                     <div className="hero-content fade-in">
                         <h1 className="hero-title">View Appointment 🐾</h1>
-                        <p className="hero-subtitle">See the details of your pet's appointment.</p>
+                        {user && (
+                            <button
+                                className="btn btn-secondary mb-3"
+                                onClick={() => {
+                                    localStorage.removeItem('token');
+                                    localStorage.removeItem('user');
+                                    setUser(null);
+                                    navigate('/login');
+                                }}
+                            >
+                                Logout
+                            </button>
+                        )}
+                        {user ? (
+                            <div className="profile-photo-container">
+                                <img
+                                    src={user.profilePhoto ? `${axios.defaults.baseURL}${user.profilePhoto}` : 'https://placehold.co/100x100?text=Profile'}
+                                    alt="Profile"
+                                    className="profile-photo"
+                                    onError={(e) => {
+                                        if (e.target.src !== 'https://placehold.co/100x100?text=Profile') {
+                                            e.target.src = 'https://placehold.co/100x100?text=Profile';
+                                        }
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <p className="hero-subtitle">See the details of your pet's appointment.</p>
+                        )}
                     </div>
                 </section>
                 <div className="container py-5">
@@ -80,7 +149,6 @@ function ViewAppointment() {
             <section className="hero-section">
                 <div className="hero-content fade-in">
                     <h1 className="hero-title">View Appointment 🐾</h1>
-                    <p className="hero-subtitle">See the details of your pet's appointment.</p>
                 </div>
             </section>
 
@@ -113,7 +181,7 @@ function ViewAppointment() {
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Amount:</span>
-                                <span className="detail-value">Rs.{appointment.amount}</span>
+                                <span className="detail-value">Rs.{appointment.amount ?? 'N/A'}</span>
                             </div>
                             {appointment.notes && (
                                 <div className="detail-item">

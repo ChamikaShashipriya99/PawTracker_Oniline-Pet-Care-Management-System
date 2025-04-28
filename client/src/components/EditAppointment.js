@@ -1,11 +1,10 @@
-// client/src/EditAppointment.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Notification from '../components/Notification';
 import './Service.css';
 
-axios.defaults.baseURL = 'http://localhost:5000'; // Updated to port 5000
+axios.defaults.baseURL = 'http://localhost:5000';
 
 function EditAppointment() {
     const [formData, setFormData] = useState({
@@ -21,40 +20,54 @@ function EditAppointment() {
     const [validationErrors, setValidationErrors] = useState({});
     const { id } = useParams();
     const navigate = useNavigate();
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const fetchAppointment = async () => {
-            try {
-                const response = await axios.get(`/api/appointment/${id}`);
-                const appointmentData = response.data;
-
-                if (!appointmentData) {
-                    throw new Error('No appointment data returned');
-                }
-
-                const formattedDate = new Date(appointmentData.date).toISOString().split('T')[0];
-                setFormData({
-                    petName: appointmentData.petName,
-                    date: formattedDate,
-                    time: appointmentData.time,
-                    notes: appointmentData.notes || ''
-                });
-                setOriginalData({
-                    serviceType: appointmentData.serviceType,
-                    trainingType: appointmentData.trainingType || 'N/A',
-                    amount: appointmentData.amount
-                });
-                setAmount(appointmentData.amount);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching appointment:', error);
-                setError(error.response?.data?.message || 'Failed to fetch appointment');
-                setLoading(false);
-            }
-        };
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
 
         fetchAppointment();
     }, [id]);
+
+    const fetchAppointment = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`/api/appointment/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const appointmentData = response.data;
+
+            if (!appointmentData) {
+                throw new Error('No appointment data returned');
+            }
+
+            console.log('Fetched appointment:', appointmentData);
+            console.log('Appointment amount:', appointmentData.amount);
+
+            const formattedDate = new Date(appointmentData.date).toISOString().split('T')[0];
+            setFormData({
+                petName: appointmentData.petName,
+                date: formattedDate,
+                time: appointmentData.time,
+                notes: appointmentData.notes || ''
+            });
+            setOriginalData({
+                serviceType: appointmentData.serviceType,
+                trainingType: appointmentData.trainingType || 'N/A',
+                amount: appointmentData.amount
+            });
+            setAmount(appointmentData.amount);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching appointment:', error);
+            setError(error.response?.data?.message || 'Failed to fetch appointment');
+            setLoading(false);
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -102,6 +115,7 @@ function EditAppointment() {
         }
 
         try {
+            const token = localStorage.getItem('token');
             const updatedAppointment = {
                 ...formData,
                 serviceType: originalData.serviceType,
@@ -109,7 +123,11 @@ function EditAppointment() {
                 amount: originalData.amount
             };
 
-            const response = await axios.put(`/api/appointment/${id}`, updatedAppointment);
+            const response = await axios.put(`/api/appointment/${id}`, updatedAppointment, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             navigate('/my-appointments', {
                 state: { notification: response.data.message || 'Appointment updated successfully!' }
             });
@@ -131,7 +149,35 @@ function EditAppointment() {
                 <section className="hero-section">
                     <div className="hero-content fade-in">
                         <h1 className="hero-title">Edit Appointment 🐾</h1>
-                        <p className="hero-subtitle">Modify your pet's appointment details.</p>
+                        {user && (
+                            <button
+                                className="btn btn-secondary mb-3"
+                                onClick={() => {
+                                    localStorage.removeItem('token');
+                                    localStorage.removeItem('user');
+                                    setUser(null);
+                                    navigate('/login');
+                                }}
+                            >
+                                Logout
+                            </button>
+                        )}
+                        {user ? (
+                            <div className="profile-photo-container">
+                                <img
+                                    src={user.profilePhoto ? `${axios.defaults.baseURL}${user.profilePhoto}` : 'https://placehold.co/100x100?text=Profile'}
+                                    alt="Profile"
+                                    className="profile-photo"
+                                    onError={(e) => {
+                                        if (e.target.src !== 'https://placehold.co/100x100?text=Profile') {
+                                            e.target.src = 'https://placehold.co/100x100?text=Profile';
+                                        }
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <p className="hero-subtitle">Modify your pet's appointment details.</p>
+                        )}
                     </div>
                 </section>
                 <p className="text-center py-5 fade-in">Loading appointment details...</p>
@@ -145,7 +191,35 @@ function EditAppointment() {
                 <section className="hero-section">
                     <div className="hero-content fade-in">
                         <h1 className="hero-title">Edit Appointment 🐾</h1>
-                        <p className="hero-subtitle">Modify your pet's appointment details.</p>
+                        {user && (
+                            <button
+                                className="btn btn-secondary mb-3"
+                                onClick={() => {
+                                    localStorage.removeItem('token');
+                                    localStorage.removeItem('user');
+                                    setUser(null);
+                                    navigate('/login');
+                                }}
+                            >
+                                Logout
+                            </button>
+                        )}
+                        {user ? (
+                            <div className="profile-photo-container">
+                                <img
+                                    src={user.profilePhoto ? `${axios.defaults.baseURL}${user.profilePhoto}` : 'https://placehold.co/100x100?text=Profile'}
+                                    alt="Profile"
+                                    className="profile-photo"
+                                    onError={(e) => {
+                                        if (e.target.src !== 'https://placehold.co/100x100?text=Profile') {
+                                            e.target.src = 'https://placehold.co/100x100?text=Profile';
+                                        }
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <p className="hero-subtitle">Modify your pet's appointment details.</p>
+                        )}
                     </div>
                 </section>
                 <div className="container py-5">
@@ -164,9 +238,7 @@ function EditAppointment() {
         <div className="service-container">
             <section className="hero-section">
                 <div className="hero-content fade-in">
-                    <h1 className="hero-title">Edit Appointment 🐾</h1>
-                    <p className="hero-subtitle">Modify your pet's appointment details.</p>
-                </div>
+                    <h1 className="hero-title">Edit Appointment 🐾</h1> </div>
             </section>
 
             <section className="content-section fade-in">
@@ -240,7 +312,7 @@ function EditAppointment() {
                                 </div>
 
                                 <div className="amount-display">
-                                    Total Amount: Rs.{amount}
+                                    Total Amount: Rs.{amount ?? 'N/A'}
                                 </div>
 
                                 <div className="action-buttons">
