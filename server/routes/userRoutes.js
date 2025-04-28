@@ -579,4 +579,37 @@ router.post('/resend-verification', async (req, res) => {
   }
 });
 
+// Update pet photo
+router.put('/pets/:id/photo', upload.single('petPhoto'), async (req, res) => {
+  try {
+    const petId = req.params.id;
+    const petPhoto = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!petPhoto) {
+      return res.status(400).json({ error: 'No photo uploaded' });
+    }
+
+    const pet = await Pet.findById(petId);
+    if (!pet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    // Delete old photo if exists
+    if (pet.petPhoto) {
+      const oldPhotoPath = path.join(__dirname, '..', pet.petPhoto);
+      if (fs.existsSync(oldPhotoPath)) {
+        fs.unlinkSync(oldPhotoPath);
+      }
+    }
+
+    pet.petPhoto = petPhoto;
+    await pet.save();
+
+    res.json(pet);
+  } catch (error) {
+    console.error('Error updating pet photo:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

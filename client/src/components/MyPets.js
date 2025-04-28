@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import UpdatePetImage from './UpdatePetImage';
 
 function MyPets() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const [pets, setPets] = useState([]);
   const [editPet, setEditPet] = useState(null);
+  const [showImageUpdate, setShowImageUpdate] = useState(false);
+  const [selectedPet, setSelectedPet] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -41,6 +44,15 @@ function MyPets() {
     setEditPet({ ...pet });
   };
 
+  const handleUpdatePetImage = (pet) => {
+    setSelectedPet(pet);
+    setShowImageUpdate(true);
+  };
+
+  const handleImageUpdate = (updatedPet) => {
+    setPets(pets.map(p => (p._id === updatedPet._id ? updatedPet : p)));
+  };
+
   const validateEditPet = () => {
     const lettersRegex = /^[A-Za-z\s]+$/;
     const today = new Date();
@@ -64,7 +76,6 @@ function MyPets() {
     }
     return true;
   };
-  
 
   const handleUpdatePet = async (e) => {
     e.preventDefault();
@@ -79,7 +90,6 @@ function MyPets() {
       alert('Update failed: ' + error.message);
     }
   };
-  
 
   const handleChangeEditPet = (e) => {
     setEditPet({ ...editPet, [e.target.name]: e.target.value });
@@ -122,6 +132,35 @@ function MyPets() {
               <div key={pet._id} className="col">
                 <div className="card h-100 shadow-sm" style={{ borderRadius: '15px', border: 'none', transition: 'transform 0.3s ease' }}>
                   <div className="card-body p-4">
+                    <div className="text-center mb-3">
+                      {pet.petPhoto ? (
+                        <img 
+                          src={`http://localhost:5000${pet.petPhoto}`} 
+                          alt={pet.petName} 
+                          className="img-fluid rounded mb-3" 
+                          style={{ 
+                            width: '150px', 
+                            height: '150px', 
+                            objectFit: 'cover',
+                            border: '3px solid #00c4cc',
+                            boxShadow: '0 4px 8px rgba(0, 196, 204, 0.2)'
+                          }} 
+                        />
+                      ) : (
+                        <div 
+                          className="mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                          style={{ 
+                            width: '150px', 
+                            height: '150px', 
+                            backgroundColor: '#e9ecef',
+                            border: '3px solid #00c4cc',
+                            borderRadius: '10px'
+                          }}
+                        >
+                          <i className="fas fa-paw fa-4x text-secondary"></i>
+                        </div>
+                      )}
+                    </div>
                     <div className="d-flex justify-content-between align-items-start mb-3">
                       <h4 className="card-title fw-bold" style={{ color: '#00c4cc' }}>
                         <i className="fas fa-paw me-2"></i>{pet.petName}
@@ -167,6 +206,15 @@ function MyPets() {
                           <span>{pet.specialConditions}</span>
                         </div>
                       )}
+                    </div>
+                    <div className="text-center mt-3">
+                      <button
+                        className="btn btn-outline-primary"
+                        onClick={() => handleUpdatePetImage(pet)}
+                        style={{ borderRadius: '10px' }}
+                      >
+                        <i className="fas fa-camera me-2"></i>Update Photo
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -271,7 +319,8 @@ function MyPets() {
                       <label className="form-label fw-bold">Special Conditions</label>
                       <div className="input-group">
                         <span className="input-group-text"><i className="fas fa-notes-medical"></i></span>
-                        <textarea 
+                        <input 
+                          type="text" 
                           name="specialConditions" 
                           className="form-control" 
                           value={editPet.specialConditions || ''} 
@@ -282,27 +331,38 @@ function MyPets() {
                     </div>
                   </div>
                   
-                  <div className="d-flex justify-content-end mt-4">
+                  <div className="d-flex justify-content-end gap-2">
                     <button 
                       type="button" 
-                      className="btn btn-outline-secondary me-2" 
-                      onClick={() => setEditPet(null)} 
+                      className="btn btn-secondary" 
+                      onClick={() => setEditPet(null)}
                       style={{ borderRadius: '10px' }}
                     >
-                      <i className="fas fa-times me-2"></i>Cancel
+                      Cancel
                     </button>
                     <button 
                       type="submit" 
-                      className="btn btn-primary" 
+                      className="btn btn-primary"
                       style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
                     >
-                      <i className="fas fa-save me-2"></i>Update Pet
+                      Save Changes
                     </button>
                   </div>
                 </form>
               </div>
             </div>
           </div>
+        )}
+
+        {showImageUpdate && selectedPet && (
+          <UpdatePetImage 
+            pet={selectedPet}
+            onUpdate={handleImageUpdate}
+            onClose={() => {
+              setShowImageUpdate(false);
+              setSelectedPet(null);
+            }}
+          />
         )}
       </div>
     </div>
