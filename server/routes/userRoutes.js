@@ -7,6 +7,12 @@ const multer = require('multer');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const auth = require('../middleware/auth');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
+const { authenticator } = require('otpauth');
+const { TOTP } = require('otpauth');
 const {
   signupValidation,
   loginValidation,
@@ -608,6 +614,159 @@ router.put('/pets/:id/photo', upload.single('petPhoto'), async (req, res) => {
     res.json(pet);
   } catch (error) {
     console.error('Error updating pet photo:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Generate 2FA secret
+router.post('/generate-2fa', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate secret
+    const secret = speakeasy.generateSecret({
+      name: `PawTracker:${user.email}`
+    });
+
+    // Generate backup codes
+    const backupCodes = Array.from({ length: 8 }, () => 
+      Math.random().toString(36).substring(2, 15)
+    );
+
+    // Save secret and backup codes
+    user.twoFactorSecret = secret.base32;
+    user.twoFactorBackupCodes = backupCodes;
+    await user.save();
+
+    // Generate QR code
+    const qrCode = await QRCode.toDataURL(secret.otpauth_url);
+
+    res.json({
+      secret: secret.base32,
+      qrCode,
+      backupCodes
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Verify and enable 2FA
+router.post('/verify-2fa-setup', async (req, res) => {
+  try {
+    const { userId, token } = req.body;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const totp = new TOTP({
+      secret: user.twoFactorSecret,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30
+    });
+
+    const isValid = totp.validate({ token });
+
+    if (!isValid) {
+      return res.status(400).json({ error: 'Invalid verification code' });
+    }
+
+    user.twoFactorEnabled = true;
+    user.twoFactorVerified = true;
+    await user.save();
+
+    res.json({ message: '2FA enabled successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Verify 2FA during login
+router.post('/verify-2fa-login', async (req, res) => {
+  try {
+    const { email, token } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!user.twoFactorEnabled) {
+      return res.status(400).json({ error: '2FA not enabled' });
+    }
+
+    const totp = new TOTP({
+      secret: user.twoFactorSecret,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30
+    });
+
+    const isValid = totp.validate({ token });
+
+    if (!isValid) {
+      return res.status(400).json({ error: 'Invalid verification code' });
+    }
+
+    res.json({
+      message: '2FA verification successful',
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        profilePhoto: user.profilePhoto,
+        isVerified: user.isVerified,
+        twoFactorEnabled: user.twoFactorEnabled
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Disable 2FA
+router.post('/disable-2fa', async (req, res) => {
+  try {
+    const { userId, token } = req.body;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const totp = new TOTP({
+      secret: user.twoFactorSecret,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30
+    });
+
+    const isValid = totp.validate({ token });
+
+    if (!isValid) {
+      return res.status(400).json({ error: 'Invalid verification code' });
+    }
+
+    user.twoFactorEnabled = false;
+    user.twoFactorSecret = undefined;
+    user.twoFactorBackupCodes = undefined;
+    user.twoFactorVerified = false;
+    await user.save();
+
+    res.json({ message: '2FA disabled successfully' });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });

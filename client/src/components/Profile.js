@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import TwoFactorSetup from './TwoFactorSetup';
 
 function Profile() {
   const user = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
   const [pets, setPets] = useState([]);
+  const [show2FASetup, setShow2FASetup] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -465,9 +467,47 @@ function Profile() {
             </div>
           )}
         </div>
+
+        {/* Add 2FA Section */}
+        <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+          <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+            <h5 className="mb-0" style={{ color: '#007bff' }}>
+              <i className="fas fa-shield-alt me-2"></i> Security Settings
+            </h5>
+          </div>
+          <div className="card-body">
+            <div className="row align-items-center">
+              <div className="col-md-8">
+                <h6 className="mb-1">Two-Factor Authentication (2FA)</h6>
+                <p className="text-muted mb-0">
+                  {user.twoFactorEnabled 
+                    ? 'Two-factor authentication is currently enabled for your account.'
+                    : 'Add an extra layer of security to your account by enabling two-factor authentication.'}
+                </p>
+              </div>
+              <div className="col-md-4 text-end">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setShow2FASetup(true)}
+                  style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
+                >
+                  <i className="fas fa-shield-alt me-2"></i>
+                  {user.twoFactorEnabled ? 'Manage 2FA' : 'Enable 2FA'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <br></br>
       <br></br>
+
+      {show2FASetup && (
+        <TwoFactorSetup
+          user={user}
+          onClose={() => setShow2FASetup(false)}
+        />
+      )}
     </div>
   );
 }

@@ -13,7 +13,17 @@ const userSchema = new mongoose.Schema({
   resetTokenExpiry: { type: Date },
   isVerified: { type: Boolean, default: false },
   verificationCode: { type: String },
-  verificationCodeExpiry: { type: Date }
+  verificationCodeExpiry: { type: Date },
+  // 2FA fields
+  twoFactorEnabled: { type: Boolean, default: false },
+  twoFactorSecret: { type: String },
+  twoFactorBackupCodes: [String],
+  twoFactorVerified: { type: Boolean, default: false },
+  verificationExpires: Date,
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

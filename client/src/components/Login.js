@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import TwoFactorAuth from './TwoFactorAuth';
 
 function Login({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({ email: '', password: '' });
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [userFor2FA, setUserFor2FA] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,35 +43,42 @@ function Login({ setIsLoggedIn }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setErrors({ email: '', password: '' });
+
     if (!validateForm()) return;
     
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', formData);
+      const response = await axios.post('http://localhost:5000/api/users/login', formData);
       
-      // Check if user needs verification
-      if (res.data.needsVerification) {
-        // Redirect to verification page
-        navigate('/verify-email', { 
-          state: { 
-            email: formData.email,
-            previewUrl: res.data.previewUrl 
-          } 
-        });
+      if (response.data.needsVerification) {
+        navigate('/verify-email', { state: { email: formData.email } });
         return;
       }
-      
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      setIsLoggedIn(true);
-      alert('Login successful!');
-      navigate('/profile');
+
+      if (response.data.user.twoFactorEnabled) {
+        setUserFor2FA(response.data.user);
+        setShow2FA(true);
+      } else {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        setIsLoggedIn(true);
+        navigate('/profile');
+      }
     } catch (error) {
       if (error.response?.status === 403 && error.response?.data?.needsVerification) {
-        // Redirect to verification page
         navigate('/verify-email', { state: { email: formData.email } });
       } else {
-        alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
+        setErrors({ email: '', password: error.response?.data?.message || 'Login failed' });
       }
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handle2FASuccess = (user) => {
+    localStorage.setItem('user', JSON.stringify(user));
+    setIsLoggedIn(true);
+    navigate('/profile');
   };
 
   return (
@@ -102,7 +113,16 @@ function Login({ setIsLoggedIn }) {
             />
             {errors.password && <small className="text-danger">{errors.password}</small>}
           </div>
-          <button type="submit" className="btn btn-primary w-100" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>Login</button>
+          <button type="submit" className="btn btn-primary w-100" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }} disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Logging in...
+              </>
+            ) : (
+              'Login'
+            )}
+          </button>
         </form>
         <p className="text-center mt-3" style={{ color: '#555' }}>
           Don't have an account? <Link to="/signup" style={{ color: '#007bff', textDecoration: 'none' }}>Sign up here</Link>
@@ -113,6 +133,15 @@ function Login({ setIsLoggedIn }) {
       </div>
       <br></br>
       <br></br>
+
+      {show2FA && (
+        <TwoFactorAuth
+          user={userFor2FA}
+          onClose={() => setShow2FA(false)}
+          isLogin={true}
+          onSuccess={handle2FASuccess}
+        />
+      )}
     </div>
   );
 }
