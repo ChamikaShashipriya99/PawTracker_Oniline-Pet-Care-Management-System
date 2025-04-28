@@ -263,6 +263,8 @@ router.post('/login', loginValidation, async (req, res) => {
         isAdmin: user.isAdmin, 
         profilePhoto: user.profilePhoto,
         isVerified: user.isVerified,
+        twoFactorEnabled: user.twoFactorEnabled,
+        twoFactorVerified: user.twoFactorVerified,
         createdAt: user.createdAt
       } 
     });
