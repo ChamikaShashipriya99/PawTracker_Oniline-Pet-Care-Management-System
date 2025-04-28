@@ -630,7 +630,8 @@ router.post('/generate-2fa', async (req, res) => {
 
     // Generate secret
     const secret = speakeasy.generateSecret({
-      name: `PawTracker:${user.email}`
+      name: `PawTracker:${user.email}`,
+      length: 20
     });
 
     // Generate backup codes
@@ -666,14 +667,13 @@ router.post('/verify-2fa-setup', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const totp = new TOTP({
+    // Verify using speakeasy instead of otpauth
+    const isValid = speakeasy.totp.verify({
       secret: user.twoFactorSecret,
-      algorithm: 'SHA1',
-      digits: 6,
-      period: 30
+      encoding: 'base32',
+      token: token,
+      window: 1 // Allow 1 period before and after
     });
-
-    const isValid = totp.validate({ token });
 
     if (!isValid) {
       return res.status(400).json({ error: 'Invalid verification code' });
@@ -703,14 +703,13 @@ router.post('/verify-2fa-login', async (req, res) => {
       return res.status(400).json({ error: '2FA not enabled' });
     }
 
-    const totp = new TOTP({
+    // Verify using speakeasy instead of otpauth
+    const isValid = speakeasy.totp.verify({
       secret: user.twoFactorSecret,
-      algorithm: 'SHA1',
-      digits: 6,
-      period: 30
+      encoding: 'base32',
+      token: token,
+      window: 1 // Allow 1 period before and after
     });
-
-    const isValid = totp.validate({ token });
 
     if (!isValid) {
       return res.status(400).json({ error: 'Invalid verification code' });
@@ -746,14 +745,13 @@ router.post('/disable-2fa', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const totp = new TOTP({
+    // Verify using speakeasy instead of otpauth
+    const isValid = speakeasy.totp.verify({
       secret: user.twoFactorSecret,
-      algorithm: 'SHA1',
-      digits: 6,
-      period: 30
+      encoding: 'base32',
+      token: token,
+      window: 1 // Allow 1 period before and after
     });
-
-    const isValid = totp.validate({ token });
 
     if (!isValid) {
       return res.status(400).json({ error: 'Invalid verification code' });

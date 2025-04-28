@@ -10,6 +10,9 @@ function Profile() {
   const navigate = useNavigate();
   const [pets, setPets] = useState([]);
   const [show2FASetup, setShow2FASetup] = useState(false);
+  const [showStatus, setShowStatus] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [statusType, setStatusType] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -27,6 +30,15 @@ function Profile() {
     };
     fetchPets();
   }, [navigate, user]);
+
+  const handle2FAStatusChange = (enabled) => {
+    setStatusMessage(enabled ? 'Two-Factor Authentication has been enabled successfully!' : 'Two-Factor Authentication has been disabled.');
+    setStatusType(enabled ? 'success' : 'info');
+    setShowStatus(true);
+    setTimeout(() => {
+      setShowStatus(false);
+    }, 5000);
+  };
 
   if (!user) return null;
 
@@ -108,6 +120,14 @@ function Profile() {
 
   return (
     <div className="container mt-5">
+      {showStatus && (
+        <div className={`alert alert-${statusType} alert-dismissible fade show`} role="alert" style={{ borderRadius: '10px' }}>
+          <i className={`fas fa-${statusType === 'success' ? 'check-circle' : 'info-circle'} me-2`}></i>
+          {statusMessage}
+          <button type="button" className="btn-close" onClick={() => setShowStatus(false)}></button>
+        </div>
+      )}
+
       <div className="card shadow-lg p-4" style={{ borderRadius: '15px', border: 'none' }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Profile 🐾</h2>
@@ -478,12 +498,33 @@ function Profile() {
           <div className="card-body">
             <div className="row align-items-center">
               <div className="col-md-8">
-                <h6 className="mb-1">Two-Factor Authentication (2FA)</h6>
+                <div className="d-flex align-items-center mb-2">
+                  <h6 className="mb-0 me-2">Two-Factor Authentication (2FA)</h6>
+                  {user.twoFactorEnabled ? (
+                    <span className="badge bg-success">
+                      <i className="fas fa-check-circle me-1"></i>
+                      Enabled
+                    </span>
+                  ) : (
+                    <span className="badge bg-secondary">
+                      <i className="fas fa-times-circle me-1"></i>
+                      Disabled
+                    </span>
+                  )}
+                </div>
                 <p className="text-muted mb-0">
                   {user.twoFactorEnabled 
-                    ? 'Two-factor authentication is currently enabled for your account.'
-                    : 'Add an extra layer of security to your account by enabling two-factor authentication.'}
+                    ? "Your account is protected with two-factor authentication. You will need to enter a verification code each time you log in."
+                    : "Add an extra layer of security to your account by enabling two-factor authentication."}
                 </p>
+                {user.twoFactorEnabled && (
+                  <div className="mt-2">
+                    <small className="text-muted">
+                      <i className="fas fa-info-circle me-1"></i>
+                      Last verified: {new Date(user.twoFactorVerified).toLocaleDateString()}
+                    </small>
+                  </div>
+                )}
               </div>
               <div className="col-md-4 text-end">
                 <button
@@ -496,6 +537,34 @@ function Profile() {
                 </button>
               </div>
             </div>
+
+            {user.twoFactorEnabled && (
+              <div className="mt-3 pt-3 border-top">
+                <h6 className="mb-3">Security Recommendations</h6>
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="d-flex align-items-center mb-2">
+                      <i className="fas fa-check-circle text-success me-2"></i>
+                      <span>2FA is enabled</span>
+                    </div>
+                    <div className="d-flex align-items-center mb-2">
+                      <i className="fas fa-check-circle text-success me-2"></i>
+                      <span>Backup codes are available</span>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="d-flex align-items-center mb-2">
+                      <i className="fas fa-info-circle text-info me-2"></i>
+                      <span>Keep your authenticator app secure</span>
+                    </div>
+                    <div className="d-flex align-items-center mb-2">
+                      <i className="fas fa-info-circle text-info me-2"></i>
+                      <span>Save your backup codes in a safe place</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -506,6 +575,7 @@ function Profile() {
         <TwoFactorSetup
           user={user}
           onClose={() => setShow2FASetup(false)}
+          onStatusChange={handle2FAStatusChange}
         />
       )}
     </div>

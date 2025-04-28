@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function TwoFactorSetup({ user, onClose }) {
+function TwoFactorSetup({ user, onClose, onStatusChange }) {
   const [step, setStep] = useState('initial');
   const [qrCode, setQrCode] = useState('');
   const [secret, setSecret] = useState('');
@@ -9,6 +9,7 @@ function TwoFactorSetup({ user, onClose }) {
   const [token, setToken] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [status, setStatus] = useState('');
 
   const handleGenerate2FA = async () => {
     try {
@@ -33,11 +34,51 @@ function TwoFactorSetup({ user, onClose }) {
       });
       setMessage(response.data.message);
       setError('');
+      setStatus('success');
+      
+      // Update user in localStorage
+      const updatedUser = { ...user, twoFactorEnabled: true };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Notify parent component
+      if (onStatusChange) {
+        onStatusChange(true);
+      }
+      
+      // Show success message for 3 seconds before closing
       setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 3000);
     } catch (error) {
       setError(error.response?.data?.error || 'Error verifying 2FA setup');
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/users/disable-2fa', {
+        userId: user._id,
+        token
+      });
+      setMessage(response.data.message);
+      setError('');
+      setStatus('disabled');
+      
+      // Update user in localStorage
+      const updatedUser = { ...user, twoFactorEnabled: false };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Notify parent component
+      if (onStatusChange) {
+        onStatusChange(false);
+      }
+      
+      // Show success message for 3 seconds before closing
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+    } catch (error) {
+      setError(error.response?.data?.error || 'Error disabling 2FA');
     }
   };
 
@@ -53,6 +94,20 @@ function TwoFactorSetup({ user, onClose }) {
             <button type="button" className="btn-close" onClick={onClose}></button>
           </div>
           <div className="modal-body">
+            {status === 'success' && (
+              <div className="alert alert-success" role="alert">
+                <i className="fas fa-check-circle me-2"></i>
+                Two-Factor Authentication has been enabled successfully!
+              </div>
+            )}
+            
+            {status === 'disabled' && (
+              <div className="alert alert-info" role="alert">
+                <i className="fas fa-info-circle me-2"></i>
+                Two-Factor Authentication has been disabled.
+              </div>
+            )}
+
             {step === 'initial' && (
               <div>
                 <p className="mb-4">
@@ -138,7 +193,7 @@ function TwoFactorSetup({ user, onClose }) {
               </div>
             )}
 
-            {message && (
+            {message && !status && (
               <div className="alert alert-success mt-3" role="alert">
                 {message}
               </div>
