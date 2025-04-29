@@ -22,7 +22,6 @@ import EditAppointment from './components/EditAppointment';
 import ViewAppointment from './components/ViewAppointment';
 import AdminAppointments from './components/AdminAppointments';
 import Notification from './components/Notification';
-import Notifications from './components/Notifications';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
