@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Form, InputGroup } from 'react-bootstrap';
 
 function Store() {
   const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -12,6 +15,7 @@ function Store() {
       .then(res => {
         console.log('Store API response:', res.data);
         setItems(res.data);
+        setFilteredItems(res.data);
         setLoading(false);
       })
       .catch(err => {
@@ -20,6 +24,16 @@ function Store() {
         alert('Failed to load products');
       });
   }, []);
+
+  // Search functionality
+  useEffect(() => {
+    const results = items.filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredItems(results);
+  }, [searchTerm, items]);
 
   if (loading) return (
     <div className="container mt-5">
@@ -34,11 +48,34 @@ function Store() {
   return (
     <div className="container mt-4">
       <h2>Our Products</h2>
-      {items.length === 0 ? (
-        <div className="alert alert-info">No products available at the moment.</div>
+      
+      {/* Search Bar */}
+      <div className="row mb-4">
+        <div className="col-md-8 mx-auto">
+          <InputGroup>
+            <Form.Control
+              placeholder="Search products by name, category or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="py-2"
+            />
+            {searchTerm && (
+              <button 
+                className="btn btn-outline-secondary" 
+                onClick={() => setSearchTerm('')}
+              >
+                Clear
+              </button>
+            )}
+          </InputGroup>
+        </div>
+      </div>
+
+      {filteredItems.length === 0 ? (
+        <div className="alert alert-info">No products found matching your search.</div>
       ) : (
         <div className="row">
-          {items.map(item => (
+          {filteredItems.map(item => (
             <div className="col-md-4 mb-4" key={item._id}>
               <div className="card h-100 shadow-sm">
                 <div className="card-body">

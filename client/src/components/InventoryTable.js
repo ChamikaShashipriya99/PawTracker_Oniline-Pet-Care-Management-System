@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button, Modal, Form } from 'react-bootstrap';
+import { Table, Button, Modal, Form, InputGroup } from 'react-bootstrap';
+import * as XLSX from 'xlsx';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const INVENTORY_ENDPOINT = `${API_URL}/inventory`;
 
 function InventoryTable() {
   const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [current, setCurrent] = useState({});
@@ -15,6 +18,15 @@ function InventoryTable() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { fetchItems(); }, []);
+
+  useEffect(() => {
+    const results = items.filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredItems(results);
+  }, [searchTerm, items]);
 
   const fetchItems = async () => {
     try {
@@ -120,6 +132,25 @@ function InventoryTable() {
     setShowEdit(true);
   };
 
+  const handleDownload = () => {
+    // Create worksheet from items data
+    const worksheet = XLSX.utils.json_to_sheet(items.map(item => ({
+      ID: item._id,
+      Name: item.name,
+      Category: item.category,
+      Description: item.description,
+      Quantity: item.quantity,
+      Price: `$${item.price.toFixed(2)}`
+    })));
+
+    // Create workbook and append worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
+
+    // Generate and download Excel file
+    XLSX.writeFile(workbook, 'inventory_data.xlsx');
+  };
+
   if (loading) {
     return (
       <div className="container mt-5">
@@ -140,9 +171,33 @@ function InventoryTable() {
           {error}
         </div>
       )}
-      <Button className="mb-3" onClick={() => setShowAdd(true)} disabled={loading}>
-        Add Item
-      </Button>
+      
+      {/* Search Bar */}
+      <InputGroup className="mb-3">
+        <Form.Control
+          placeholder="Search by name, category or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {searchTerm && (
+          <Button 
+            variant="outline-secondary" 
+            onClick={() => setSearchTerm('')}
+          >
+            Clear
+          </Button>
+        )}
+      </InputGroup>
+
+      <div className="mb-3 d-flex gap-2">
+        <Button onClick={() => setShowAdd(true)} disabled={loading}>
+          Add Item
+        </Button>
+        <Button variant="success" onClick={handleDownload} disabled={loading}>
+          Download Inventory
+        </Button>
+      </div>
+      
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -156,7 +211,7 @@ function InventoryTable() {
           </tr>
         </thead>
         <tbody>
-          {items.map((item, idx) => (
+          {filteredItems.map((item, idx) => (
             <tr key={item._id}>
               <td>{idx + 1}</td>
               <td>{item.name}</td>
