@@ -107,6 +107,20 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   </>
                 ) : (
                   <>
+                    <li className="nav-item me-2">
+                      <a className="nav-link position-relative" href="#" onClick={(e) => e.preventDefault()}>
+                        <i className="fas fa-bell fa-lg"></i>
+                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                          3
+                          <span className="visually-hidden">unread notifications</span>
+                        </span>
+                      </a>
+                    </li>
+                    <li className="nav-item me-2">
+                      <Link className="nav-link" to="/profile">
+                        <i className="fas fa-user-circle fa-lg"></i>
+                      </Link>
+                    </li>
                     <li className="nav-item dropdown">
                       <a className="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
                         Profile
@@ -144,9 +158,6 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/admin-appointments">Appointments</Link> {/* New Appointments tab */}
-                </li>
-                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
@@ -182,8 +193,6 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/view-appointment/:id" element={<ViewAppointment />} />
               <Route path="/admin-appointments" element={<AdminAppointments />} />
               <Route path="/notification" element={<Notification />} />
-              <Route path="/notifications" element={<Notifications recipient="admin" />} /> {/* Pass recipient as "admin" */}
-              <Route path="/notifications/:recipient" element={<Notifications recipient="petOwner" />} /> {/* Pass recipient as "petOwner" */}
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
