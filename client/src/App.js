@@ -13,6 +13,7 @@ import MyPets from './components/MyPets';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import InventoryTable from './components/InventoryTable';
+import Store from './components/Store';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -158,7 +159,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="/add-pet" element={<AddPet />} />
               <Route path="/my-pets" element={<MyPets />} />
-              <Route path="/store" element={<div>Store Page</div>} />
+              <Route path="/store" element={<Store />} />
               <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />
               <Route path="/services/training" element={<div>Pet Training Page</div>} />
