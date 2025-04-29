@@ -148,6 +148,10 @@
     font-weight: bold;
 }
 
+.modal-title {
+    color: #ff5733;
+}
+
 /* Footer (consistent with previous service pages) */
 .service-footer {
     background-color: #1F2937;
