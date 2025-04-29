@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 function Cart() {
   const [cart, setCart] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -19,11 +21,25 @@ function Cart() {
     return cart.reduce((sum, item) => sum + item.price * (item.cartQuantity || 1), 0);
   };
 
+  const handleCheckout = () => {
+    // Here you can add checkout logic
+    alert('Proceeding to checkout...');
+    // You can navigate to a checkout page or show a payment modal
+    // For now, we'll just clear the cart
+    localStorage.removeItem('cart');
+    setCart([]);
+    // You can redirect to a thank you page or back to store
+    navigate('/store');
+  };
+
   if (cart.length === 0) {
     return (
       <div className="container mt-5">
         <h2>Your Cart</h2>
         <div className="alert alert-info">Your cart is empty.</div>
+        <Button variant="primary" onClick={() => navigate('/store')}>
+          Continue Shopping
+        </Button>
       </div>
     );
   }
@@ -61,8 +77,22 @@ function Cart() {
           ))}
         </tbody>
       </Table>
+      
       <div className="text-end">
-        <h4>Total: Rs. {getTotal().toFixed(2)}</h4>
+        <h4 className="mb-3">Total: Rs. {getTotal().toFixed(2)}</h4>
+        <div className="d-flex justify-content-end gap-2">
+          <Button variant="secondary" onClick={() => navigate('/store')}>
+            Continue Shopping
+          </Button>
+          <Button 
+            variant="success" 
+            size="lg" 
+            onClick={handleCheckout}
+            className="px-5"
+          >
+            Proceed to Checkout
+          </Button>
+        </div>
       </div>
     </div>
   );
