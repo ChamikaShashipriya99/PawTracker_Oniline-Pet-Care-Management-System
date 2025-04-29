@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Form, InputGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 function Store() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("Store component loaded");
@@ -34,6 +36,23 @@ function Store() {
     );
     setFilteredItems(results);
   }, [searchTerm, items]);
+
+  // Add to Cart handler
+  const handleAddToCart = (item) => {
+    // Get current cart from localStorage
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    // Check if item already in cart
+    const existing = cart.find(i => i._id === item._id);
+    if (existing) {
+      // If already in cart, increase quantity
+      existing.cartQuantity = (existing.cartQuantity || 1) + 1;
+    } else {
+      // Add new item with cartQuantity = 1
+      cart.push({ ...item, cartQuantity: 1 });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    navigate('/cart');
+  };
 
   if (loading) return (
     <div className="container mt-5">
@@ -93,6 +112,7 @@ function Store() {
                   <button 
                     className="btn btn-primary w-100" 
                     disabled={item.quantity === 0}
+                    onClick={() => handleAddToCart(item)}
                   >
                     Add to Cart
                   </button>
