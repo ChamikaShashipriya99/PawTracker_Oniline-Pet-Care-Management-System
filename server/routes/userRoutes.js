@@ -1,35 +1,40 @@
 import express from 'express';
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import multer from 'multer';
+import path from 'path';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const router = express.Router();
-//import User, { findOne, find, findByIdAndUpdate, findByIdAndDelete } from '../models/User.js';
-//import Pet, {findByIdAndUpdate as _findByIdAndUpdate, findByIdAndDelete as _findByIdAndDelete } from '../models/Pet.js';
-import { hash, compare } from 'bcryptjs';
-import multer, { diskStorage } from 'multer';
-import { extname } from 'path';
-import { createTransport } from 'nodemailer';
-import { randomBytes } from 'crypto';
 
 // Set up multer for file uploads
-const storage = diskStorage({
+const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + extname(file.originalname));
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 const upload = multer({ storage });
 
 // Ensure 'uploads' directory exists
-import { existsSync, mkdirSync } from 'fs';
-if (!existsSync('uploads')) {
-  mkdirSync('uploads');
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
 }
 
 // Serve uploaded files statically
 router.use('/uploads', express.static('uploads'));
 
 // Email configuration
-const transporter = createTransport({
+const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
     user: 'myactualemail@gmail.com', // Your actual Gmail address
@@ -41,13 +46,43 @@ const transporter = createTransport({
 router.post('/signup', upload.single('profilePhoto'), async (req, res) => {
   const { firstName, lastName, username, email, phone, password } = req.body;
   const profilePhoto = req.file ? `/uploads/${req.file.filename}` : null;
+  
   try {
-    const hashedPassword = await hash(password, 10);
-    const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, profilePhoto });
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: existingUser.email === email ? 'Email already registered' : 'Username already taken' 
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ 
+      firstName, 
+      lastName, 
+      username, 
+      email, 
+      phone, 
+      password: hashedPassword, 
+      profilePhoto 
+    });
+    
     await user.save();
-    res.status(201).json({ message: 'User created', user: { ...user.toObject(), password: undefined } });
+    res.status(201).json({ 
+      message: 'User created successfully',
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        profilePhoto: user.profilePhoto
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Error creating user account' });
   }
 });
 
@@ -55,7 +90,7 @@ router.post('/signup', upload.single('profilePhoto'), async (req, res) => {
 router.post('/admin/signup', async (req, res) => {
   const { firstName, lastName, username, email, phone, password } = req.body;
   try {
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, isAdmin: true });
     await user.save();
     res.status(201).json({ message: 'Admin created' });
@@ -68,8 +103,8 @@ router.post('/admin/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await findOne({ email });
-    if (!user || !(await compare(password, user.password))) {
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     res.json({ user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, username: user.username, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto } });
@@ -82,8 +117,8 @@ router.post('/login', async (req, res) => {
 router.post('/admin/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await findOne({ email, isAdmin: true });
-    if (!user || !(await compare(password, user.password))) {
+    const user = await User.findOne({ email, isAdmin: true });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
     res.json({ user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, username: user.username, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto } });
@@ -96,12 +131,12 @@ router.post('/admin/login', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const resetToken = randomBytes(32).toString('hex');
+    const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = Date.now() + 3600000;
 
     user.resetToken = resetToken;
@@ -132,7 +167,7 @@ router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
   try {
-    const user = await findOne({
+    const user = await User.findOne({
       resetToken: token,
       resetTokenExpiry: { $gt: Date.now() }
     });
@@ -140,7 +175,7 @@ router.post('/reset-password/:token', async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired token' });
     }
 
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
@@ -155,7 +190,7 @@ router.post('/reset-password/:token', async (req, res) => {
 // Get all users (admin only)
 router.get('/users', async (req, res) => {
   try {
-    const users = await find();
+    const users = await User.find();
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -166,7 +201,7 @@ router.get('/users', async (req, res) => {
 router.post('/admin/add', async (req, res) => {
   const { firstName, lastName, username, email, phone, password } = req.body;
   try {
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, isAdmin: true });
     await user.save();
     res.status(201).json({ message: 'Admin created' });
@@ -183,11 +218,11 @@ router.put('/:id', async (req, res) => {
     
     // If password is provided, hash it and add to update data
     if (password) {
-      const hashedPassword = await hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 10);
       updateData.password = hashedPassword;
     }
 
-    const user = await findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -203,7 +238,7 @@ router.put('/:id', async (req, res) => {
 // Delete user (admin only)
 router.delete('/:id', async (req, res) => {
   try {
-    await findByIdAndDelete(req.params.id);
+    await User.findByIdAndDelete(req.params.id);
     res.json({ message: 'User deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -226,7 +261,7 @@ router.post('/pets', upload.single('petPhoto'), async (req, res) => {
 // Get user's pets
 router.get('/pets/:userId', async (req, res) => {
   try {
-    const pets = await _find({ userId: req.params.userId });
+    const pets = await Pet.find({ userId: req.params.userId });
     res.json(pets);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -238,7 +273,7 @@ router.put('/pets/:id', upload.single('petPhoto'), async (req, res) => {
   const { petName, breed, birthday, age, weight, specialConditions } = req.body;
   const petPhoto = req.file ? `/uploads/${req.file.filename}` : req.body.petPhoto;
   try {
-    const pet = await _findByIdAndUpdate(req.params.id, { petName, breed, birthday, age, weight, specialConditions, petPhoto }, { new: true });
+    const pet = await Pet.findByIdAndUpdate(req.params.id, { petName, breed, birthday, age, weight, specialConditions, petPhoto }, { new: true });
     res.json(pet);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -248,7 +283,7 @@ router.put('/pets/:id', upload.single('petPhoto'), async (req, res) => {
 // Delete pet
 router.delete('/pets/:id', async (req, res) => {
   try {
-    await _findByIdAndDelete(req.params.id);
+    await Pet.findByIdAndDelete(req.params.id);
     res.json({ message: 'Pet deleted' });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   username: { type: String, required: true, unique: true },
@@ -10,7 +10,10 @@ const userSchema = new Schema({
   isAdmin: { type: Boolean, default: false },
   profilePhoto: { type: String },
   resetToken: { type: String }, 
-  resetTokenExpiry: { type: Date } 
-});
+  resetTokenExpiry: { type: Date },
+  isVerified: { type: Boolean, default: false },
+  verificationCode: { type: String },
+  verificationCodeExpiry: { type: Date }
+}, { timestamps: true });
 
-export default model('User', userSchema);
+export default mongoose.model('User', userSchema);
