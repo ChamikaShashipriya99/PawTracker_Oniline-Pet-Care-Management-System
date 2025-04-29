@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { BsArrowLeft } from "react-icons/bs";
@@ -18,30 +18,46 @@ const EditAdvertisement = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get(`http://localhost:5000/advertisements/details/${id}`)
-      .then((response) => {
-        const ad = response.data;
-        setName(ad.name || "");
-        setEmail(ad.email || "");
-        setContactNumber(ad.contactNumber || "");
-        setAdvertisementType(ad.advertisementType || "");
-        setPetType(ad.petType || "");
-        setHeading(ad.heading || "");
-        setDescription(ad.description || "");
-        setExistingImage(ad.photo || null);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error("Fetch Error:", error.response?.data || error.message);
-        enqueueSnackbar("Error fetching advertisement", { variant: "error" });
-      });
-  }, [id, enqueueSnackbar]);
+    // First try to get data from location state
+    const advertisement = location.state?.advertisement;
+    if (advertisement) {
+      setName(advertisement.name || "");
+      setEmail(advertisement.email || "");
+      setContactNumber(advertisement.contactNumber || "");
+      setAdvertisementType(advertisement.advertisementType || "");
+      setPetType(advertisement.petType || "");
+      setHeading(advertisement.heading || "");
+      setDescription(advertisement.description || "");
+      setExistingImage(advertisement.photo || null);
+      setLoading(false);
+    } else {
+      // If no data in state, fetch from API
+      setLoading(true);
+      axios
+        .get(`http://localhost:5000/api/advertisements/details/${id}`)
+        .then((response) => {
+          const ad = response.data;
+          setName(ad.name || "");
+          setEmail(ad.email || "");
+          setContactNumber(ad.contactNumber || "");
+          setAdvertisementType(ad.advertisementType || "");
+          setPetType(ad.petType || "");
+          setHeading(ad.heading || "");
+          setDescription(ad.description || "");
+          setExistingImage(ad.photo || null);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+          console.error("Fetch Error:", error.response?.data || error.message);
+          enqueueSnackbar("Error fetching advertisement", { variant: "error" });
+        });
+    }
+  }, [id, location.state, enqueueSnackbar]);
 
   const handleEditAdvertisement = () => {
     if (!/^[A-Za-z\s]+$/.test(name)) {
@@ -81,25 +97,21 @@ const EditAdvertisement = () => {
     if (petType) formData.append("petType", petType);
     formData.append("heading", heading);
     formData.append("description", description);
-    if (uploadImage) formData.append("uploadImage", uploadImage);
+    if (uploadImage) formData.append("photo", uploadImage);
 
     setLoading(true);
 
     axios
-      .put(`http://localhost:5000/advertisements/edit/${id}`, formData)
+      .put(`http://localhost:5000/api/advertisements/edit/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
       .then(() => {
         setLoading(false);
         enqueueSnackbar("Advertisement Updated Successfully", { variant: "success" });
-        setName("");
-        setEmail("");
-        setContactNumber("");
-        setAdvertisementType("");
-        setPetType("");
-        setHeading("");
-        setDescription("");
-        setUploadImage(null);
-        setExistingImage(null);
-        navigate("/advertisements/my-ads", { state: { email } });
+        navigate("/my-advertisements", { 
+          state: { email },
+          replace: true 
+        });
       })
       .catch((error) => {
         setLoading(false);
@@ -129,179 +141,211 @@ const EditAdvertisement = () => {
   );
 
   return (
-    <div className="home-container">
-      <section className="hero-section">
-        <div className="hero-content fade-in">
-          <h1 className="hero-title">Edit Pet Advertisement 🐾</h1>
-          <p className="hero-subtitle">Update your pet ad on PawTracker.</p>
-        </div>
-      </section>
-
-      <section className="content-section fade-in">
-        <div className="container">
-          
-
-          <BackButton />
-
-          {loading ? (
-            <Spinner />
-          ) : (
-            <div className="row justify-content-center">
-              <div className="col-md-8">
-                <div className="card hover-card">
-                  <div className="card-body">
-                    <h2 className="card-title">Edit Advertisement</h2>
-                    {existingImage && (
-                      <div className="mb-3">
-                        <label className="form-label">Current Image</label>
-                        <img
-                          src={`http://localhost:5000/uploads/${existingImage}`}
-                          alt="Current"
-                          className="img-preview"
-                        />
-                      </div>
-                    )}
-                    <form className="create-form" onSubmit={(e) => { e.preventDefault(); handleEditAdvertisement(); }}>
-                      <div className="mb-3">
-                        <label htmlFor="name" className="form-label">Name</label>
-                        <input
-                          type="text"
-                          id="name"
-                          name="name"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          className="form-control"
-                          required
-                        />
-                      </div>
-
-                      <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email</label>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="form-control"
-                          required
-                        />
-                      </div>
-
-                      <div className="mb-3">
-                        <label htmlFor="contactNumber" className="form-label">Contact Number</label>
-                        <input
-                          type="text"
-                          id="contactNumber"
-                          name="contactNumber"
-                          value={contactNumber}
-                          onChange={(e) => setContactNumber(e.target.value)}
-                          className="form-control"
-                          placeholder="e.g., 123-456-7890"
-                          required
-                        />
-                      </div>
-
-                      <div className="mb-3">
-                        <label htmlFor="advertisementType" className="form-label">Advertisement Type</label>
-                        <select
-                          id="advertisementType"
-                          name="advertisementType"
-                          value={advertisementType}
-                          onChange={(e) => setAdvertisementType(e.target.value)}
-                          className="form-select"
-                          required
-                        >
-                          <option value="">Select Type</option>
-                          <option value="Sell a Pet">Sell a Pet</option>
-                          <option value="Lost Pet">Lost Pet</option>
-                          <option value="Found Pet">Found Pet</option>
-                        </select>
-                      </div>
-
-                      {advertisementType === "Sell a Pet" && (
-                        <div className="mb-3">
-                          <label htmlFor="petType" className="form-label">Pet Type</label>
-                          <select
-                            id="petType"
-                            name="petType"
-                            value={petType}
-                            onChange={(e) => setPetType(e.target.value)}
-                            className="form-select"
-                            required
-                          >
-                            <option value="">Select Pet Type</option>
-                            <option value="Cat">Cat</option>
-                            <option value="Dog">Dog</option>
-                            <option value="Bird">Bird</option>
-                            <option value="Fish">Fish</option>
-                            <option value="Other">Other</option>
-                          </select>
-                        </div>
-                      )}
-
-                      <div className="mb-3">
-                        <label htmlFor="heading" className="form-label">Heading</label>
-                        <input
-                          type="text"
-                          id="heading"
-                          name="heading"
-                          value={heading}
-                          onChange={(e) => setHeading(e.target.value)}
-                          className="form-control"
-                          required
-                        />
-                      </div>
-
-                      <div className="mb-3">
-                        <label htmlFor="description" className="form-label">Description</label>
-                        <textarea
-                          id="description"
-                          name="description"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          className="form-control"
-                          rows="4"
-                          required
-                        />
-                      </div>
-
-                      <div className="mb-3">
-                        <label htmlFor="uploadImage" className="form-label">Upload New Image (JPEG/PNG/GIF, max 5MB)</label>
-                        <input
-                          type="file"
-                          id="uploadImage"
-                          name="uploadImage"
-                          onChange={(e) => setUploadImage(e.target.files[0])}
-                          className="form-control"
-                          accept="image/jpeg,image/png,image/gif"
-                        />
-                      </div>
-
-                      <div className="form-actions">
-                        <button
-                          type="submit"
-                          className="hero-btn"
-                          disabled={loading}
-                        >
-                          {loading ? "Updating..." : "Save Changes"}
-                        </button>
-                        <button
-                          type="button"
-                          className="hero-btn cancel"
-                          onClick={() => navigate("/advertisements/my-ads")}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+    <div className="container-fluid py-5">
+      <div className="row justify-content-center">
+        <div className="col-md-10">
+          <div className="card shadow-lg border-0 rounded-lg">
+            <div className="card-header bg-primary text-white">
+              <div className="d-flex justify-content-between align-items-center">
+                <h3 className="mb-0">Edit Pet Advertisement 🐾</h3>
+                <Link to="/my-advertisements" className="btn btn-light">
+                  <BsArrowLeft className="me-2" />
+                  Back
+                </Link>
               </div>
             </div>
-          )}
+
+            <div className="card-body">
+              {loading ? (
+                <div className="text-center py-5">
+                  <Spinner />
+                </div>
+              ) : (
+                <form onSubmit={(e) => { e.preventDefault(); handleEditAdvertisement(); }}>
+                  <div className="row">
+                    {/* Left Column - Image Upload and Contact Info */}
+                    <div className="col-md-4">
+                      <div className="card mb-4">
+                        <div className="card-body">
+                          <h5 className="card-title mb-3">Advertisement Image</h5>
+                          {existingImage && (
+                            <div className="text-center mb-3">
+                              <img
+                                src={`http://localhost:5000/uploads/${existingImage}`}
+                                alt="Current"
+                                className="img-fluid rounded shadow-sm"
+                                style={{ maxHeight: '200px', objectFit: 'cover' }}
+                              />
+                            </div>
+                          )}
+                          <div className="mb-3">
+                            <label htmlFor="uploadImage" className="form-label">Update Image</label>
+                            <input
+                              type="file"
+                              id="uploadImage"
+                              name="uploadImage"
+                              onChange={(e) => setUploadImage(e.target.files[0])}
+                              className="form-control"
+                              accept="image/jpeg,image/png,image/gif"
+                            />
+                            <small className="text-muted">JPEG/PNG/GIF, max 5MB</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="card">
+                        <div className="card-body">
+                          <h5 className="card-title mb-3">Contact Information</h5>
+                          <div className="mb-3">
+                            <label htmlFor="name" className="form-label">Name</label>
+                            <input
+                              type="text"
+                              id="name"
+                              name="name"
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                              className="form-control bg-light"
+                              required
+                            />
+                            <small className="text-muted">Pre-filled from your profile, can be changed</small>
+                          </div>
+                          <div className="mb-3">
+                            <label htmlFor="email" className="form-label">Email</label>
+                            <input
+                              type="email"
+                              id="email"
+                              name="email"
+                              value={email}
+                              className="form-control bg-light"
+                              readOnly
+                              disabled
+                            />
+                            <small className="text-muted">Email is taken from your profile</small>
+                          </div>
+                          <div className="mb-3">
+                            <label htmlFor="contactNumber" className="form-label">Contact Number</label>
+                            <input
+                              type="text"
+                              id="contactNumber"
+                              name="contactNumber"
+                              value={contactNumber}
+                              onChange={(e) => setContactNumber(e.target.value)}
+                              className="form-control bg-light"
+                              placeholder="e.g., 123-456-7890"
+                              required
+                            />
+                            <small className="text-muted">Pre-filled from your profile, can be changed</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Advertisement Details */}
+                    <div className="col-md-8">
+                      <div className="card">
+                        <div className="card-body">
+                          <h5 className="card-title mb-3">Advertisement Details</h5>
+                          <div className="row">
+                            <div className="col-md-6 mb-3">
+                              <label htmlFor="advertisementType" className="form-label">Advertisement Type</label>
+                              <select
+                                id="advertisementType"
+                                name="advertisementType"
+                                value={advertisementType}
+                                onChange={(e) => setAdvertisementType(e.target.value)}
+                                className="form-select"
+                                required
+                              >
+                                <option value="">Select Type</option>
+                                <option value="Sell a Pet">Sell a Pet</option>
+                                <option value="Lost Pet">Lost Pet</option>
+                                <option value="Found Pet">Found Pet</option>
+                              </select>
+                            </div>
+
+                            {advertisementType === "Sell a Pet" && (
+                              <div className="col-md-6 mb-3">
+                                <label htmlFor="petType" className="form-label">Pet Type</label>
+                                <select
+                                  id="petType"
+                                  name="petType"
+                                  value={petType}
+                                  onChange={(e) => setPetType(e.target.value)}
+                                  className="form-select"
+                                  required
+                                >
+                                  <option value="">Select Pet Type</option>
+                                  <option value="Cat">Cat</option>
+                                  <option value="Dog">Dog</option>
+                                  <option value="Bird">Bird</option>
+                                  <option value="Fish">Fish</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mb-3">
+                            <label htmlFor="heading" className="form-label">Heading</label>
+                            <input
+                              type="text"
+                              id="heading"
+                              name="heading"
+                              value={heading}
+                              onChange={(e) => setHeading(e.target.value)}
+                              className="form-control"
+                              required
+                            />
+                          </div>
+
+                          <div className="mb-3">
+                            <label htmlFor="description" className="form-label">Description</label>
+                            <textarea
+                              id="description"
+                              name="description"
+                              value={description}
+                              onChange={(e) => setDescription(e.target.value)}
+                              className="form-control"
+                              rows="4"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card-footer bg-light mt-4">
+                    <div className="d-flex justify-content-end gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => navigate("/my-advertisements")}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Updating...
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 };

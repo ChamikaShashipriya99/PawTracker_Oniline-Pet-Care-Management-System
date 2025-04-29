@@ -19,6 +19,8 @@ import ShowAdvertisement from './components/ShowAdvertisement';
 import DeleteAdvertisement from './components/DeleteAdvertisement';
 import EditAdvertisement from './components/EditAdvertisement';
 import AdminAdvertisement from './components/AdminAdvertisement';
+import AddAdvertisement from './components/AddAdvertisement';
+import VaccinationTracker from './components/VaccinationTracker';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -167,6 +169,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="/add-pet" element={<AddPet />} />
               <Route path="/my-pets" element={<MyPets />} />
+              <Route path="/pets/:petId/vaccinations" element={<VaccinationTracker />} />
+              <Route path="/advertisements/add" element={<AddAdvertisement />} />
+              <Route path="/advertisements/my-ads" element={<MyAdvertisement />} />
+              <Route path="/advertisements/edit/:id" element={<EditAdvertisement />} />
               <Route path="/store" element={<div>Store Page</div>} />
               <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />

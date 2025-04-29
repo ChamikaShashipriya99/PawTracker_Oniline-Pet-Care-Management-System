@@ -1,9 +1,10 @@
-import express from "express";
-import multer from "multer";
-import path from "path";
-import { fileURLToPath } from "url";
-import Advertisement from "../models/Advertisement.js";
-import requirePhoto from "../middleware/requirePhoto.js";
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import Advertisement from '../models/Advertisement.js';
+import requirePhoto from '../middleware/requirePhoto.js';
 
 const router = express.Router();
 
@@ -11,107 +12,148 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Ensure upload directory exists
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Multer configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../project_images"));
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
 });
 
 const fileFilter = (req, file, cb) => {
   const filetypes = /jpeg|jpg|png|gif/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
+  
   if (extname && mimetype) {
     cb(null, true);
   } else {
-    cb(new Error("Only JPEG, PNG, and GIF images are allowed"));
+    cb(new Error('Only JPEG, PNG, and GIF images are allowed'));
   }
 };
 
 const upload = multer({
   storage,
-  limits: { fileSize: process.env.MAX_FILE_SIZE || 5 * 1024 * 1024 }, // 5MB
-  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter
 });
 
 // Get all advertisements
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const advertisements = await Advertisement.find({});
     return res.status(200).json({ data: advertisements });
   } catch (error) {
-    console.error("Error fetching advertisements:", error.stack);
-    res.status(500).json({ message: "Server error fetching advertisements" });
+    console.error('Error fetching advertisements:', error.stack);
+    res.status(500).json({ message: 'Server error fetching advertisements' });
   }
 });
 
 // Create new advertisement
-router.post("/", upload.single("uploadImage"), requirePhoto, async (req, res) => {
+router.post('/', upload.single('photo'), requirePhoto, async (req, res) => {
   try {
-    console.log("POST /advertisements received:", req.body, req.file); // Debug
     const { name, email, contactNumber, advertisementType, petType, heading, description } = req.body;
 
     // Validate required fields
     if (!name || !email || !contactNumber || !advertisementType || !heading || !description) {
-      console.log("Validation failed: Missing required fields");
-      return res.status(400).json({ message: "Please fill all required fields" });
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        details: 'Please fill all required fields'
+      });
     }
 
     // Validate advertisementType
-    const validTypes = ["Sell a Pet", "Lost Pet", "Found Pet"];
+    const validTypes = ['Sell a Pet', 'Lost Pet', 'Found Pet'];
     if (!validTypes.includes(advertisementType)) {
-      console.log("Validation failed: Invalid advertisement type:", advertisementType);
-      return res.status(400).json({ message: "Invalid advertisement type" });
+      return res.status(400).json({ 
+        error: 'Invalid advertisement type',
+        details: 'Please select a valid advertisement type'
+      });
     }
 
     // Require petType for "Sell a Pet"
-    if (advertisementType === "Sell a Pet" && !petType) {
-      console.log("Validation failed: Pet type required for Sell a Pet");
-      return res.status(400).json({ message: "Pet type is required for selling a pet" });
+    if (advertisementType === 'Sell a Pet' && !petType) {
+      return res.status(400).json({ 
+        error: 'Pet type required',
+        details: 'Pet type is required for selling a pet'
+      });
     }
 
-    const newAdvertisement = {
+    // Validate photo
+    if (!req.file) {
+      return res.status(400).json({ 
+        error: 'Photo required',
+        details: 'Please upload a photo'
+      });
+    }
+
+    const newAdvertisement = new Advertisement({
       name,
       email,
       contactNumber,
       advertisementType,
-      petType: advertisementType === "Sell a Pet" ? petType : "",
+      petType: advertisementType === 'Sell a Pet' ? petType : '',
       heading,
       description,
-      photo: req.file ? req.file.filename : null,
-    };
+      photo: req.file.filename
+    });
 
-    console.log("Creating advertisement:", newAdvertisement); // Debug
-    const advertisement = await Advertisement.create(newAdvertisement);
-    console.log("Advertisement created:", advertisement); // Debug
-    return res.status(201).json({ message: "Advertisement created successfully", id: advertisement._id });
+    const advertisement = await newAdvertisement.save();
+    
+    res.status(201).json({
+      message: 'Advertisement created successfully',
+      advertisement: {
+        id: advertisement._id,
+        name: advertisement.name,
+        email: advertisement.email,
+        advertisementType: advertisement.advertisementType,
+        heading: advertisement.heading,
+        status: advertisement.status
+      }
+    });
   } catch (error) {
-    console.error("Error creating advertisement:", error.stack);
-    res.status(500).json({ message: "Server error creating advertisement", error: error.message });
+    console.error('Error creating advertisement:', error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: 'Validation error',
+        details: Object.values(error.errors).map(err => err.message)
+      });
+    }
+
+    res.status(500).json({
+      error: 'Server error',
+      details: 'Error creating advertisement'
+    });
   }
 });
 
 // Get advertisement by ID
-router.get("/details/:id", async (req, res) => {
+router.get('/details/:id', async (req, res) => {
   try {
     const advertisement = await Advertisement.findById(req.params.id);
     if (!advertisement) {
-      return res.status(404).json({ message: "Advertisement not found" });
+      return res.status(404).json({ message: 'Advertisement not found' });
     }
     return res.status(200).json(advertisement);
   } catch (error) {
-    console.error("Error fetching advertisement:", error.stack);
-    res.status(500).json({ message: "Server error fetching advertisement" });
+    console.error('Error fetching advertisement:', error.stack);
+    res.status(500).json({ message: 'Server error fetching advertisement' });
   }
 });
 
 // Get advertisements by email
-router.get("/my-ads/:email", async (req, res) => {
+router.get('/my-ads/:email', async (req, res) => {
   try {
     const advertisements = await Advertisement.find({ email: req.params.email });
     return res.status(200).json({
@@ -119,30 +161,30 @@ router.get("/my-ads/:email", async (req, res) => {
       data: advertisements,
     });
   } catch (error) {
-    console.error("Error fetching user advertisements:", error.stack);
-    res.status(500).json({ message: "Server error fetching user advertisements" });
+    console.error('Error fetching user advertisements:', error.stack);
+    res.status(500).json({ message: 'Server error fetching user advertisements' });
   }
 });
 
 // Update advertisement
-router.put("/edit/:id", upload.single("uploadImage"), async (req, res) => {
+router.put('/edit/:id', upload.single('photo'), async (req, res) => {
   try {
     const { name, email, contactNumber, advertisementType, petType, heading, description } = req.body;
 
     // Validate required fields
     if (!name || !email || !contactNumber || !advertisementType || !heading || !description) {
-      return res.status(400).json({ message: "Please fill all required fields" });
+      return res.status(400).json({ message: 'Please fill all required fields' });
     }
 
     // Validate advertisementType
-    const validTypes = ["Sell a Pet", "Lost Pet", "Found Pet"];
+    const validTypes = ['Sell a Pet', 'Lost Pet', 'Found Pet'];
     if (!validTypes.includes(advertisementType)) {
-      return res.status(400).json({ message: "Invalid advertisement type" });
+      return res.status(400).json({ message: 'Invalid advertisement type' });
     }
 
     // Require petType for "Sell a Pet"
-    if (advertisementType === "Sell a Pet" && !petType) {
-      return res.status(400).json({ message: "Pet type is required for selling a pet" });
+    if (advertisementType === 'Sell a Pet' && !petType) {
+      return res.status(400).json({ message: 'Pet type is required for selling a pet' });
     }
 
     const updateData = {
@@ -150,7 +192,7 @@ router.put("/edit/:id", upload.single("uploadImage"), async (req, res) => {
       email,
       contactNumber,
       advertisementType,
-      petType: advertisementType === "Sell a Pet" ? petType : "",
+      petType: advertisementType === 'Sell a Pet' ? petType : '',
       heading,
       description,
     };
@@ -158,68 +200,68 @@ router.put("/edit/:id", upload.single("uploadImage"), async (req, res) => {
 
     const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!advertisement) {
-      return res.status(404).json({ message: "Advertisement not found" });
+      return res.status(404).json({ message: 'Advertisement not found' });
     }
-    return res.status(200).json({ message: "Advertisement updated successfully" });
+    return res.status(200).json({ message: 'Advertisement updated successfully' });
   } catch (error) {
-    console.error("Error updating advertisement:", error.stack);
-    res.status(500).json({ message: "Server error updating advertisement" });
+    console.error('Error updating advertisement:', error.stack);
+    res.status(500).json({ message: 'Server error updating advertisement' });
   }
 });
 
 // Approve advertisement
-router.put("/approve/:id", async (req, res) => {
+router.put('/approve/:id', async (req, res) => {
   try {
-    const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, { status: "Approved" }, { new: true });
+    const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, { status: 'Approved' }, { new: true });
     if (!advertisement) {
-      return res.status(404).json({ message: "Advertisement not found" });
+      return res.status(404).json({ message: 'Advertisement not found' });
     }
-    return res.status(200).json({ message: "Advertisement approved successfully" });
+    return res.status(200).json({ message: 'Advertisement approved successfully' });
   } catch (error) {
-    console.error("Error approving advertisement:", error.stack);
-    res.status(500).json({ message: "Server error approving advertisement" });
+    console.error('Error approving advertisement:', error.stack);
+    res.status(500).json({ message: 'Server error approving advertisement' });
   }
 });
 
 // Reject advertisement
-router.put("/reject/:id", async (req, res) => {
+router.put('/reject/:id', async (req, res) => {
   try {
-    const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, { status: "Rejected" }, { new: true });
+    const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, { status: 'Rejected' }, { new: true });
     if (!advertisement) {
-      return res.status(404).json({ message: "Advertisement not found" });
+      return res.status(404).json({ message: 'Advertisement not found' });
     }
-    return res.status(200).json({ message: "Advertisement rejected successfully" });
+    return res.status(200).json({ message: 'Advertisement rejected successfully' });
   } catch (error) {
-    console.error("Error rejecting advertisement:", error.stack);
-    res.status(500).json({ message: "Server error rejecting advertisement" });
+    console.error('Error rejecting advertisement:', error.stack);
+    res.status(500).json({ message: 'Server error rejecting advertisement' });
   }
 });
 
 // Mark advertisement as paid
-router.put("/pay/:id", async (req, res) => {
+router.put('/pay/:id', async (req, res) => {
   try {
-    const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, { paymentStatus: "Paid" }, { new: true });
+    const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, { paymentStatus: 'Paid' }, { new: true });
     if (!advertisement) {
-      return res.status(404).json({ message: "Advertisement not found" });
+      return res.status(404).json({ message: 'Advertisement not found' });
     }
-    return res.status(200).json({ message: "Advertisement marked as paid" });
+    return res.status(200).json({ message: 'Advertisement marked as paid' });
   } catch (error) {
-    console.error("Error marking payment:", error.stack);
-    res.status(500).json({ message: "Server error marking payment" });
+    console.error('Error marking payment:', error.stack);
+    res.status(500).json({ message: 'Server error marking payment' });
   }
 });
 
 // Delete advertisement
-router.delete("/delete/:id", async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
   try {
     const advertisement = await Advertisement.findByIdAndDelete(req.params.id);
     if (!advertisement) {
-      return res.status(404).json({ message: "Advertisement not found" });
+      return res.status(404).json({ message: 'Advertisement not found' });
     }
-    return res.status(200).json({ message: "Advertisement deleted successfully" });
+    return res.status(200).json({ message: 'Advertisement deleted successfully' });
   } catch (error) {
-    console.error("Error deleting advertisement:", error.stack);
-    res.status(500).json({ message: "Server error deleting advertisement" });
+    console.error('Error deleting advertisement:', error.stack);
+    res.status(500).json({ message: 'Server error deleting advertisement' });
   }
 });
 
