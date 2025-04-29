@@ -10,8 +10,9 @@ import AdminDashboard from './components/AdminDashboard';
 import AdminSignup from './components/AdminSignup';
 import AddPet from './components/AddPet';
 import MyPets from './components/MyPets';
-import ForgotPassword from './components/ForgotPassword'; // New import
-import ResetPassword from './components/ResetPassword'; // New import
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import InventoryTable from './components/InventoryTable';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -66,10 +67,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       <Link className="nav-link" to="/store">Store</Link>
                     </li>
                     <li className="nav-item dropdown">
-                      <a className="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
+                      <button className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Services
-                      </a>
-                      <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
+                      </button>
+                      <ul className="dropdown-menu">
                         <li><Link className="dropdown-item" to="/services/veterinary">Veterinary Service</Link></li>
                         <li><Link className="dropdown-item" to="/services/grooming">Grooming</Link></li>
                         <li><Link className="dropdown-item" to="/services/training">Pet Training</Link></li>
@@ -97,10 +98,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                 ) : (
                   <>
                     <li className="nav-item dropdown">
-                      <a className="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                      <button className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Profile
-                      </a>
-                      <ul className="dropdown-menu" aria-labelledby="profileDropdown">
+                      </button>
+                      <ul className="dropdown-menu">
                         <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
                         <li><Link className="dropdown-item" to="/my-appointments">My Appointments</Link></li>
                         <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
@@ -133,6 +134,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/inventory">Inventory</Link>
+                </li>
+                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
@@ -146,8 +150,8 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
           <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} /> {/* New route */}
-          <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} /> {/* New route */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} />
           {isLoggedIn && (
             <>
               <Route path="/profile" element={<Profile />} />
@@ -163,6 +167,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
+              <Route path="/inventory" element={<InventoryTable />} />
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
@@ -183,10 +188,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <div className="col-md-4">
                 <h5>Quick Links</h5>
                 <ul className="list-unstyled">
-                  <li><a href="#" className="text-white">Pet Health Tips</a></li>
-                  <li><a href="#" className="text-white">Find a Vet</a></li>
-                  <li><a href="#" className="text-white">Pet Adoption</a></li>
-                  <li><a href="#" className="text-white">Customer Reviews</a></li>
+                  <li><button className="btn btn-link text-white p-0">Pet Health Tips</button></li>
+                  <li><button className="btn btn-link text-white p-0">Find a Vet</button></li>
+                  <li><button className="btn btn-link text-white p-0">Pet Adoption</button></li>
+                  <li><button className="btn btn-link text-white p-0">Customer Reviews</button></li>
                 </ul>
               </div>
               <div className="col-md-4">
@@ -195,9 +200,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                 <p>Phone: (123) 456-7890</p>
                 <p>Address: 123 Pet Street, Animal City, PC 12345</p>
                 <div>
-                  <a href="#" className="text-white mx-2">Facebook</a>
-                  <a href="#" className="text-white mx-2">Twitter</a>
-                  <a href="#" className="text-white mx-2">Instagram</a>
+                  <button className="btn btn-link text-white mx-2 p-0">Facebook</button>
+                  <button className="btn btn-link text-white mx-2 p-0">Twitter</button>
+                  <button className="btn btn-link text-white mx-2 p-0">Instagram</button>
                 </div>
               </div>
             </div>
@@ -212,9 +217,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
           <div className="container">
             <p>🐾 Admin Control Center © 2025</p>
             <p>
-              <a href="#" className="text-white mx-2">Admin Guide</a> |
-              <a href="#" className="text-white mx-2">System Logs</a> |
-              <a href="#" className="text-white mx-2">Support</a>
+              <button className="btn btn-link text-white mx-2 p-0">Admin Guide</button> |
+              <button className="btn btn-link text-white mx-2 p-0">System Logs</button> |
+              <button className="btn btn-link text-white mx-2 p-0">Support</button>
             </p>
             <p>Email: admin@petcare.com | Phone: (987) 654-3210</p>
           </div>
