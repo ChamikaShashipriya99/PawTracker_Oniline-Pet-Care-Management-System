@@ -2,11 +2,11 @@
 const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
-    // userId: {
-    //     type: mongoose.Schema.Types.ObjectId, // Reference to User model
-    //     ref: 'User',
-    //     required: [true, 'User ID is required'],
-    // },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'User ID is required'],
+    },
     petOwner: {
         type: String,
         required: [true, 'Pet owner name is required'],

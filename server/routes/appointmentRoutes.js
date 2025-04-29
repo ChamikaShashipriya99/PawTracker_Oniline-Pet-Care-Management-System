@@ -26,6 +26,10 @@
 const express = require('express');
 const router = express.Router();
 const appointmentController = require('../Controllers/appointmentController');
+const auth = require('../middleware/auth');
+
+// Apply auth middleware to all routes
+router.use(auth);
 
 router.get('/', appointmentController.getAppointments);
 router.get('/:id', appointmentController.getAppointment);

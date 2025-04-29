@@ -25,7 +25,21 @@ function AdminAppointments() {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('/api/appointment');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setError('Authentication token not found. Please log in again.');
+                setLoading(false);
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            const response = await axios.get('/api/appointment', config);
             console.log('Fetched appointments:', response.data);
             response.data.forEach(appointment => {
                 console.log(`Appointment ${appointment._id} amount:`, appointment.amount);
@@ -78,7 +92,20 @@ function AdminAppointments() {
 
     const handleUpdateStatus = async (id, newStatus) => {
         try {
-            await axios.put(`/api/appointment/${id}`, { status: newStatus });
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setError('Authentication token not found. Please log in again.');
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            await axios.put(`/api/appointment/${id}`, { status: newStatus }, config);
             fetchAppointments();
         } catch (error) {
             console.error('Error updating appointment status:', error);
@@ -88,7 +115,20 @@ function AdminAppointments() {
 
     const handleReopen = async (id) => {
         try {
-            await axios.put(`/api/appointment/${id}`, { status: 'Pending' });
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setError('Authentication token not found. Please log in again.');
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            await axios.put(`/api/appointment/${id}`, { status: 'Pending' }, config);
             fetchAppointments();
         } catch (error) {
             console.error('Error reopening appointment:', error);

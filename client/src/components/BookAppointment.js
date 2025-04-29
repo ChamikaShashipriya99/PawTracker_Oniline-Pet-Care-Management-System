@@ -13,8 +13,13 @@ function BookAppointment() {
     const initialServiceType = queryParams.get('service') || '';
     const initialTrainingType = queryParams.get('type') || 'N/A';
 
+    // Get user from localStorage
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const userName = user ? `${user.firstName} ${user.lastName}` : '';
+
     const [formData, setFormData] = useState({
-        petOwner: '',
+        petOwner: userName,
         petName: '',
         serviceType: initialServiceType,
         trainingType: initialTrainingType,
@@ -51,6 +56,12 @@ function BookAppointment() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
+        // Prevent changes to petOwner field
+        if (name === 'petOwner') {
+            return;
+        }
+        
         setFormData(prev => ({
             ...prev,
             [name]: value,
@@ -64,11 +75,12 @@ function BookAppointment() {
         const newErrors = {};
         const today = new Date().toISOString().split('T')[0];
 
-        if (!formData.petOwner.trim()) {
-            newErrors.petOwner = 'Pet owner name is required';
-        } else if (formData.petOwner.length < 2) {
-            newErrors.petOwner = 'Pet owner name must be at least 2 characters';
-        }
+        // Skip validation for petOwner since it's automatically set
+        // if (!formData.petOwner.trim()) {
+        //     newErrors.petOwner = 'Pet owner name is required';
+        // } else if (formData.petOwner.length < 2) {
+        //     newErrors.petOwner = 'Pet owner name must be at least 2 characters';
+        // }
 
         if (!formData.petName.trim()) {
             newErrors.petName = 'Pet name is required';
@@ -101,28 +113,44 @@ function BookAppointment() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateForm()) return;
+        if (validateForm()) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setErrors({ submit: 'Please login to book an appointment' });
+                    return;
+                }
 
-        try {
-            const appointmentData = {
-                ...formData,
-                date: formData.date ? new Date(formData.date) : undefined,
-                amount: amount
-            };
-            console.log('Sending formData to /api/appointment:', appointmentData);
-            const response = await axios.post('/api/appointment', appointmentData);
-            console.log('API Response:', response);
-            setNotification({ message: response.data.message, type: 'success' });
-            setForceUpdate(prev => prev + 1);
-            setTimeout(() => {
-                navigate('/my-appointments');
-            }, 2000);
-        } catch (error) {
-            console.error('Error booking appointment:', error);
-            setNotification({
-                message: error.response?.data?.message || 'Failed to book appointment',
-                type: 'error',
-            });
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                const response = await axios.post('http://localhost:5000/api/appointment', formData, config);
+                setNotification({ message: 'Appointment booked successfully!', type: 'success' });
+                
+                // Redirect to MyAppointments page after a short delay
+                setTimeout(() => {
+                    navigate('/my-appointments');
+                }, 1500);
+                
+                setFormData({
+                    petOwner: '',
+                    petName: '',
+                    serviceType: '',
+                    trainingType: 'N/A',
+                    date: '',
+                    time: '',
+                    notes: ''
+                });
+                setAmount(0);
+                setForceUpdate(prev => !prev);
+            } catch (error) {
+                console.error('Error booking appointment:', error);
+                setNotification({ message: error.response?.data?.message || 'Error booking appointment', type: 'error' });
+            }
         }
     };
 
@@ -153,7 +181,8 @@ function BookAppointment() {
                                         name="petOwner"
                                         className="form-control"
                                         value={formData.petOwner}
-                                        onChange={handleChange}
+                                        readOnly
+                                        disabled
                                     />
                                     {errors.petOwner && <span className="error">{errors.petOwner}</span>}
                                 </div>

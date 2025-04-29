@@ -31,7 +31,12 @@ function MyAppointments() {
 
     const fetchAppointments = async () => {
         try {
-            const response = await axios.get('/api/appointment');
+            const token = localStorage.getItem('token');
+            const response = await axios.get('/api/appointment', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             console.log('Fetched appointments:', response.data);
             response.data.forEach(appointment => {
                 console.log(`Appointment ${appointment._id} amount:`, appointment.amount);
@@ -87,7 +92,12 @@ function MyAppointments() {
     const handleDeleteAppointment = async (id) => {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
             try {
-                await axios.delete(`/api/appointment/${id}`);
+                const token = localStorage.getItem('token');
+                await axios.delete(`/api/appointment/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 setNotification('Appointment cancelled successfully.');
                 fetchAppointments();
             } catch (error) {

@@ -31,10 +31,8 @@ function AdminLogin({ setIsLoggedIn }) {
 
     try {
       const res = await axios.post('http://localhost:5000/api/users/admin/login', formData);
-      if (!res.data.user.isAdmin) {
-        throw new Error('Not an admin account');
-      }
       localStorage.setItem('user', JSON.stringify(res.data.user));
+      localStorage.setItem('token', res.data.token);
       setIsLoggedIn(true);
       alert('Admin login successful!');
       navigate('/admin/dashboard');

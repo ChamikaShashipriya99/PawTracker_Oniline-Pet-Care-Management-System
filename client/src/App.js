@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+
+
 import Home from './components/Home';
 import Signup from './components/Signup';
 import Login from './components/Login';
@@ -28,12 +31,12 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
     setIsAdmin(false);
     setTimeout(() => {
-      if (user && user.isAdmin) {
+      if (isAdmin && window.location.pathname === '/') {
         navigate('/admin/login');
       } else {
         navigate('/login');

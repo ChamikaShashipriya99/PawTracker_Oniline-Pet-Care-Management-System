@@ -32,6 +32,9 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const notificationController = require('./Controllers/notificationController');
 // const { protect } = require('./middleware/auth');
 
+// Set JWT secret
+process.env.JWT_SECRET = 'pawtracker_secret_key_2024';
+
 const app = express();
 
 // Middleware

@@ -7,6 +7,7 @@ const multer = require('multer');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -72,7 +73,20 @@ router.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-    res.json({ user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, username: user.username, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto } });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.json({ 
+      user: { 
+        _id: user._id, 
+        firstName: user.firstName, 
+        lastName: user.lastName, 
+        username: user.username, 
+        email: user.email, 
+        phone: user.phone, 
+        isAdmin: user.isAdmin, 
+        profilePhoto: user.profilePhoto 
+      },
+      token 
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -86,7 +100,20 @@ router.post('/admin/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
-    res.json({ user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, username: user.username, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto } });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.json({ 
+      user: { 
+        _id: user._id, 
+        firstName: user.firstName, 
+        lastName: user.lastName, 
+        username: user.username, 
+        email: user.email, 
+        phone: user.phone, 
+        isAdmin: user.isAdmin, 
+        profilePhoto: user.profilePhoto 
+      },
+      token 
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
