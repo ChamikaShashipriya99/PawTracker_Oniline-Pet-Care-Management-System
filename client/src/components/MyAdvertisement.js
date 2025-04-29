@@ -1,49 +1,47 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from "notistack";
-import { Link } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
 
-const MyAds = () => {
+const MyAdvertisement = () => {
   const [advertisements, setAdvertisements] = useState([]);
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
+  // Get email from navigation state or prompt user
+  const email = location.state?.email || "";
+
   useEffect(() => {
+    if (!email) {
+      enqueueSnackbar("Please provide an email to view your advertisements", { variant: "warning", autoHideDuration: 5000 });
+      return;
+    }
+
     setLoading(true);
     axios
-      .get("http://localhost:5000/advertisements")
+      .get(`http://localhost:5000/advertisements/my-ads/${encodeURIComponent(email)}`)
       .then((response) => {
-        setAdvertisements(response.data.data);
+        setAdvertisements(response.data.data || []);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Fetch Error:", error.response?.data || error.message);
         setLoading(false);
-        enqueueSnackbar("Error fetching advertisements: " + (error.response?.data?.message || error.message), { variant: "error" });
+        console.error("Fetch Error:", error.response?.data || error.message);
+        enqueueSnackbar(
+          error.response?.data?.message || "Error fetching advertisements",
+          { variant: "error", autoHideDuration: 5000 }
+        );
       });
-  }, []);
-
-  const handlePay = (id) => {
-    axios
-      .put(`http://localhost:5000/advertisements/pay/${id}`)
-      .then(() => {
-        setAdvertisements(advertisements.map(ad => 
-          ad._id === id ? { ...ad, paymentStatus: "Paid" } : ad
-        ));
-        enqueueSnackbar("Payment Successful - Ad Published!", { variant: "success" });
-      })
-      .catch(error => {
-        console.error("Payment Error:", error);
-        enqueueSnackbar("Error processing payment", { variant: "error" });
-      });
-  };
+  }, [email, enqueueSnackbar]);
 
   // Inline BackButton component
-  const BackButton = ({ destination = "/ad-dashboard" }) => (
+  const BackButton = ({ destination = "/" }) => (
     <div className="back-button fade-in">
-      <Link to={destination} className="hero-btn back-btn">
+      <Link to={destination} className="back-btn">
         <BsArrowLeft style={{ marginRight: "8px", fontSize: "1.5rem" }} />
         Back
       </Link>
@@ -62,67 +60,61 @@ const MyAds = () => {
       <section className="hero-section">
         <div className="hero-content fade-in">
           <h1 className="hero-title">My Advertisements 🐾</h1>
-          <p className="hero-subtitle">Manage your pet advertisements with PawTracker.</p>
+          <p className="hero-subtitle">View and manage your pet ads on PawTracker.</p>
         </div>
       </section>
 
       <section className="content-section fade-in">
         <div className="container">
-          
 
-          <BackButton />
+          <BackButton destination="/" />
 
           {loading ? (
             <Spinner />
-          ) : advertisements.length === 0 ? (
-            <p className="text-center">No advertisements found.</p>
           ) : (
-            <div className="row">
-              {advertisements.map(ad => (
-                <div key={ad._id} className="col-md-4 mb-4">
-                  <div className="card hover-card">
-                    {ad.photo && (
-                      <img
-                        src={`http://localhost:5000/uploads/${ad.photo}`}
-                        alt={ad.heading}
-                        className="card-img-top"
-                      />
-                    )}
-                    <div className="card-body">
-                      <h3>{ad.heading}</h3>
-                      <p>{ad.description.slice(0, 100)}...</p>
-                      <p>Contact: {ad.contactNumber}</p>
-                      <p>Type: {ad.advertisementType}</p>
-                      {ad.petType && <p>Pet Type: {ad.petType}</p>}
-                      <p className={`status-text ${
-                        ad.status === "Approved" ? "status-approved" :
-                        ad.status === "Rejected" ? "status-rejected" : "status-pending"
-                      }`}>
-                        Status: {ad.status}
-                      </p>
-                      <div className="card-actions">
-                        <Link to={`/advertisements/details/${ad._id}`}>
-                          <button className="hero-btn action-btn">View</button>
-                        </Link>
-                        <Link to={`/advertisements/edit/${ad._id}`}>
-                          <button className="hero-btn action-btn warning">Edit</button>
-                        </Link>
-                        <Link to={`/advertisements/delete/${ad._id}`}>
-                          <button className="hero-btn action-btn danger">Delete</button>
-                        </Link>
-                        {ad.status === "Approved" && ad.paymentStatus === "Pending" && (
-                          <button
-                            onClick={() => handlePay(ad._id)}
-                            className="hero-btn action-btn success"
-                          >
-                            Pay
-                          </button>
-                        )}
+            <div className="row justify-content-center">
+              <div className="col-md-10">
+                <div className="card hover-card">
+                  <div className="card-body">
+                    <h2 className="card-title">Your Advertisements</h2>
+                    {advertisements.length === 0 ? (
+                      <p>No advertisements found for {email}.</p>
+                    ) : (
+                      <div className="advertisement-list">
+                        {advertisements.map((ad) => (
+                          <div key={ad._id} className="advertisement-card fade-in">
+                            {ad.photo && (
+                              <img
+                                src={`http://localhost:5000/uploads/${ad.photo}`}
+                                alt={ad.heading}
+                                className="img-preview"
+                              />
+                            )}
+                            <div className="advertisement-details">
+                              <h3>{ad.heading}</h3>
+                              <p><strong>Type:</strong> {ad.advertisementType}</p>
+                              {ad.petType && <p><strong>Pet Type:</strong> {ad.petType}</p>}
+                              <p><strong>Description:</strong> {ad.description}</p>
+                              <p><strong>Contact:</strong> {ad.contactNumber}</p>
+                              <p><strong>Posted by:</strong> {ad.name} ({ad.email})</p>
+                              <p><strong>Status:</strong> {ad.status}</p>
+                              <p><strong>Payment Status:</strong> {ad.paymentStatus}</p>
+                              <div className="advertisement-actions">
+                                <Link
+                                  to={`/edit-add${ad._id}`}
+                                  className="hero-btn"
+                                >
+                                  Edit
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>
@@ -131,4 +123,4 @@ const MyAds = () => {
   );
 };
 
-export default MyAds;
+export default MyAdvertisement;

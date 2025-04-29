@@ -72,7 +72,7 @@ const DeleteAdvertisement = () => {
                     </button>
                     <button
                       className="btn cancel-button"
-                      onClick={() => navigate("/advertisements/my-ads")}
+                      onClick={() => navigate("/my-advertisements")}
                       disabled={loading}
                     >
                       Cancel

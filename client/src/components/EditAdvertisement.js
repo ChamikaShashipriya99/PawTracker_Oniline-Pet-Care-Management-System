@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import { BsArrowLeft } from "react-icons/bs";
 import { useSnackbar } from "notistack";
+import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
 
 const EditAdvertisement = () => {
@@ -14,6 +14,7 @@ const EditAdvertisement = () => {
   const [heading, setHeading] = useState("");
   const [description, setDescription] = useState("");
   const [uploadImage, setUploadImage] = useState(null);
+  const [existingImage, setExistingImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -25,21 +26,22 @@ const EditAdvertisement = () => {
       .get(`http://localhost:5000/advertisements/details/${id}`)
       .then((response) => {
         const ad = response.data;
-        setName(ad.name);
-        setEmail(ad.email);
-        setContactNumber(ad.contactNumber);
-        setAdvertisementType(ad.advertisementType);
+        setName(ad.name || "");
+        setEmail(ad.email || "");
+        setContactNumber(ad.contactNumber || "");
+        setAdvertisementType(ad.advertisementType || "");
         setPetType(ad.petType || "");
-        setHeading(ad.heading);
-        setDescription(ad.description);
+        setHeading(ad.heading || "");
+        setDescription(ad.description || "");
+        setExistingImage(ad.photo || null);
         setLoading(false);
       })
       .catch((error) => {
         setLoading(false);
-        console.error("Error fetching advertisement:", error);
-        enqueueSnackbar("Error loading advertisement", { variant: "error" });
+        console.error("Fetch Error:", error.response?.data || error.message);
+        enqueueSnackbar("Error fetching advertisement", { variant: "error" });
       });
-  }, [id]);
+  }, [id, enqueueSnackbar]);
 
   const handleEditAdvertisement = () => {
     if (!/^[A-Za-z\s]+$/.test(name)) {
@@ -50,12 +52,16 @@ const EditAdvertisement = () => {
       enqueueSnackbar("Please enter a valid email address", { variant: "error" });
       return;
     }
-    if (!/^\d{10}$/.test(contactNumber)) {
-      enqueueSnackbar("Please enter a 10-digit phone number", { variant: "error" });
+    if (!/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(contactNumber)) {
+      enqueueSnackbar("Please enter a valid phone number (e.g., 123-456-7890)", { variant: "error" });
       return;
     }
-    if (!advertisementType) {
-      enqueueSnackbar("Please select an advertisement type", { variant: "error" });
+    if (!["Sell a Pet", "Lost Pet", "Found Pet"].includes(advertisementType)) {
+      enqueueSnackbar("Please select a valid advertisement type", { variant: "error" });
+      return;
+    }
+    if (advertisementType === "Sell a Pet" && !petType) {
+      enqueueSnackbar("Please select a pet type for selling a pet", { variant: "error" });
       return;
     }
     if (!heading.trim()) {
@@ -72,29 +78,36 @@ const EditAdvertisement = () => {
     formData.append("email", email);
     formData.append("contactNumber", contactNumber);
     formData.append("advertisementType", advertisementType);
-    if (advertisementType === "Sell a Pet" && petType) {
-      formData.append("petType", petType);
-    }
+    if (petType) formData.append("petType", petType);
     formData.append("heading", heading);
     formData.append("description", description);
-    if (uploadImage) {
-      formData.append("uploadImage", uploadImage);
-    }
+    if (uploadImage) formData.append("uploadImage", uploadImage);
 
     setLoading(true);
+
     axios
-      .put(`http://localhost:5000/advertisements/edit/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      .put(`http://localhost:5000/advertisements/edit/${id}`, formData)
       .then(() => {
         setLoading(false);
         enqueueSnackbar("Advertisement Updated Successfully", { variant: "success" });
-        navigate("/advertisements/my-ads");
+        setName("");
+        setEmail("");
+        setContactNumber("");
+        setAdvertisementType("");
+        setPetType("");
+        setHeading("");
+        setDescription("");
+        setUploadImage(null);
+        setExistingImage(null);
+        navigate("/advertisements/my-ads", { state: { email } });
       })
       .catch((error) => {
         setLoading(false);
-        console.error("Error updating advertisement:", error);
-        enqueueSnackbar("Error updating advertisement", { variant: "error" });
+        console.error("Update Error:", error.response?.data || error.message);
+        enqueueSnackbar(
+          error.response?.data?.message || "Error updating advertisement",
+          { variant: "error" }
+        );
       });
   };
 
@@ -120,12 +133,13 @@ const EditAdvertisement = () => {
       <section className="hero-section">
         <div className="hero-content fade-in">
           <h1 className="hero-title">Edit Pet Advertisement 🐾</h1>
-          <p className="hero-subtitle">Update your pet ad with the PawTracker community.</p>
+          <p className="hero-subtitle">Update your pet ad on PawTracker.</p>
         </div>
       </section>
 
       <section className="content-section fade-in">
         <div className="container">
+          
 
           <BackButton />
 
@@ -137,9 +151,19 @@ const EditAdvertisement = () => {
                 <div className="card hover-card">
                   <div className="card-body">
                     <h2 className="card-title">Edit Advertisement</h2>
-                    <form className="session-form" onSubmit={(e) => { e.preventDefault(); handleEditAdvertisement(); }}>
-                      <div className="form-group">
-                        <label htmlFor="name">Name</label>
+                    {existingImage && (
+                      <div className="mb-3">
+                        <label className="form-label">Current Image</label>
+                        <img
+                          src={`http://localhost:5000/uploads/${existingImage}`}
+                          alt="Current"
+                          className="img-preview"
+                        />
+                      </div>
+                    )}
+                    <form className="create-form" onSubmit={(e) => { e.preventDefault(); handleEditAdvertisement(); }}>
+                      <div className="mb-3">
+                        <label htmlFor="name" className="form-label">Name</label>
                         <input
                           type="text"
                           id="name"
@@ -147,11 +171,12 @@ const EditAdvertisement = () => {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           className="form-control"
+                          required
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="email">Email</label>
+                      <div className="mb-3">
+                        <label htmlFor="email" className="form-label">Email</label>
                         <input
                           type="email"
                           id="email"
@@ -159,11 +184,12 @@ const EditAdvertisement = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="form-control"
+                          required
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="contactNumber">Contact Number</label>
+                      <div className="mb-3">
+                        <label htmlFor="contactNumber" className="form-label">Contact Number</label>
                         <input
                           type="text"
                           id="contactNumber"
@@ -171,61 +197,51 @@ const EditAdvertisement = () => {
                           value={contactNumber}
                           onChange={(e) => setContactNumber(e.target.value)}
                           className="form-control"
+                          placeholder="e.g., 123-456-7890"
+                          required
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label>Advertisement Type</label>
-                        <div className="form-row">
-                          <div className="form-radio">
-                            <input
-                              type="radio"
-                              id="lostAndFound"
-                              name="advertisementType"
-                              value="Lost and Found"
-                              checked={advertisementType === "Lost and Found"}
-                              onChange={(e) => setAdvertisementType(e.target.value)}
-                              className="form-radio-input"
-                            />
-                            <label htmlFor="lostAndFound" className="form-radio-label">Lost and Found</label>
-                          </div>
-                          <div className="form-radio">
-                            <input
-                              type="radio"
-                              id="sellAPet"
-                              name="advertisementType"
-                              value="Sell a Pet"
-                              checked={advertisementType === "Sell a Pet"}
-                              onChange={(e) => setAdvertisementType(e.target.value)}
-                              className="form-radio-input"
-                            />
-                            <label htmlFor="sellAPet" className="form-radio-label">Sell a Pet</label>
-                          </div>
-                        </div>
+                      <div className="mb-3">
+                        <label htmlFor="advertisementType" className="form-label">Advertisement Type</label>
+                        <select
+                          id="advertisementType"
+                          name="advertisementType"
+                          value={advertisementType}
+                          onChange={(e) => setAdvertisementType(e.target.value)}
+                          className="form-select"
+                          required
+                        >
+                          <option value="">Select Type</option>
+                          <option value="Sell a Pet">Sell a Pet</option>
+                          <option value="Lost Pet">Lost Pet</option>
+                          <option value="Found Pet">Found Pet</option>
+                        </select>
                       </div>
 
                       {advertisementType === "Sell a Pet" && (
-                        <div className="form-group">
-                          <label htmlFor="petType">Pet Type</label>
+                        <div className="mb-3">
+                          <label htmlFor="petType" className="form-label">Pet Type</label>
                           <select
                             id="petType"
                             name="petType"
                             value={petType}
                             onChange={(e) => setPetType(e.target.value)}
-                            className="form-control"
+                            className="form-select"
+                            required
                           >
                             <option value="">Select Pet Type</option>
                             <option value="Cat">Cat</option>
                             <option value="Dog">Dog</option>
                             <option value="Bird">Bird</option>
                             <option value="Fish">Fish</option>
-                            <option value="Another">Another</option>
+                            <option value="Other">Other</option>
                           </select>
                         </div>
                       )}
 
-                      <div className="form-group">
-                        <label htmlFor="heading">Heading</label>
+                      <div className="mb-3">
+                        <label htmlFor="heading" className="form-label">Heading</label>
                         <input
                           type="text"
                           id="heading"
@@ -233,11 +249,12 @@ const EditAdvertisement = () => {
                           value={heading}
                           onChange={(e) => setHeading(e.target.value)}
                           className="form-control"
+                          required
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="description">Description</label>
+                      <div className="mb-3">
+                        <label htmlFor="description" className="form-label">Description</label>
                         <textarea
                           id="description"
                           name="description"
@@ -245,32 +262,33 @@ const EditAdvertisement = () => {
                           onChange={(e) => setDescription(e.target.value)}
                           className="form-control"
                           rows="4"
+                          required
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="uploadImage">Upload New Image (optional)</label>
+                      <div className="mb-3">
+                        <label htmlFor="uploadImage" className="form-label">Upload New Image (JPEG/PNG/GIF, max 5MB)</label>
                         <input
                           type="file"
                           id="uploadImage"
                           name="uploadImage"
                           onChange={(e) => setUploadImage(e.target.files[0])}
                           className="form-control"
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/gif"
                         />
                       </div>
 
                       <div className="form-actions">
                         <button
                           type="submit"
-                          className="submit-button"
+                          className="hero-btn"
                           disabled={loading}
                         >
-                          {loading ? "Saving..." : "Save Changes"}
+                          {loading ? "Updating..." : "Save Changes"}
                         </button>
                         <button
                           type="button"
-                          className="cancel-button"
+                          className="hero-btn cancel"
                           onClick={() => navigate("/advertisements/my-ads")}
                         >
                           Cancel

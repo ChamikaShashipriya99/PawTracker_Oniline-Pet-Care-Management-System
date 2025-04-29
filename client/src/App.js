@@ -179,7 +179,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/advertising" element={<CreateAdvertisement/>}/>
               <Route path="/show-add" element={<ShowAdvertisement/>}/>
               <Route path="/delete-add" element={<DeleteAdvertisement/>}/>
-              <Route path="/edit-add" element={<EditAdvertisement/>}/>
+              <Route path="/edit-add/:id" element={<EditAdvertisement/>}/>
               <Route path="/admin-add" element={<AdminAdvertisement/>}/>
             
             </>

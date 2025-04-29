@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const petSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+const petSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   petName: { type: String, required: true },
   breed: { type: String, required: true },
   birthday: { type: Date, required: true },
@@ -11,4 +11,4 @@ const petSchema = new mongoose.Schema({
   petPhoto: { type: String } 
 });
 
-module.exports = mongoose.model('Pet', petSchema);
+export default model('Pet', petSchema);
