@@ -152,6 +152,24 @@
     color: #ff5733;
 }
 
+/* Admin table header styling */
+.appointments-table.admin-table thead {
+    background-color: #ff5733 !important;
+    color: #ffffff !important;
+}
+
+.btn-orange {
+    background-color: #ff5733;
+    border-color: #ff5733;
+    color: #ffffff;
+}
+
+.btn-orange:hover {
+    background-color: #e04e2d;
+    border-color: #e04e2d;
+    color: #ffffff;
+}
+
 /* Footer (consistent with previous service pages) */
 .service-footer {
     background-color: #1F2937;

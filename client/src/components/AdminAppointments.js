@@ -258,7 +258,7 @@ function AdminAppointments() {
                                     <option value="Pending">Pending</option>
                                     <option value="Approved">Approved</option>
                                     <option value="Completed">Completed</option>
-                                    <option value="Cancelled">Cancelled</option>
+                                    <option value="Rejected">Rejected</option>
                                 </select>
                             </div>
                             <div className="col-md-3">
@@ -305,11 +305,11 @@ function AdminAppointments() {
                         </div>
                     </div>
 
-                    <div className="appointment-count text-center py-3 fade-in" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#007bff' }}>
+                    <div className="appointment-count text-center py-3 fade-in" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ff5733' }}>
                         Total Appointments: {filteredAppointments.length}
                         {filteredAppointments.length > 0 && (
                             <button
-                                className="btn btn-primary ms-3"
+                                className="btn btn-orange ms-3"
                                 onClick={downloadAllPDFs}
                             >
                                 Download All
@@ -322,7 +322,7 @@ function AdminAppointments() {
                         <div className="appointments-list container py-5">
                             <div className="card hover-card">
                                 <div className="card-body">
-                                    <table className="appointments-table">
+                                    <table className="appointments-table admin-table">
                                         <thead>
                                             <tr>
                                                 <th>Service</th>
