@@ -30,26 +30,22 @@ const AdminAdvertisement = () => {
   const handleStatusChange = async (id, newStatus) => {
     try {
       setLoading(true);
-      await axios.put(`http://localhost:5000/api/advertisements/${newStatus.toLowerCase()}/${id}`);
-      enqueueSnackbar(`Advertisement ${newStatus.toLowerCase()} successfully`, { variant: "success" });
-      fetchAdvertisements(); // Refresh the list
+      console.log('Updating status for advertisement:', id, 'to:', newStatus);
+      
+      // Use the specific endpoint based on the status
+      const endpoint = newStatus === 'Approved' ? 'approve' : 'reject';
+      const response = await axios.put(`http://localhost:5000/api/advertisements/${endpoint}/${id}`);
+      
+      console.log('Server response:', response.data);
+      if (response.data.message) {
+        enqueueSnackbar(response.data.message, { variant: "success" });
+        await fetchAdvertisements(); // Refresh the list
+      }
     } catch (error) {
-      setLoading(false);
       console.error("Status Update Error:", error.response?.data || error.message);
-      enqueueSnackbar("Error updating advertisement status", { variant: "error" });
-    }
-  };
-
-  const handlePaymentStatusChange = async (id) => {
-    try {
-      setLoading(true);
-      await axios.put(`http://localhost:5000/api/advertisements/pay/${id}`);
-      enqueueSnackbar("Payment status updated successfully", { variant: "success" });
-      fetchAdvertisements(); // Refresh the list
-    } catch (error) {
+      enqueueSnackbar(error.response?.data?.message || "Error updating advertisement status", { variant: "error" });
+    } finally {
       setLoading(false);
-      console.error("Payment Status Update Error:", error.response?.data || error.message);
-      enqueueSnackbar("Error updating payment status", { variant: "error" });
     }
   };
 
@@ -86,7 +82,6 @@ const AdminAdvertisement = () => {
                         <th>Contact Info</th>
                         <th>Description</th>
                         <th>Status</th>
-                        <th>Payment</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -124,11 +119,6 @@ const AdminAdvertisement = () => {
                             </span>
                           </td>
                           <td>
-                            <span className={`badge bg-${ad.paymentStatus === 'Paid' ? 'success' : 'warning'}`}>
-                              {ad.paymentStatus}
-                            </span>
-                          </td>
-                          <td>
                             <div className="btn-group">
                               {ad.status === 'Pending' && (
                                 <>
@@ -147,15 +137,6 @@ const AdminAdvertisement = () => {
                                     Reject
                                   </button>
                                 </>
-                              )}
-                              {ad.paymentStatus === 'Pending' && (
-                                <button
-                                  className="btn btn-info btn-sm"
-                                  onClick={() => handlePaymentStatusChange(ad._id)}
-                                  disabled={loading}
-                                >
-                                  Mark Paid
-                                </button>
                               )}
                             </div>
                           </td>

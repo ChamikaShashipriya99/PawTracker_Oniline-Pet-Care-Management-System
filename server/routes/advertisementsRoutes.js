@@ -5,8 +5,12 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import Advertisement from '../models/Advertisement.js';
 import requirePhoto from '../middleware/requirePhoto.js';
+import cors from 'cors';
 
 const router = express.Router();
+
+// Enable CORS for all routes
+router.use(cors());
 
 // Resolve __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -248,6 +252,24 @@ router.put('/pay/:id', async (req, res) => {
   } catch (error) {
     console.error('Error marking payment:', error.stack);
     res.status(500).json({ message: 'Server error marking payment' });
+  }
+});
+
+// Update advertisement status
+router.put('/status/:id', async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!status || !['Approved', 'Rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+    const advertisement = await Advertisement.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!advertisement) {
+      return res.status(404).json({ message: 'Advertisement not found' });
+    }
+    return res.status(200).json({ message: `Advertisement ${status.toLowerCase()} successfully` });
+  } catch (error) {
+    console.error('Error updating advertisement status:', error.stack);
+    res.status(500).json({ message: 'Server error updating advertisement status' });
   }
 });
 
