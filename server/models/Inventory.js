@@ -24,6 +24,10 @@ const inventorySchema = new mongoose.Schema({
         required: true,
         min: 0,
         default: 0
+    },
+    image: {
+        type: String,
+        default: '' // This will store the image URL or base64 string
     }
 }, {
     timestamps: true

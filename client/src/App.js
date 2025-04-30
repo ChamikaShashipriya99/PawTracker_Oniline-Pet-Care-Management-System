@@ -15,6 +15,10 @@ import ResetPassword from './components/ResetPassword';
 import InventoryTable from './components/InventoryTable';
 import Store from './components/Store';
 import Cart from './components/Cart';
+import ProductView from './components/ProductView';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { Button } from 'react-bootstrap';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -46,6 +50,21 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
       setIsAdmin(false);
     }
   }, [navigate, setIsLoggedIn, setIsAdmin]);
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Inventory List', 14, 16);
+    doc.autoTable({
+      head: [['ID', 'Name', 'Category']],
+      body: [
+        ['1', 'Sample', 'Category1'],
+        // ...your data
+      ],
+      startY: 24,
+      styles: { fontSize: 10 }
+    });
+    doc.save('inventory.pdf');
+  };
 
   return (
     <>
@@ -162,6 +181,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/my-pets" element={<MyPets />} />
               <Route path="/store" element={<Store />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/product/:id" element={<ProductView />} />
               <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />
               <Route path="/services/training" element={<div>Pet Training Page</div>} />

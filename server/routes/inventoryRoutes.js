@@ -14,18 +14,24 @@ router.get('/', async (req, res) => {
 
 // Add new inventory item
 router.post('/', async (req, res) => {
-    const item = new Inventory({
-        name: req.body.name,
-        category: req.body.category,
-        description: req.body.description,
-        quantity: req.body.quantity,
-        price: req.body.price
-    });
-
     try {
+        // Extract image data from request body
+        const { name, category, description, quantity, price, image } = req.body;
+        
+        // Create new inventory item with image
+        const item = new Inventory({
+            name,
+            category,
+            description,
+            quantity,
+            price,
+            image // Save the base64 image string
+        });
+
         const newItem = await item.save();
         res.status(201).json(newItem);
     } catch (err) {
+        console.error('Error saving item:', err);
         res.status(400).json({ message: err.message });
     }
 });
@@ -38,11 +44,14 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Item not found' });
         }
 
-        if (req.body.name) item.name = req.body.name;
-        if (req.body.category) item.category = req.body.category;
-        if (req.body.description) item.description = req.body.description;
-        if (req.body.quantity !== undefined) item.quantity = req.body.quantity;
-        if (req.body.price !== undefined) item.price = req.body.price;
+        // Update all fields including image
+        const { name, category, description, quantity, price, image } = req.body;
+        if (name) item.name = name;
+        if (category) item.category = category;
+        if (description) item.description = description;
+        if (quantity !== undefined) item.quantity = quantity;
+        if (price !== undefined) item.price = price;
+        if (image) item.image = image; // Update image if provided
 
         const updatedItem = await item.save();
         res.json(updatedItem);
@@ -82,6 +91,19 @@ router.post('/:id/stock', async (req, res) => {
         res.json(updatedItem);
     } catch (err) {
         res.status(400).json({ message: err.message });
+    }
+});
+
+// Get single inventory item
+router.get('/:id', async (req, res) => {
+    try {
+        const item = await Inventory.findById(req.params.id);
+        if (!item) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+        res.json(item);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 

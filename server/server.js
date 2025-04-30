@@ -26,14 +26,16 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const storeRoutes = require('./routes/storeRoutes');
+const supplierRoutes = require('./routes/suppliers');
 
 const app = express();
 
 // Enable CORS for all routes
 app.use(cors());
 
-// Parse JSON bodies
-app.use(express.json());
+// Increase JSON payload limit for handling large images
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static files from 'uploads' directory
 app.use('/uploads', express.static('uploads'));
@@ -42,6 +44,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/users', userRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/store', storeRoutes);
+app.use('/api/suppliers', supplierRoutes);
 
 mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
