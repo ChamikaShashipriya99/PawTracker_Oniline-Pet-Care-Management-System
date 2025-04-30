@@ -294,6 +294,12 @@ function AdminAppointments() {
         setSortOrder('asc');
     };
 
+    // Appointment status counts
+    const totalCount = appointments.length;
+    const pendingCount = appointments.filter(a => a.status === 'Pending').length;
+    const approvedCount = appointments.filter(a => a.status === 'Approved').length;
+    const rejectedCount = appointments.filter(a => a.status === 'Rejected').length;
+
     return (
         <div className="service-container">
 
@@ -302,6 +308,44 @@ function AdminAppointments() {
                 <p className="text-center py-5 fade-in">Loading appointments...</p>
             ) : (
                 <>
+                    {/* Status Cards */}
+                    <div className="container py-3">
+                        <div className="row mb-4">
+                            <div className="col-md-3">
+                                <div className="card text-center" style={{ background: '#e3f2fd' }}>
+                                    <div className="card-body">
+                                        <h5 className="card-title">All Appointments</h5>
+                                        <p className="card-text" style={{ fontSize: '2rem', fontWeight: 'bold' }}>{totalCount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="card text-center" style={{ background: '#fff3cd' }}>
+                                    <div className="card-body">
+                                        <h5 className="card-title">Pending</h5>
+                                        <p className="card-text" style={{ fontSize: '2rem', fontWeight: 'bold' }}>{pendingCount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="card text-center" style={{ background: '#d4edda' }}>
+                                    <div className="card-body">
+                                        <h5 className="card-title">Approved</h5>
+                                        <p className="card-text" style={{ fontSize: '2rem', fontWeight: 'bold' }}>{approvedCount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="card text-center" style={{ background: '#f8d7da' }}>
+                                    <div className="card-body">
+                                        <h5 className="card-title">Rejected</h5>
+                                        <p className="card-text" style={{ fontSize: '2rem', fontWeight: 'bold' }}>{rejectedCount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="container py-3">
                         <div className="row mb-3">
                             <div className="col-md-3">
@@ -378,7 +422,7 @@ function AdminAppointments() {
                     </div>
 
                     <div className="appointment-count text-center py-3 fade-in" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ff5733' }}>
-                        Total Appointments: {filteredAppointments.length}
+                       
                         {filteredAppointments.length > 0 && (
                             <button
                                 className="btn btn-orange ms-3"
