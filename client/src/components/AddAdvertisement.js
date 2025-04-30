@@ -96,161 +96,191 @@ const AddAdvertisement = () => {
     }
   };
 
+  // Inline Spinner component
+  const Spinner = () => (
+    <div className="spinner-container fade-in">
+      <div className="spinner" />
+    </div>
+  );
+
   return (
-    <div className="home-container">
-      <section className="hero-section">
-        <div className="hero-content fade-in">
-          <h1 className="hero-title">Create Pet Advertisement 🐾</h1>
-          <p className="hero-subtitle">Post your pet ad on PawTracker.</p>
-        </div>
-      </section>
-
-      <section className="content-section fade-in">
-        <div className="container">
-          <div className="back-button fade-in">
-            <Link to="/" className="back-btn">
-              <BsArrowLeft style={{ marginRight: "8px", fontSize: "1.5rem" }} />
-              Back
-            </Link>
-          </div>
-
-          <div className="row justify-content-center">
-            <div className="col-md-8">
-              <div className="card hover-card">
-                <div className="card-body">
-                  <h2 className="card-title">Create Advertisement</h2>
-                  <form onSubmit={handleSubmit} className="create-form">
-                    <div className="mb-3">
-                      <label htmlFor="name" className="form-label">Name</label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="form-control"
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label htmlFor="email" className="form-label">Email</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="form-control"
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label htmlFor="contactNumber" className="form-label">Contact Number</label>
-                      <input
-                        type="text"
-                        id="contactNumber"
-                        name="contactNumber"
-                        value={formData.contactNumber}
-                        onChange={handleChange}
-                        className="form-control"
-                        placeholder="e.g., 123-456-7890"
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label htmlFor="advertisementType" className="form-label">Advertisement Type</label>
-                      <select
-                        id="advertisementType"
-                        name="advertisementType"
-                        value={formData.advertisementType}
-                        onChange={handleChange}
-                        className="form-control"
-                        required
-                      >
-                        <option value="">Select Type</option>
-                        <option value="Sell a Pet">Sell a Pet</option>
-                        <option value="Lost Pet">Lost Pet</option>
-                        <option value="Found Pet">Found Pet</option>
-                      </select>
-                    </div>
-
-                    {formData.advertisementType === "Sell a Pet" && (
-                      <div className="mb-3">
-                        <label htmlFor="petType" className="form-label">Pet Type</label>
-                        <select
-                          id="petType"
-                          name="petType"
-                          value={formData.petType}
-                          onChange={handleChange}
-                          className="form-control"
-                          required
-                        >
-                          <option value="">Select Pet Type</option>
-                          <option value="Cat">Cat</option>
-                          <option value="Dog">Dog</option>
-                          <option value="Bird">Bird</option>
-                          <option value="Fish">Fish</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                    )}
-
-                    <div className="mb-3">
-                      <label htmlFor="heading" className="form-label">Heading</label>
-                      <input
-                        type="text"
-                        id="heading"
-                        name="heading"
-                        value={formData.heading}
-                        onChange={handleChange}
-                        className="form-control"
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label htmlFor="description" className="form-label">Description</label>
-                      <textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="form-control"
-                        rows="4"
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label htmlFor="photo" className="form-label">Photo</label>
-                      <input
-                        type="file"
-                        id="photo"
-                        name="photo"
-                        onChange={handlePhotoChange}
-                        className="form-control"
-                        accept="image/*"
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={loading}
-                    >
-                      {loading ? "Creating..." : "Create Advertisement"}
-                    </button>
-                  </form>
-                </div>
+    <div className="container-fluid py-5">
+      <div className="row justify-content-center">
+        <div className="col-md-10">
+          <div className="card shadow-lg border-0 rounded-lg">
+            <div className="card-header bg-primary text-white">
+              <div className="d-flex justify-content-between align-items-center">
+                <h3 className="mb-0">Create Pet Advertisement 🐾</h3>
+                <Link to="/ad-dashboard" className="btn btn-light">
+                  <BsArrowLeft className="me-2" />
+                  Back
+                </Link>
               </div>
+            </div>
+
+            <div className="card-body">
+              {loading ? (
+                <div className="text-center py-5">
+                  <Spinner />
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <div className="row">
+                    {/* Left Column - Image Upload and Contact Info */}
+                    <div className="col-md-4">
+                      <div className="card mb-4">
+                        <div className="card-body">
+                          <h5 className="card-title mb-3">Advertisement Image</h5>
+                          <div className="mb-3">
+                            <label htmlFor="photo" className="form-label">Upload Image</label>
+                            <input
+                              type="file"
+                              id="photo"
+                              name="photo"
+                              onChange={handlePhotoChange}
+                              className="form-control"
+                              accept="image/jpeg,image/png,image/gif"
+                              required
+                            />
+                            <small className="text-muted">JPEG/PNG/GIF, max 5MB</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="card">
+                        <div className="card-body">
+                          <h5 className="card-title mb-3">Contact Information</h5>
+                          <div className="mb-3">
+                            <label htmlFor="name" className="form-label">Name</label>
+                            <input
+                              type="text"
+                              id="name"
+                              name="name"
+                              value={formData.name}
+                              onChange={handleChange}
+                              className="form-control bg-light"
+                              required
+                            />
+                          </div>
+                          <div className="mb-3">
+                            <label htmlFor="email" className="form-label">Email</label>
+                            <input
+                              type="email"
+                              id="email"
+                              name="email"
+                              value={formData.email}
+                              onChange={handleChange}
+                              className="form-control bg-light"
+                              required
+                            />
+                          </div>
+                          <div className="mb-3">
+                            <label htmlFor="contactNumber" className="form-label">Contact Number</label>
+                            <input
+                              type="text"
+                              id="contactNumber"
+                              name="contactNumber"
+                              value={formData.contactNumber}
+                              onChange={handleChange}
+                              className="form-control bg-light"
+                              placeholder="e.g., 123-456-7890"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Advertisement Details */}
+                    <div className="col-md-8">
+                      <div className="card">
+                        <div className="card-body">
+                          <h5 className="card-title mb-3">Advertisement Details</h5>
+                          <div className="row">
+                            <div className="col-md-6 mb-3">
+                              <label htmlFor="advertisementType" className="form-label">Advertisement Type</label>
+                              <select
+                                id="advertisementType"
+                                name="advertisementType"
+                                value={formData.advertisementType}
+                                onChange={handleChange}
+                                className="form-control"
+                                required
+                              >
+                                <option value="">Select Type</option>
+                                <option value="Sell a Pet">Sell a Pet</option>
+                                <option value="Lost Pet">Lost Pet</option>
+                                <option value="Found Pet">Found Pet</option>
+                              </select>
+                            </div>
+
+                            {formData.advertisementType === "Sell a Pet" && (
+                              <div className="col-md-6 mb-3">
+                                <label htmlFor="petType" className="form-label">Pet Type</label>
+                                <select
+                                  id="petType"
+                                  name="petType"
+                                  value={formData.petType}
+                                  onChange={handleChange}
+                                  className="form-control"
+                                  required
+                                >
+                                  <option value="">Select Pet Type</option>
+                                  <option value="Cat">Cat</option>
+                                  <option value="Dog">Dog</option>
+                                  <option value="Bird">Bird</option>
+                                  <option value="Fish">Fish</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mb-3">
+                            <label htmlFor="heading" className="form-label">Heading</label>
+                            <input
+                              type="text"
+                              id="heading"
+                              name="heading"
+                              value={formData.heading}
+                              onChange={handleChange}
+                              className="form-control"
+                              required
+                            />
+                          </div>
+
+                          <div className="mb-3">
+                            <label htmlFor="description" className="form-label">Description</label>
+                            <textarea
+                              id="description"
+                              name="description"
+                              value={formData.description}
+                              onChange={handleChange}
+                              className="form-control"
+                              rows="4"
+                              required
+                            />
+                          </div>
+
+                          <div className="text-end">
+                            <button
+                              type="submit"
+                              className="btn btn-primary"
+                              disabled={loading}
+                            >
+                              {loading ? "Creating..." : "Create Advertisement"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 };

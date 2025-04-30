@@ -15,7 +15,7 @@ const AdvertisingDashboard = () => {
     {
       _id: "sample1",
       heading: "Lost Dog - Max",
-      description: "Max, a 3-year-old Golden Retriever, went missing near Central Park on March 25, 2025. He’s friendly, has a red collar, and responds to his name. Please contact if found!",
+      description: "Max, a 3-year-old Golden Retriever, went missing near Central Park on March 25, 2025. He's friendly, has a red collar, and responds to his name. Please contact if found!",
       photo: DogImage,
       name: "Sample User",
       email: "sample@example.com",
@@ -44,19 +44,20 @@ const AdvertisingDashboard = () => {
   const [selectedAd, setSelectedAd] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get("http://localhost:5000/advertisements")
-      .then((response) => {
+    const fetchApprovedAds = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("http://localhost:5000/api/advertisements");
         const approved = response.data.data.filter(ad => ad.status === "Approved");
         setApprovedAds(approved);
+      } catch (error) {
+        console.error("Error fetching advertisements:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Fetch Error:", error);
-        setApprovedAds([]);
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchApprovedAds();
   }, []);
 
   const handleAdClick = (ad) => setSelectedAd(ad);
@@ -136,16 +137,14 @@ const AdvertisingDashboard = () => {
         </div>
 
         <div className="dashboard-actions">
-            <Link to="/advertising">
-              <button className="hero-btn">Create Advertisement</button>
-            </Link>
-          </div>
-
+          <Link to="/advertisements/add">
+            <button className="hero-btn">Create Advertisement</button>
+          </Link>
+        </div>
       </section>
 
       <section className="content-section fade-in">
         <div className="container">
-
           {loading ? (
             <Spinner />
           ) : (
@@ -211,7 +210,7 @@ const AdvertisingDashboard = () => {
               </div>
 
               <div className="content-section">
-                <h2 className="section-title">Approved Advertisements</h2>
+                <h2 className="section-title">Admin Approved Advertisements</h2>
                 {approvedAds.length > 0 ? (
                   <div className="row">
                     {approvedAds
@@ -234,13 +233,16 @@ const AdvertisingDashboard = () => {
                               <p>{ad.description.slice(0, 100)}...</p>
                               <p>Type: {ad.advertisementType}</p>
                               {ad.petType && <p>Pet Type: {ad.petType}</p>}
+                              <div className="mt-2">
+                                <span className="badge bg-success">Admin Approved</span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       ))}
                   </div>
                 ) : (
-                  <p className="text-center">No approved advertisements yet.</p>
+                  <p className="text-center">No admin approved advertisements yet.</p>
                 )}
               </div>
             </>

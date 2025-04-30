@@ -15,8 +15,6 @@ import ResetPassword from './components/ResetPassword';
 import EmailVerification from './components/EmailVerification';
 import FAQ from './components/FAQ';
 import Contact from './components/Contact';
-import ForgotPassword from './components/ForgotPassword'; // New import
-import ResetPassword from './components/ResetPassword'; // New import
 import CreateAdvertisement from './components/CreateAdvertisement';
 import AdvertisementDashboard from './components/AdvertistmentDashboard';
 import MyAdvertisement from './components/MyAdvertisement';

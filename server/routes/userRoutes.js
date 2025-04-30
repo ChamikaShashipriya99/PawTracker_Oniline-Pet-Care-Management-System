@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import Pet from '../models/Pet.js';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import path from 'path';
@@ -8,18 +9,21 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import {
+  signupValidation,
+  loginValidation,
+  adminSignupValidation,
+  updateProfileValidation,
+  addPetValidation,
+  contactValidation,
+  resetPasswordValidation,
+  forgotPasswordValidation
+} from '../middleware/validationMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const router = express.Router();
-const User = require('../models/User');
-const Pet = require('../models/Pet');
-const bcrypt = require('bcryptjs');
-const multer = require('multer');
-const path = require('path');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
