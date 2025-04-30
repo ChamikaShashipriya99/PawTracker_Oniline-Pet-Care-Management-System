@@ -1,0 +1,258 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useSnackbar } from "notistack";
+import { BsArrowLeft } from "react-icons/bs";
+import "./Advertisement.css";
+
+const AddAdvertisement = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    contactNumber: "",
+    advertisementType: "",
+    petType: "",
+    heading: "",
+    description: ""
+  });
+  const [photo, setPhoto] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePhotoChange = (e) => {
+    setPhoto(e.target.files[0]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (!/^[A-Za-z\s]+$/.test(formData.name)) {
+      enqueueSnackbar("Please enter a valid name (letters and spaces only)", { variant: "error" });
+      return;
+    }
+    if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(formData.email)) {
+      enqueueSnackbar("Please enter a valid email address", { variant: "error" });
+      return;
+    }
+    if (!/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(formData.contactNumber)) {
+      enqueueSnackbar("Please enter a valid phone number (e.g., 123-456-7890)", { variant: "error" });
+      return;
+    }
+    if (!["Sell a Pet", "Lost Pet", "Found Pet"].includes(formData.advertisementType)) {
+      enqueueSnackbar("Please select a valid advertisement type", { variant: "error" });
+      return;
+    }
+    if (formData.advertisementType === "Sell a Pet" && !formData.petType) {
+      enqueueSnackbar("Please select a pet type for selling a pet", { variant: "error" });
+      return;
+    }
+    if (!formData.heading.trim()) {
+      enqueueSnackbar("Please enter a heading", { variant: "error" });
+      return;
+    }
+    if (!formData.description.trim()) {
+      enqueueSnackbar("Please enter a description", { variant: "error" });
+      return;
+    }
+    if (!photo) {
+      enqueueSnackbar("Please upload a photo", { variant: "error" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach(key => {
+        formDataToSend.append(key, formData[key]);
+      });
+      formDataToSend.append("photo", photo);
+
+      const response = await axios.post("http://localhost:5000/api/advertisements", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      enqueueSnackbar("Advertisement created successfully!", { variant: "success" });
+      navigate("/advertisements/my-ads", { state: { email: formData.email } });
+    } catch (error) {
+      console.error("Error creating advertisement:", error);
+      enqueueSnackbar(
+        error.response?.data?.error || "Error creating advertisement",
+        { variant: "error" }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="home-container">
+      <section className="hero-section">
+        <div className="hero-content fade-in">
+          <h1 className="hero-title">Create Pet Advertisement 🐾</h1>
+          <p className="hero-subtitle">Post your pet ad on PawTracker.</p>
+        </div>
+      </section>
+
+      <section className="content-section fade-in">
+        <div className="container">
+          <div className="back-button fade-in">
+            <Link to="/" className="back-btn">
+              <BsArrowLeft style={{ marginRight: "8px", fontSize: "1.5rem" }} />
+              Back
+            </Link>
+          </div>
+
+          <div className="row justify-content-center">
+            <div className="col-md-8">
+              <div className="card hover-card">
+                <div className="card-body">
+                  <h2 className="card-title">Create Advertisement</h2>
+                  <form onSubmit={handleSubmit} className="create-form">
+                    <div className="mb-3">
+                      <label htmlFor="name" className="form-label">Name</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="form-control"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label htmlFor="email" className="form-label">Email</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="form-control"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label htmlFor="contactNumber" className="form-label">Contact Number</label>
+                      <input
+                        type="text"
+                        id="contactNumber"
+                        name="contactNumber"
+                        value={formData.contactNumber}
+                        onChange={handleChange}
+                        className="form-control"
+                        placeholder="e.g., 123-456-7890"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label htmlFor="advertisementType" className="form-label">Advertisement Type</label>
+                      <select
+                        id="advertisementType"
+                        name="advertisementType"
+                        value={formData.advertisementType}
+                        onChange={handleChange}
+                        className="form-control"
+                        required
+                      >
+                        <option value="">Select Type</option>
+                        <option value="Sell a Pet">Sell a Pet</option>
+                        <option value="Lost Pet">Lost Pet</option>
+                        <option value="Found Pet">Found Pet</option>
+                      </select>
+                    </div>
+
+                    {formData.advertisementType === "Sell a Pet" && (
+                      <div className="mb-3">
+                        <label htmlFor="petType" className="form-label">Pet Type</label>
+                        <select
+                          id="petType"
+                          name="petType"
+                          value={formData.petType}
+                          onChange={handleChange}
+                          className="form-control"
+                          required
+                        >
+                          <option value="">Select Pet Type</option>
+                          <option value="Cat">Cat</option>
+                          <option value="Dog">Dog</option>
+                          <option value="Bird">Bird</option>
+                          <option value="Fish">Fish</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="mb-3">
+                      <label htmlFor="heading" className="form-label">Heading</label>
+                      <input
+                        type="text"
+                        id="heading"
+                        name="heading"
+                        value={formData.heading}
+                        onChange={handleChange}
+                        className="form-control"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label htmlFor="description" className="form-label">Description</label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        className="form-control"
+                        rows="4"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label htmlFor="photo" className="form-label">Photo</label>
+                      <input
+                        type="file"
+                        id="photo"
+                        name="photo"
+                        onChange={handlePhotoChange}
+                        className="form-control"
+                        accept="image/*"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}
+                    >
+                      {loading ? "Creating..." : "Create Advertisement"}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default AddAdvertisement; 

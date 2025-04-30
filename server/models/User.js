@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   }
+  verificationCodeExpiry: { type: Date }
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

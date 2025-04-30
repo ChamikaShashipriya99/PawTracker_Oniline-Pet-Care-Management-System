@@ -1,4 +1,17 @@
-const express = require('express');
+import express from 'express';
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import multer from 'multer';
+import path from 'path';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const router = express.Router();
 const User = require('../models/User');
 const Pet = require('../models/Pet');
@@ -7,22 +20,6 @@ const multer = require('multer');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const auth = require('../middleware/auth');
-const speakeasy = require('speakeasy');
-const QRCode = require('qrcode');
-const { authenticator } = require('otpauth');
-const { TOTP } = require('otpauth');
-const {
-  signupValidation,
-  loginValidation,
-  adminSignupValidation,
-  updateProfileValidation,
-  addPetValidation,
-  contactValidation,
-  resetPasswordValidation,
-  forgotPasswordValidation
-} = require('../middleware/validators');
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -36,7 +33,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Ensure 'uploads' directory exists
-const fs = require('fs');
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
@@ -78,94 +74,13 @@ router.post('/signup', upload.single('profilePhoto'), signupValidation, async (r
   const profilePhoto = req.file ? `/uploads/${req.file.filename}` : null;
   
   try {
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res.status(400).json({ 
-        error: existingUser.email === email ? 'Email already registered' : 'Username already taken' 
-      });
-    }
-    
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Generate verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const verificationCodeExpiry = Date.now() + 3600000;
-    
-    const user = new User({ 
-      firstName, 
-      lastName, 
-      username, 
-      email, 
-      phone, 
-      password: hashedPassword, 
-      profilePhoto,
-      verificationCode,
-      verificationCodeExpiry,
-      isVerified: false
-    });
-    
+    const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, profilePhoto });
     await user.save();
-    
-    // Send verification email
-    const mailOptions = {
-      from: '"PawTracker" <noreply@pawtracker.com>',
-      to: email,
-      subject: 'Verify Your PawTracker Account',
-      html: `
-        <h2>Welcome to PawTracker!</h2>
-        <p>Thank you for registering. Please verify your email address by entering the following code:</p>
-        <h1 style="color: #007bff; font-size: 32px; letter-spacing: 5px;">${verificationCode}</h1>
-        <p>This code will expire in 1 hour.</p>
-        <p>If you did not create this account, please ignore this email.</p>
-      `
-    };
-    
-    try {
-      if (!transporter) {
-        console.log('Transporter not initialized yet, waiting...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-      
-      const info = await transporter.sendMail(mailOptions);
-      console.log('Verification email sent successfully to:', email);
-      
-      res.status(201).json({ 
-        message: 'User created successfully. Please verify your email.',
-        user: {
-          _id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          username: user.username,
-          email: user.email,
-          phone: user.phone,
-          isAdmin: user.isAdmin,
-          profilePhoto: user.profilePhoto,
-          isVerified: user.isVerified,
-          createdAt: user.createdAt
-        },
-        previewUrl: nodemailer.getTestMessageUrl(info)
-      });
-    } catch (emailError) {
-      console.error('Error sending verification email:', emailError);
-      res.status(201).json({ 
-        message: 'User created successfully but could not send verification email. Please try logging in to resend the verification email.',
-        user: {
-          _id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          username: user.username,
-          email: user.email,
-          phone: user.phone,
-          isAdmin: user.isAdmin,
-          profilePhoto: user.profilePhoto,
-          isVerified: user.isVerified,
-          createdAt: user.createdAt
-        }
-      });
-    }
+    res.status(201).json({ message: 'User created', user: { ...user.toObject(), password: undefined } });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Error creating user account' });
   }
 });
 
@@ -811,4 +726,4 @@ router.post('/disable-2fa', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

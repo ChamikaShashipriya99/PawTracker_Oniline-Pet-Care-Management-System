@@ -15,6 +15,17 @@ import ResetPassword from './components/ResetPassword';
 import EmailVerification from './components/EmailVerification';
 import FAQ from './components/FAQ';
 import Contact from './components/Contact';
+import ForgotPassword from './components/ForgotPassword'; // New import
+import ResetPassword from './components/ResetPassword'; // New import
+import CreateAdvertisement from './components/CreateAdvertisement';
+import AdvertisementDashboard from './components/AdvertistmentDashboard';
+import MyAdvertisement from './components/MyAdvertisement';
+import ShowAdvertisement from './components/ShowAdvertisement';
+import DeleteAdvertisement from './components/DeleteAdvertisement';
+import EditAdvertisement from './components/EditAdvertisement';
+import AdminAdvertisement from './components/AdminAdvertisement';
+import AddAdvertisement from './components/AddAdvertisement';
+import VaccinationTracker from './components/VaccinationTracker';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -96,10 +107,13 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       </ul>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link" to="/advertising">Advertising</Link>
+                      <Link className="nav-link" to="/ad-dashboard">Advertising</Link>
                     </li>
                     <li className="nav-item">
                       <Link className="nav-link" to="/faq">FAQ</Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/feedback">Feedback</Link>
                     </li>
                   </>
                 )}
@@ -167,6 +181,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/admin-add">Advertisement</Link>
+                </li>
+                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
@@ -191,6 +208,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="/add-pet" element={<AddPet />} />
               <Route path="/my-pets" element={<MyPets />} />
+              <Route path="/pets/:petId/vaccinations" element={<VaccinationTracker />} />
+              <Route path="/advertisements/add" element={<AddAdvertisement />} />
+              <Route path="/advertisements/my-ads" element={<MyAdvertisement />} />
+              <Route path="/advertisements/edit/:id" element={<EditAdvertisement />} />
               <Route path="/store" element={<div>Store Page</div>} />
               <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />
@@ -198,9 +219,17 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/advertising" element={<div>Advertising Page</div>} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/ad-dashboard" element={<AdvertisementDashboard/>} />
+              <Route path="/faq" element={<div>FAQ Page</div>} />
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
-              <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
+              <Route path="/my-advertisements" element={<MyAdvertisement/>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
+              <Route path="/advertising" element={<CreateAdvertisement/>}/>
+              <Route path="/show-add" element={<ShowAdvertisement/>}/>
+              <Route path="/delete-add" element={<DeleteAdvertisement/>}/>
+              <Route path="/edit-add/:id" element={<EditAdvertisement/>}/>
+              <Route path="/admin-add" element={<AdminAdvertisement/>}/>
+            
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
