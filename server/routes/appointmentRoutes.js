@@ -54,6 +54,16 @@ router.use((req, res, next) => {
 // Create appointment
 router.post('/', auth, async (req, res) => {
     try {
+        const { serviceType, date, time } = req.body;
+        // Prevent overlapping appointments for same service, date, and time
+        const existing = await Appointment.findOne({
+            serviceType,
+            date: new Date(date),
+            time
+        });
+        if (existing) {
+            return res.status(400).json({ message: 'already booked time slot' });
+        }
         const user = req.user;
         const appointment = new Appointment({
             ...req.body,

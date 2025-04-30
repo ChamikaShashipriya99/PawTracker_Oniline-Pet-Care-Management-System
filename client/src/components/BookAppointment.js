@@ -164,6 +164,17 @@ function BookAppointment() {
         }
     };
 
+    // Generate 30-minute time slots from 09:00 to 16:30
+    const generateTimeSlots = (start = 9, end = 17) => {
+        const slots = [];
+        for (let hour = start; hour < end; hour++) {
+            slots.push(`${hour.toString().padStart(2, '0')}:00`);
+            slots.push(`${hour.toString().padStart(2, '0')}:30`);
+        }
+        return slots;
+    };
+    const timeSlots = generateTimeSlots();
+
     return (
         <div className="service-container">
             <section className="hero-section">
@@ -258,14 +269,18 @@ function BookAppointment() {
 
                                 <div className="form-group">
                                     <label htmlFor="time">Preferred Time</label>
-                                    <input
-                                        type="time"
+                                    <select
                                         id="time"
                                         name="time"
-                                        className="form-control"
+                                        className="form-select"
                                         value={formData.time}
                                         onChange={handleChange}
-                                    />
+                                    >
+                                        <option value="">Select a time</option>
+                                        {timeSlots.map(slot => (
+                                            <option key={slot} value={slot}>{slot}</option>
+                                        ))}
+                                    </select>
                                     {errors.time && <span className="error">{errors.time}</span>}
                                 </div>
 

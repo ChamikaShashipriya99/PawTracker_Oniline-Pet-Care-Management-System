@@ -422,7 +422,7 @@ function AdminAppointments() {
                     </div>
 
                     <div className="appointment-count text-center py-3 fade-in" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ff5733' }}>
-                       
+                        Appointments Count: {filteredAppointments.length}
                         {filteredAppointments.length > 0 && (
                             <button
                                 className="btn btn-orange ms-3"

@@ -114,3 +114,15 @@ module.exports = mongoose.model('Appointment', appointmentSchema);
 // }, { timestamps: true });
 
 // module.exports = mongoose.model('Appointment', appointmentSchema);
+
+const generateTimeSlots = (start = 9, end = 17) => {
+  const slots = [];
+  for (let hour = start; hour < end; hour++) {
+    slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    slots.push(`${hour.toString().padStart(2, '0')}:30`);
+  }
+  return slots;
+};
+
+// Usage in your component:
+const timeSlots = generateTimeSlots(); // ["09:00", "09:30", ..., "16:30"]
