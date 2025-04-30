@@ -15,6 +15,9 @@ import ResetPassword from './components/ResetPassword';
 import EmailVerification from './components/EmailVerification';
 import FAQ from './components/FAQ';
 import Contact from './components/Contact';
+import FeedbackForm from './components/FeedbackForm';
+import MyFeedback from './components/MyFeedback';
+import AdminFeedback from './components/AdminFeedback'; 
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -101,6 +104,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                     <li className="nav-item">
                       <Link className="nav-link" to="/faq">FAQ</Link>
                     </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/submit-feedback">Feedback</Link>
+                    </li>
                   </>
                 )}
               </ul>
@@ -139,6 +145,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                         <li><Link className="dropdown-item" to="/my-appointments">My Appointments</Link></li>
                         <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
                         <li><Link className="dropdown-item" to="/my-payments">My Payments</Link></li>
+                        <li><Link className="dropdown-item" to="/my-feedback">My Feedback</Link></li>
                       </ul>
                     </li>
                     <li className="nav-item">
@@ -165,6 +172,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <ul className="navbar-nav ms-auto">
                 <li className="nav-item">
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/admin-feedback">Feedback Management</Link>
                 </li>
                 <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
@@ -201,6 +211,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
               <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
+              <Route path="/my-feedback" element={<MyFeedback />} />
+              <Route path="/submit-feedback" element={<FeedbackForm />} />
+              <Route path="/admin-feedback" element={<AdminFeedback />} />
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
