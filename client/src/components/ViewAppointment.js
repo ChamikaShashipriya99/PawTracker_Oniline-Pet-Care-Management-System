@@ -26,7 +26,7 @@ function ViewAppointment() {
     const fetchAppointment = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`/api/appointment/${id}`, {
+            const response = await axios.get(`/api/appointments/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

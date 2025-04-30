@@ -2,9 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-
-
+import { NotificationProvider } from './context/NotificationContext';
 import Home from './components/Home';
 import Signup from './components/Signup';
 import Login from './components/Login';
@@ -26,9 +24,18 @@ import EditAppointment from './components/EditAppointment';
 import ViewAppointment from './components/ViewAppointment';
 import AdminAppointments from './components/AdminAppointments';
 import Notification from './components/Notification';
+import NotificationIcon from './components/NotificationIcon';
+import Notifications from './components/Notifications';
+import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -57,6 +64,60 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
       setIsAdmin(false);
     }
   }, [navigate, setIsLoggedIn, setIsAdmin]);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        if (!token) return;
+        const response = await fetch('http://localhost:5000/api/notifications/unread-count', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        setUnreadCount(data.count || 0);
+      } catch (err) {
+        setUnreadCount(0);
+      }
+    };
+    if (isLoggedIn) fetchUnreadCount();
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/notifications', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setNotifications(data.notifications || []);
+      setLoading(false);
+    };
+    fetchNotifications();
+  }, []);
+
+  const handleNotificationClick = async (id) => {
+    const token = localStorage.getItem('token');
+    await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setNotifications(prev =>
+      prev.map(n => n._id === id ? { ...n, read: true } : n)
+    );
+    // Optionally, update unreadCount in App.js via context or callback
+  };
+
+  const handleMarkAllAsRead = async () => {
+    const token = localStorage.getItem('token');
+    await fetch('http://localhost:5000/api/notifications/mark-all-read', {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    // Optionally, update unreadCount in App.js via context or callback
+  };
+
+  const unread = notifications.filter(n => !n.read);
+  const read = notifications.filter(n => n.read);
 
   return (
     <>
@@ -98,49 +159,61 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   </>
                 )}
               </ul>
-              <ul className="navbar-nav ms-auto">
-                {!isLoggedIn ? (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/signup">Sign Up</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/login">Login</Link>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="nav-item me-2">
-                      <a className="nav-link position-relative" href="#" onClick={(e) => e.preventDefault()}>
-                        <i className="fas fa-bell fa-lg"></i>
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                          3
-                          <span className="visually-hidden">unread notifications</span>
-                        </span>
-                      </a>
-                    </li>
-                    <li className="nav-item me-2">
-                      <Link className="nav-link" to="/profile">
-                        <i className="fas fa-user-circle fa-lg"></i>
-                      </Link>
-                    </li>
-                    <li className="nav-item dropdown">
-                      <a className="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
-                        Profile
-                      </a>
-                      <ul className="dropdown-menu" aria-labelledby="profileDropdown">
-                        <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
-                        <li><Link className="dropdown-item" to="/my-appointments">My Appointments</Link></li>
-                        <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
-                        <li><Link className="dropdown-item" to="/my-payments">My Payments</Link></li>
-                      </ul>
-                    </li>
-                    <li className="nav-item">
-                      <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
-                    </li>
-                  </>
-                )}
-              </ul>
+
+              {token && (
+                <ul className="navbar-nav ms-auto">
+                  {!isLoggedIn ? (
+                    <>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/signup">Sign Up</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/login">Login</Link>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="nav-item me-2">
+                        <a className="nav-link position-relative" href="#" onClick={(e) => { e.preventDefault(); navigate('/notifications'); }}>
+                          <i className="fas fa-bell fa-lg"></i>
+                          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {unreadCount}
+                            <span className="visually-hidden">unread notifications</span>
+                          </span>
+                        </a>
+                      </li>
+                      <li className="nav-item me-2">
+                        <Link className="nav-link" to="/profile">
+                          <i className="fas fa-user-circle fa-lg"></i>
+                        </Link>
+                      </li>
+                      <li className="nav-item dropdown">
+                        <a className="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                          Profile
+                        </a>
+                        <ul className="dropdown-menu" aria-labelledby="profileDropdown">
+                          <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
+                          <li><Link className="dropdown-item" to="/my-appointments">My Appointments</Link></li>
+                          <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
+                          <li><Link className="dropdown-item" to="/my-payments">My Payments</Link></li>
+                        </ul>
+                      </li>
+                      <li className="nav-item">
+                        <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              )}
+
+              {!token && (
+                <Link
+                  to="/login"
+                  className="text-white hover:text-gray-200 border border-white rounded px-4 py-1"
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </nav>
@@ -173,39 +246,56 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
       )}
 
       <div style={{ paddingTop: '80px', minHeight: 'calc(100vh - 200px)' }}>
-        <Routes>
-          <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
-          <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} />
-          {isLoggedIn && (
-            <>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/update-profile" element={<UpdateProfile />} />
-              <Route path="/add-pet" element={<AddPet />} />
-              <Route path="/my-pets" element={<MyPets />} />
-              <Route path="/store" element={<div>Store Page</div>} />
-              <Route path="/vet-service" element={<VetService />} />
-              <Route path="/pet-grooming" element={<PetGrooming />} />
-              <Route path="/pet-training" element={<PetTraining />} />
-              <Route path="/advertising" element={<div>Advertising Page</div>} />
-              <Route path="/faq" element={<div>FAQ Page</div>} />
-              <Route path="/my-appointments" element={<MyAppointments />} />
-              <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
-              <Route path="/my-payments" element={<div>My Payments Page</div>} />
-              <Route path="/book-appointment" element={<BookAppointment />} />
-              <Route path="/edit-appointment/:id" element={<EditAppointment />} />
-              <Route path="/view-appointment/:id" element={<ViewAppointment />} />
-              <Route path="/admin-appointments" element={<AdminAppointments />} />
-              <Route path="/notification" element={<Notification />} />
-            </>
-          )}
-          <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/admin/signup" element={<AdminSignup setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="*" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-        </Routes>
+        <main className="container mx-auto px-4 py-8">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
+            <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword setIsLoggedIn={setIsLoggedIn} />} />
+            {isLoggedIn && (
+              <>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/update-profile" element={<UpdateProfile />} />
+                <Route path="/add-pet" element={<AddPet />} />
+                <Route path="/my-pets" element={<MyPets />} />
+                <Route path="/store" element={<div>Store Page</div>} />
+                <Route path="/vet-service" element={<VetService />} />
+                <Route path="/pet-grooming" element={<PetGrooming />} />
+                <Route path="/pet-training" element={<PetTraining />} />
+                <Route path="/advertising" element={<div>Advertising Page</div>} />
+                <Route path="/faq" element={<div>FAQ Page</div>} />
+                <Route path="/my-appointments" element={<MyAppointments />} />
+                <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
+                <Route path="/my-payments" element={<div>My Payments Page</div>} />
+                <Route path="/book-appointment" element={<BookAppointment />} />
+                <Route path="/edit-appointment/:id" element={<EditAppointment />} />
+                <Route path="/view-appointment/:id" element={<ViewAppointment />} />
+                <Route
+                  path="/admin-appointments"
+                  element={
+                    <AdminRoute>
+                      <AdminAppointments />
+                    </AdminRoute>
+                  }
+                />
+                <Route path="/notification" element={<Notification />} />
+                <Route path="/notifications" element={<Notifications />} />
+              </>
+            )}
+            <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
+            <Route path="/admin/signup" element={<AdminSignup setIsLoggedIn={setIsLoggedIn} />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route path="*" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+          </Routes>
+        </main>
       </div>
 
       {(!isLoggedIn || !isAdmin) && (
@@ -266,12 +356,14 @@ export default function App() {
 
   return (
     <Router>
-      <AppContent
-        isLoggedIn={isLoggedIn}
-        setIsLoggedIn={setIsLoggedIn}
-        isAdmin={isAdmin}
-        setIsAdmin={setIsAdmin}
-      />
+      <NotificationProvider>
+        <AppContent
+          isLoggedIn={isLoggedIn}
+          setIsLoggedIn={setIsLoggedIn}
+          isAdmin={isAdmin}
+          setIsAdmin={setIsAdmin}
+        />
+      </NotificationProvider>
     </Router>
   );
 }

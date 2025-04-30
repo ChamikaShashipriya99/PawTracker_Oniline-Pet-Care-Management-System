@@ -128,7 +128,17 @@ function BookAppointment() {
                     }
                 };
 
-                const response = await axios.post('http://localhost:5000/api/appointment', formData, config);
+                // Get user ID from token
+                const user = JSON.parse(localStorage.getItem('user'));
+                const userId = user ? user._id : null;
+
+                const appointmentData = {
+                    ...formData,
+                    amount: amount,
+                    userId: userId
+                };
+
+                const response = await axios.post('http://localhost:5000/api/appointments', appointmentData, config);
                 setNotification({ message: 'Appointment booked successfully!', type: 'success' });
                 
                 // Redirect to MyAppointments page after a short delay

@@ -3,6 +3,7 @@ import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import './Service.css';
+import { useNavigate } from 'react-router-dom';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
@@ -18,6 +19,9 @@ function AdminAppointments() {
     const [sortOrder, setSortOrder] = useState('asc');
     const [showModal, setShowModal] = useState(false);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [notification, setNotification] = useState(null);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchAppointments();
@@ -39,7 +43,7 @@ function AdminAppointments() {
                 }
             };
 
-            const response = await axios.get('/api/appointment', config);
+            const response = await axios.get('http://localhost:5000/api/appointments/all', config);
             console.log('Fetched appointments:', response.data);
             response.data.forEach(appointment => {
                 console.log(`Appointment ${appointment._id} amount:`, appointment.amount);
@@ -90,26 +94,40 @@ function AdminAppointments() {
         setFilteredAppointments(updatedAppointments);
     }, [appointments, serviceFilter, statusFilter, searchQuery, sortBy, sortOrder]);
 
-    const handleUpdateStatus = async (id, newStatus) => {
+    const handleStatusChange = async (appointmentId, newStatus) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                setError('Authentication token not found. Please log in again.');
+                setError('Authentication required');
                 return;
             }
 
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+            const response = await axios.patch(
+                `http://localhost:5000/api/appointments/${appointmentId}/status`,
+                { status: newStatus },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
-            };
+            );
 
-            await axios.put(`/api/appointment/${id}`, { status: newStatus }, config);
-            fetchAppointments();
+            // Update the appointments list with the new status
+            setAppointments(appointments.map(appointment => 
+                appointment._id === appointmentId 
+                    ? { ...appointment, status: newStatus } 
+                    : appointment
+            ));
+
+            // Show success message
+            setNotification({
+                message: `Appointment status updated to ${newStatus}`,
+                type: 'success'
+            });
         } catch (error) {
             console.error('Error updating appointment status:', error);
-            setError('Failed to update appointment status');
+            setError(error.response?.data?.message || 'Failed to update appointment status');
         }
     };
 
@@ -121,18 +139,32 @@ function AdminAppointments() {
                 return;
             }
 
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+            const response = await axios.patch(
+                `http://localhost:5000/api/appointments/${id}/status`,
+                { status: 'Pending' },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
-            };
+            );
 
-            await axios.put(`/api/appointment/${id}`, { status: 'Pending' }, config);
-            fetchAppointments();
+            // Update the appointments list with the new status
+            setAppointments(appointments.map(appointment => 
+                appointment._id === id 
+                    ? { ...appointment, status: 'Pending' } 
+                    : appointment
+            ));
+
+            // Show success message
+            setNotification({
+                message: 'Appointment reopened successfully',
+                type: 'success'
+            });
         } catch (error) {
             console.error('Error reopening appointment:', error);
-            setError('Failed to reopen appointment');
+            setError(error.response?.data?.message || 'Failed to reopen appointment');
         }
     };
 
@@ -405,7 +437,7 @@ function AdminAppointments() {
                                                                     className="form-select status-select"
                                                                     style={{ width: '120px' }}
                                                                     value={appointment.status}
-                                                                    onChange={(e) => handleUpdateStatus(appointment._id, e.target.value)}
+                                                                    onChange={(e) => handleStatusChange(appointment._id, e.target.value)}
                                                                 >
                                                                     <option value="Pending">Pending</option>
                                                                     <option value="Approved">Approved</option>

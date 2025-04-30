@@ -16,11 +16,10 @@ export const NotificationProvider = ({ children }) => {
       if (!token) return;
 
       const response = await axios.get('http://localhost:5000/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: token }
       });
-      
       setNotifications(response.data);
-      setUnreadCount(response.data.filter(n => !n.isRead).length);
+      setUnreadCount(response.data.filter(n => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -33,12 +32,16 @@ export const NotificationProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.patch(
+        `http://localhost:5000/api/notifications/${notificationId}/read`,
+        {},
+        { headers: { Authorization: token } }
+      );
 
-      setNotifications(prev => 
-        prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
+      setNotifications(prev =>
+        prev.map(n =>
+          n._id === notificationId ? { ...n, read: true } : n
+        )
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
@@ -51,11 +54,15 @@ export const NotificationProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      await axios.put('http://localhost:5000/api/notifications/read-all', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.patch(
+        'http://localhost:5000/api/notifications/read-all',
+        {},
+        { headers: { Authorization: token } }
+      );
 
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, read: true }))
+      );
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -64,7 +71,7 @@ export const NotificationProvider = ({ children }) => {
 
   useEffect(() => {
     fetchNotifications();
-    // Set up polling for new notifications every 30 seconds
+    // Set up polling every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);

@@ -28,6 +28,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 // const authRoutes = require('./routes/authRoutes');
 const notificationController = require('./Controllers/notificationController');
 // const { protect } = require('./middleware/auth');
@@ -51,8 +52,8 @@ mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mong
 
 // Routes
 app.use('/api/users', userRoutes);
-app.use('/api/appointment', appointmentRoutes);
-app.get('/api/notifications', notificationController.getNotifications);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/notifications', notificationRoutes);
 // app.use('/api/auth', authRoutes);
 
 // Start the Server

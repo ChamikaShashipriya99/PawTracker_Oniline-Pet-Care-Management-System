@@ -16,14 +16,14 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['appointment', 'system', 'reminder'],
-    default: 'appointment'
+    enum: ['appointment_status', 'system'],
+    default: 'system'
   },
   appointmentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Appointment'
   },
-  isRead: {
+  read: {
     type: Boolean,
     default: false
   },

@@ -32,7 +32,7 @@ function MyAppointments() {
     const fetchAppointments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('/api/appointment', {
+            const response = await axios.get('/api/appointments/my-appointments', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -93,7 +93,7 @@ function MyAppointments() {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`/api/appointment/${id}`, {
+                await axios.delete(`/api/appointments/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -136,7 +136,7 @@ function MyAppointments() {
             `${formatDate(appointment.date)} at ${appointment.time}`,
             appointment.status,
             `Rs.${appointment.amount ?? 'N/A'}`,
-            appointment.petOwner,
+            `${appointment.petOwner}`,
             appointment.petName,
             appointment.notes || 'N/A'
         ]];
@@ -290,7 +290,9 @@ function MyAppointments() {
                                                         {appointment.serviceType}
                                                         {appointment.trainingType !== 'N/A' && ` (${appointment.trainingType})`}
                                                     </td>
-                                                    <td>{appointment.petOwner}</td>
+                                                    <td>
+                                                        {appointment.petOwner}
+                                                    </td>
                                                     <td>{appointment.petName}</td>
                                                     <td>{formatDate(appointment.date)} at {appointment.time}</td>
                                                     <td className={`status-${appointment.status.toLowerCase()}`}>{appointment.status}</td>

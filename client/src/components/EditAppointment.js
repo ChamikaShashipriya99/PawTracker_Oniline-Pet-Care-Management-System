@@ -34,7 +34,7 @@ function EditAppointment() {
     const fetchAppointment = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`/api/appointment/${id}`, {
+            const response = await axios.get(`/api/appointments/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -123,7 +123,7 @@ function EditAppointment() {
                 amount: originalData.amount
             };
 
-            const response = await axios.put(`/api/appointment/${id}`, updatedAppointment, {
+            const response = await axios.put(`/api/appointments/${id}`, updatedAppointment, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
