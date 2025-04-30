@@ -432,15 +432,55 @@ router.get('/users', async (req, res) => {
 });
 
 // Add new admin (admin only)
-router.post('/admin/add', async (req, res) => {
+router.post('/admin/add', adminSignupValidation, async (req, res) => {
   const { firstName, lastName, username, email, phone, password } = req.body;
   try {
+    // Check if user with email or username already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }]
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: existingUser.email === email ? 
+          'Email already registered' : 
+          'Username already taken'
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, isAdmin: true });
+    const user = new User({ 
+      firstName, 
+      lastName, 
+      username, 
+      email, 
+      phone, 
+      password: hashedPassword, 
+      isAdmin: true,
+      isVerified: true // Automatically verify admin accounts
+    });
+    
     await user.save();
-    res.status(201).json({ message: 'Admin created' });
+    
+    res.status(201).json({ 
+      message: 'Admin created successfully',
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        isAdmin: user.isAdmin,
+        createdAt: user.createdAt
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error creating admin:', error);
+    res.status(500).json({ 
+      error: 'Failed to create admin account',
+      details: error.message 
+    });
   }
 });
 

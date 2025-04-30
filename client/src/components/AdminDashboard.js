@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PointElement, LineElement } from 'chart.js';
+import { Pie, Bar, Line } from 'react-chartjs-2';
+
+// Register ChartJS components
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PointElement, LineElement);
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -17,6 +22,7 @@ function AdminDashboard() {
   const [errors, setErrors] = useState({
     firstName: '', lastName: '', username: '', email: '', phone: '', password: ''
   });
+  const [activeTab, setActiveTab] = useState('dashboard');
   const user = JSON.parse(localStorage.getItem('user'));
 
   // Validation functions
@@ -103,15 +109,16 @@ function AdminDashboard() {
     } else {
       const filtered = users
         .filter(u => {
-          const username = u.username ? u.username.toLowerCase() : '';
-          const match = username.includes(term);
-          console.log(`Checking ${username} against ${term}: ${match}`);
-          return match;
+          if (activeTab === 'admins') {
+            return u.isAdmin && u.username.toLowerCase().includes(term);
+          } else {
+            return !u.isAdmin && u.username.toLowerCase().includes(term);
+          }
         })
         .sort((a, b) => a.username.localeCompare(b.username));
       console.log('Filtered users:', filtered);
       setFilteredUsers(filtered);
-      setSearchError(filtered.length === 0 ? 'No users or admins found with that name.' : '');
+      setSearchError(filtered.length === 0 ? `No ${activeTab === 'admins' ? 'admins' : 'users'} found with that name.` : '');
     }
   };
 
@@ -152,7 +159,7 @@ function AdminDashboard() {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/users/admin/add', newAdmin);
+      const response = await axios.post('http://localhost:5000/api/users/admin/add', newAdmin);
       alert('New admin added successfully!');
       setNewAdmin({ firstName: '', lastName: '', username: '', email: '', phone: '', password: '' });
       const res = await axios.get('http://localhost:5000/api/users/users');
@@ -167,7 +174,8 @@ function AdminDashboard() {
         setFilteredUsers([]);
       }
     } catch (error) {
-      alert('Failed to add admin: ' + error.message);
+      const errorMessage = error.response?.data?.error || error.response?.data?.details || error.message;
+      alert('Failed to add admin: ' + errorMessage);
     }
   };
 
@@ -227,37 +235,82 @@ function AdminDashboard() {
 
   const handleDownloadAllPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(18);
+    
+    // Add title
+    doc.setFontSize(24);
     doc.setTextColor(255, 87, 51);
-    doc.text('Pet Care Admin Report', 105, 20, { align: 'center' });
+    doc.text('PawTracker Admin Report', 105, 20, { align: 'center' });
+    
+    // Add date
     doc.setFontSize(12);
     doc.setTextColor(85, 85, 85);
-    doc.text('All Users and Admins', 105, 30, { align: 'center' });
-
-    const tableData = users.map(u => [
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 30, { align: 'center' });
+    
+    // Add user statistics
+    doc.setFontSize(16);
+    doc.setTextColor(0, 123, 255);
+    doc.text('User Statistics', 20, 45);
+    
+    // Add user counts
+    doc.setFontSize(12);
+    doc.setTextColor(85, 85, 85);
+    doc.text(`Total Users: ${userCount}`, 20, 55);
+    doc.text(`Total Admins: ${adminCount}`, 20, 62);
+    
+    // Add admin list
+    doc.setFontSize(16);
+    doc.setTextColor(0, 123, 255);
+    doc.text('Admin List', 20, 80);
+    
+    const adminData = users.filter(u => u.isAdmin).map(u => [
       u.firstName,
       u.lastName,
       u.username,
       u.email,
-      u.phone,
-      u.isAdmin ? 'Admin' : 'User'
+      u.phone
     ]);
-
+    
     autoTable(doc, {
-      startY: 40,
-      head: [['First Name', 'Last Name', 'Username', 'Email', 'Phone', 'Role']],
-      body: tableData,
+      startY: 85,
+      head: [['First Name', 'Last Name', 'Username', 'Email', 'Phone']],
+      body: adminData,
       theme: 'grid',
       styles: { fontSize: 10, cellPadding: 3 },
       headStyles: { fillColor: [255, 87, 51], textColor: [255, 255, 255] },
       alternateRowStyles: { fillColor: [240, 240, 240] },
     });
-
+    
+    // Add user list
+    doc.setFontSize(16);
+    doc.setTextColor(0, 123, 255);
+    doc.text('User List', 20, doc.lastAutoTable.finalY + 15);
+    
+    const userData = users.filter(u => !u.isAdmin).map(u => [
+      u.firstName,
+      u.lastName,
+      u.username,
+      u.email,
+      u.phone
+    ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['First Name', 'Last Name', 'Username', 'Email', 'Phone']],
+      body: userData,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [0, 123, 255], textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+    });
+    
+    // Add footer
     doc.setFontSize(8);
     doc.setTextColor(85, 85, 85);
-    doc.text('Generated by Online Pet Care Admin System', 105, doc.internal.pageSize.height - 10, { align: 'center' });
-    doc.save('all_users_and_admins.pdf');
-    alert('User and admin details downloaded as PDF!');
+    doc.text('Generated by PawTracker Admin System', 105, doc.internal.pageSize.height - 10, { align: 'center' });
+    
+    // Save the PDF
+    doc.save('pawtracker_admin_report.pdf');
+    alert('Admin report downloaded successfully!');
   };
 
   const handleDownloadSearchResultsPDF = () => {
@@ -319,6 +372,60 @@ function AdminDashboard() {
   const userCount = users.filter(u => !u.isAdmin).length;
   const adminCount = users.filter(u => u.isAdmin).length;
 
+  // Prepare data for charts
+  const userRoleData = {
+    labels: ['Users', 'Admins'],
+    datasets: [
+      {
+        data: [userCount, adminCount],
+        backgroundColor: ['#007bff', '#ff5733'],
+        borderColor: ['#0056b3', '#cc4529'],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // Mock data for registration trends (you should replace this with real data from your backend)
+  const registrationTrendsData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [
+      {
+        label: 'New Registrations',
+        data: [12, 19, 15, 25, 22, 30],
+        backgroundColor: '#007bff',
+        borderColor: '#0056b3',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // Mock data for active users (you should replace this with real data from your backend)
+  const activeUsersData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [
+      {
+        label: 'Active Users',
+        data: [65, 59, 80, 81, 56, 55, 40],
+        fill: false,
+        borderColor: '#ff5733',
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'User Statistics',
+      },
+    },
+  };
+
   return (
     <div className="container mt-5">
       <div className="card shadow-lg p-4" style={{ borderRadius: '15px', border: 'none' }}>
@@ -329,6 +436,51 @@ function AdminDashboard() {
           </button>
         </div>
 
+        {/* Add Tab Navigation */}
+        <ul className="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+          <li className="nav-item" role="presentation">
+            <button
+              className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setActiveTab('dashboard')}
+              style={{ borderRadius: '10px 10px 0 0' }}
+            >
+              <i className="fas fa-chart-line me-2"></i> Dashboard
+            </button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button
+              className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+              style={{ borderRadius: '10px 10px 0 0' }}
+            >
+              <i className="fas fa-users me-2"></i> Users
+            </button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button
+              className={`nav-link ${activeTab === 'admins' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admins')}
+              style={{ borderRadius: '10px 10px 0 0' }}
+            >
+              <i className="fas fa-user-shield me-2"></i> Admins
+            </button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button
+              className={`nav-link ${activeTab === 'add-admin' ? 'active' : ''}`}
+              onClick={() => setActiveTab('add-admin')}
+              style={{ borderRadius: '10px 10px 0 0' }}
+            >
+              <i className="fas fa-user-plus me-2"></i> Add Admin
+            </button>
+          </li>
+        </ul>
+
+        {/* Tab Content */}
+        <div className="tab-content">
+          {/* Dashboard Tab */}
+          {activeTab === 'dashboard' && (
+            <div className="tab-pane fade show active">
         <div className="row mb-4">
           <div className="col-md-6">
             <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
@@ -354,152 +506,493 @@ function AdminDashboard() {
           </div>
         </div>
 
-        <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+              {/* Charts Section */}
+              <div className="row">
+                {/* User Role Distribution Pie Chart */}
+                <div className="col-md-4">
+                  <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                    <div className="card-body">
+                      <h5 className="card-title" style={{ color: '#007bff' }}>
+                        <i className="fas fa-chart-pie me-2"></i> User Distribution
+                      </h5>
+                      <div style={{ height: '250px' }}>
+                        <Pie data={userRoleData} options={chartOptions} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Registration Trends Bar Chart */}
+                <div className="col-md-8">
+                  <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                    <div className="card-body">
+                      <h5 className="card-title" style={{ color: '#007bff' }}>
+                        <i className="fas fa-chart-bar me-2"></i> Registration Trends
+                      </h5>
+                      <div style={{ height: '250px' }}>
+                        <Bar 
+                          data={registrationTrendsData} 
+                          options={{
+                            ...chartOptions,
+                            scales: {
+                              y: {
+                                beginAtZero: true,
+                                title: {
+                                  display: true,
+                                  text: 'Number of Users'
+                                }
+                              }
+                            }
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Active Users Line Chart */}
+              <div className="row mt-4">
+                <div className="col-12">
+                  <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                    <div className="card-body">
+                      <h5 className="card-title" style={{ color: '#007bff' }}>
+                        <i className="fas fa-chart-line me-2"></i> Active Users
+                      </h5>
+                      <div style={{ height: '300px' }}>
+                        <Line 
+                          data={activeUsersData} 
+                          options={{
+                            ...chartOptions,
+                            scales: {
+                              y: {
+                                beginAtZero: true,
+                                title: {
+                                  display: true,
+                                  text: 'Number of Active Users'
+                                }
+                              }
+                            }
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Users Tab */}
+          {activeTab === 'users' && (
+            <div className="tab-pane fade show active">
+              <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+                  <h5 className="mb-0" style={{ color: '#007bff' }}>
+                    <i className="fas fa-search me-2"></i> Search Users
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search by username..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    style={{ borderRadius: '10px' }}
+                  />
+                  {searchError && <p className="text-danger mt-2">{searchError}</p>}
+                </div>
+              </div>
+
+              <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0" style={{ color: '#007bff' }}>
+                      <i className="fas fa-list me-2"></i> {searchTerm ? 'Search Results' : 'All Users'}
+                    </h5>
+                    <div>
+                      {searchTerm ? (
+                        <button
+                          onClick={handleDownloadSearchResultsPDF}
+                          className="btn btn-outline-primary me-2"
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-download me-2"></i> Download Search Results
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const doc = new jsPDF();
+                            doc.setFontSize(24);
+                            doc.setTextColor(0, 123, 255);
+                            doc.text('PawTracker User List', 105, 20, { align: 'center' });
+                            
+                            doc.setFontSize(12);
+                            doc.setTextColor(85, 85, 85);
+                            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 30, { align: 'center' });
+                            
+                            const userData = users.filter(u => !u.isAdmin).map(u => [
+                              u.firstName,
+                              u.lastName,
+                              u.username,
+                              u.email,
+                              u.phone
+                            ]);
+                            
+                            autoTable(doc, {
+                              startY: 40,
+                              head: [['First Name', 'Last Name', 'Username', 'Email', 'Phone']],
+                              body: userData,
+                              theme: 'grid',
+                              styles: { fontSize: 10, cellPadding: 3 },
+                              headStyles: { fillColor: [0, 123, 255], textColor: [255, 255, 255] },
+                              alternateRowStyles: { fillColor: [240, 240, 240] },
+                            });
+                            
+                            doc.setFontSize(8);
+                            doc.setTextColor(85, 85, 85);
+                            doc.text('Generated by PawTracker Admin System', 105, doc.internal.pageSize.height - 10, { align: 'center' });
+                            
+                            doc.save('pawtracker_user_list.pdf');
+                            alert('User list downloaded successfully!');
+                          }}
+                          className="btn btn-outline-primary"
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-download me-2"></i> Download User List
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>First Name</th>
+                          <th>Last Name</th>
+                          <th>Username</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(searchTerm ? filteredUsers : users.filter(u => !u.isAdmin)).map(u => (
+                          <tr key={u._id}>
+                            <td>{u.firstName}</td>
+                            <td>{u.lastName}</td>
+                            <td>{u.username}</td>
+                            <td>{u.email}</td>
+                            <td>{u.phone}</td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-primary me-2"
+                                onClick={() => handleEditUser(u)}
+                                data-bs-toggle="modal"
+                                data-bs-target="#editUserModal"
+                                style={{ borderRadius: '10px' }}
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDeleteUser(u._id)}
+                                style={{ borderRadius: '10px' }}
+                              >
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Admins Tab */}
+          {activeTab === 'admins' && (
+            <div className="tab-pane fade show active">
+              <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+                  <h5 className="mb-0" style={{ color: '#ff5733' }}>
+                    <i className="fas fa-search me-2"></i> Search Admins
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search by username..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    style={{ borderRadius: '10px' }}
+                  />
+                  {searchError && <p className="text-danger mt-2">{searchError}</p>}
+                </div>
+              </div>
+
+              <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0" style={{ color: '#ff5733' }}>
+                      <i className="fas fa-user-shield me-2"></i> {searchTerm ? 'Search Results' : 'Admin List'}
+                    </h5>
+                    <div>
+                      {searchTerm ? (
+                        <button
+                          onClick={() => {
+                            const doc = new jsPDF();
+                            doc.setFontSize(24);
+                            doc.setTextColor(255, 87, 51);
+                            doc.text('PawTracker Admin Search Results', 105, 20, { align: 'center' });
+                            
+                            doc.setFontSize(12);
+                            doc.setTextColor(85, 85, 85);
+                            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 30, { align: 'center' });
+                            doc.text(`Search Term: ${searchTerm}`, 14, 40);
+                            
+                            const adminData = filteredUsers.map(u => [
+                              u.firstName,
+                              u.lastName,
+                              u.username,
+                              u.email,
+                              u.phone
+                            ]);
+                            
+                            autoTable(doc, {
+                              startY: 45,
+                              head: [['First Name', 'Last Name', 'Username', 'Email', 'Phone']],
+                              body: adminData,
+                              theme: 'grid',
+                              styles: { fontSize: 10, cellPadding: 3 },
+                              headStyles: { fillColor: [255, 87, 51], textColor: [255, 255, 255] },
+                              alternateRowStyles: { fillColor: [240, 240, 240] },
+                            });
+                            
+                            doc.setFontSize(8);
+                            doc.setTextColor(85, 85, 85);
+                            doc.text('Generated by PawTracker Admin System', 105, doc.internal.pageSize.height - 10, { align: 'center' });
+                            
+                            doc.save(`admin_search_results_${searchTerm}.pdf`);
+                            alert('Admin search results downloaded successfully!');
+                          }}
+                          className="btn btn-outline-danger me-2"
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-download me-2"></i> Download Search Results
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const doc = new jsPDF();
+                            doc.setFontSize(24);
+                            doc.setTextColor(255, 87, 51);
+                            doc.text('PawTracker Admin List', 105, 20, { align: 'center' });
+                            
+                            doc.setFontSize(12);
+                            doc.setTextColor(85, 85, 85);
+                            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 30, { align: 'center' });
+                            
+                            const adminData = users.filter(u => u.isAdmin).map(u => [
+                              u.firstName,
+                              u.lastName,
+                              u.username,
+                              u.email,
+                              u.phone
+                            ]);
+                            
+                            autoTable(doc, {
+                              startY: 40,
+                              head: [['First Name', 'Last Name', 'Username', 'Email', 'Phone']],
+                              body: adminData,
+                              theme: 'grid',
+                              styles: { fontSize: 10, cellPadding: 3 },
+                              headStyles: { fillColor: [255, 87, 51], textColor: [255, 255, 255] },
+                              alternateRowStyles: { fillColor: [240, 240, 240] },
+                            });
+                            
+                            doc.setFontSize(8);
+                            doc.setTextColor(85, 85, 85);
+                            doc.text('Generated by PawTracker Admin System', 105, doc.internal.pageSize.height - 10, { align: 'center' });
+                            
+                            doc.save('pawtracker_admin_list.pdf');
+                            alert('Admin list downloaded successfully!');
+                          }}
+                          className="btn btn-outline-danger"
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-download me-2"></i> Download Admin List
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>First Name</th>
+                          <th>Last Name</th>
+                          <th>Username</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(searchTerm ? filteredUsers : users.filter(u => u.isAdmin)).map(admin => (
+                          <tr key={admin._id}>
+                            <td>{admin.firstName}</td>
+                            <td>{admin.lastName}</td>
+                            <td>{admin.username}</td>
+                            <td>{admin.email}</td>
+                            <td>{admin.phone}</td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-primary me-2"
+                                onClick={() => handleEditUser(admin)}
+                                data-bs-toggle="modal"
+                                data-bs-target="#editUserModal"
+                                style={{ borderRadius: '10px' }}
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDeleteUser(admin._id)}
+                                style={{ borderRadius: '10px' }}
+                              >
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Add Admin Tab */}
+          {activeTab === 'add-admin' && (
+            <div className="tab-pane fade show active">
+              <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
           <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
             <h5 className="mb-0" style={{ color: '#007bff' }}>
-              <i className="fas fa-search me-2"></i> Search Users
+                    <i className="fas fa-user-plus me-2"></i> Add New Admin
             </h5>
           </div>
           <div className="card-body">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search by username..."
-              value={searchTerm}
-              onChange={handleSearch}
-              style={{ borderRadius: '10px' }}
-            />
-            {searchError && <p className="text-danger mt-2">{searchError}</p>}
-          </div>
-        </div>
-
-        {searchTerm && (
-          <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
-            <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
-              <div className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0" style={{ color: '#007bff' }}>
-                  <i className="fas fa-list me-2"></i> Search Results
-                </h5>
-                <button
-                  onClick={handleDownloadSearchResultsPDF}
-                  className="btn btn-outline-primary"
-                  style={{ borderRadius: '10px' }}
-                >
-                  <i className="fas fa-download me-2"></i> Download Results
-                </button>
+                  <form onSubmit={handleAddAdmin}>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">First Name</label>
+                        <input 
+                          type="text" 
+                          name="firstName" 
+                          className={`form-control ${errors.firstName ? 'is-invalid' : ''}`} 
+                          placeholder="First Name" 
+                          value={newAdmin.firstName} 
+                          onChange={handleChangeNewAdmin} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Last Name</label>
+                        <input 
+                          type="text" 
+                          name="lastName" 
+                          className={`form-control ${errors.lastName ? 'is-invalid' : ''}`} 
+                          placeholder="Last Name" 
+                          value={newAdmin.lastName} 
+                          onChange={handleChangeNewAdmin} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Username</label>
+                        <input 
+                          type="text" 
+                          name="username" 
+                          className={`form-control ${errors.username ? 'is-invalid' : ''}`} 
+                          placeholder="Username" 
+                          value={newAdmin.username} 
+                          onChange={handleChangeNewAdmin} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.username && <div className="invalid-feedback">{errors.username}</div>}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Email</label>
+                        <input 
+                          type="email" 
+                          name="email" 
+                          className={`form-control ${errors.email ? 'is-invalid' : ''}`} 
+                          placeholder="Email" 
+                          value={newAdmin.email} 
+                          onChange={handleChangeNewAdmin} 
+                          required 
+                          style={{ borderRadius: '10px' }} 
+                        />
+                        {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Phone</label>
+                        <input 
+                          type="tel" 
+                          name="phone" 
+                          className={`form-control ${errors.phone ? 'is-invalid' : ''}`} 
+                          placeholder="Phone" 
+                          value={newAdmin.phone} 
+                          onChange={handleChangeNewAdmin} 
+                          required 
+                          style={{ borderRadius: '10px' }}
+                        />
+                        {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label">Password</label>
+                        <input 
+                          type="password" 
+                          name="password" 
+                          className={`form-control ${errors.password ? 'is-invalid' : ''}`} 
+                          placeholder="Password" 
+                          value={newAdmin.password} 
+                          onChange={handleChangeNewAdmin} 
+                          required 
+                          style={{ borderRadius: '10px' }}
+                        />
+                        {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                      </div>
+                    </div>
+                    <div className="d-flex justify-content-end">
+                      <button type="submit" className="btn btn-primary" style={{ borderRadius: '10px' }}>
+                        <i className="fas fa-user-plus me-2"></i> Add Admin
+                        </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>First Name</th>
-                      <th>Last Name</th>
-                      <th>Username</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Role</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.map(u => (
-                      <tr key={u._id}>
-                        <td>{u.firstName}</td>
-                        <td>{u.lastName}</td>
-                        <td>{u.username}</td>
-                        <td>{u.email}</td>
-                        <td>{u.phone}</td>
-                        <td>
-                          <span className={`badge ${u.isAdmin ? 'bg-danger' : 'bg-primary'}`} style={{ borderRadius: '10px' }}>
-                            {u.isAdmin ? 'Admin' : 'User'}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => handleEditUser(u)}
-                            data-bs-toggle="modal"
-                            data-bs-target="#editUserModal"
-                            style={{ borderRadius: '10px' }}
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDeleteUser(u._id)}
-                            style={{ borderRadius: '10px' }}
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="card mb-4" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
-          <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
-            <h5 className="mb-0" style={{ color: '#007bff' }}>
-              <i className="fas fa-users me-2"></i> All Users and Admins
-            </h5>
-          </div>
-          <div className="card-body">
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u._id}>
-                      <td>{u.firstName}</td>
-                      <td>{u.lastName}</td>
-                      <td>{u.username}</td>
-                      <td>{u.email}</td>
-                      <td>{u.phone}</td>
-                      <td>
-                        <span className={`badge ${u.isAdmin ? 'bg-danger' : 'bg-primary'}`} style={{ borderRadius: '10px' }}>
-                          {u.isAdmin ? 'Admin' : 'User'}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-primary me-2"
-                          onClick={() => handleEditUser(u)}
-                          data-bs-toggle="modal"
-                          data-bs-target="#editUserModal"
-                          style={{ borderRadius: '10px' }}
-                        >
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDeleteUser(u._id)}
-                          style={{ borderRadius: '10px' }}
-                        >
-                          <i className="fas fa-trash-alt"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Edit User Modal */}
@@ -611,107 +1104,6 @@ function AdminDashboard() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="card" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
-          <div className="card-header bg-white" style={{ borderRadius: '15px 15px 0 0', borderBottom: '1px solid #e9ecef' }}>
-            <h5 className="mb-0" style={{ color: '#007bff' }}>
-              <i className="fas fa-user-plus me-2"></i> Add New Admin
-            </h5>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleAddAdmin}>
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <input 
-                    type="text" 
-                    name="firstName" 
-                    className={`form-control ${errors.firstName ? 'is-invalid' : ''}`} 
-                    placeholder="First Name" 
-                    value={newAdmin.firstName} 
-                    onChange={handleChangeNewAdmin} 
-                    required 
-                    style={{ borderRadius: '10px' }} 
-                  />
-                  {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
-                </div>
-                <div className="col-md-6 mb-3">
-                  <input 
-                    type="text" 
-                    name="lastName" 
-                    className={`form-control ${errors.lastName ? 'is-invalid' : ''}`} 
-                    placeholder="Last Name" 
-                    value={newAdmin.lastName} 
-                    onChange={handleChangeNewAdmin} 
-                    required 
-                    style={{ borderRadius: '10px' }} 
-                  />
-                  {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <input 
-                    type="text" 
-                    name="username" 
-                    className={`form-control ${errors.username ? 'is-invalid' : ''}`} 
-                    placeholder="Username" 
-                    value={newAdmin.username} 
-                    onChange={handleChangeNewAdmin} 
-                    required 
-                    style={{ borderRadius: '10px' }} 
-                  />
-                  {errors.username && <div className="invalid-feedback">{errors.username}</div>}
-                </div>
-                <div className="col-md-6 mb-3">
-                  <input 
-                    type="email" 
-                    name="email" 
-                    className={`form-control ${errors.email ? 'is-invalid' : ''}`} 
-                    placeholder="Email" 
-                    value={newAdmin.email} 
-                    onChange={handleChangeNewAdmin} 
-                    required 
-                    style={{ borderRadius: '10px' }} 
-                  />
-                  {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <input 
-                    type="tel" 
-                    name="phone" 
-                    className={`form-control ${errors.phone ? 'is-invalid' : ''}`} 
-                    placeholder="Phone" 
-                    value={newAdmin.phone} 
-                    onChange={handleChangeNewAdmin} 
-                    required 
-                    style={{ borderRadius: '10px' }} 
-                  />
-                  {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
-                </div>
-                <div className="col-md-6 mb-3">
-                  <input 
-                    type="password" 
-                    name="password" 
-                    className={`form-control ${errors.password ? 'is-invalid' : ''}`} 
-                    placeholder="Password" 
-                    value={newAdmin.password} 
-                    onChange={handleChangeNewAdmin} 
-                    required 
-                    style={{ borderRadius: '10px' }} 
-                  />
-                  {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-                </div>
-              </div>
-              <div className="d-flex justify-content-end">
-                <button type="submit" className="btn btn-primary" style={{ borderRadius: '10px' }}>
-                  Add Admin
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       </div>
