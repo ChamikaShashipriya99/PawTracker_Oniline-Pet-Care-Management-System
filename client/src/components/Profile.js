@@ -40,6 +40,25 @@ function Profile() {
     }, 5000);
   };
 
+  const handleDeletePet = async (petId) => {
+    if (window.confirm('Are you sure you want to delete this pet?')) {
+      try {
+        await axios.delete(`http://localhost:5000/api/users/pets/${petId}`);
+        setPets(pets.filter(pet => pet._id !== petId));
+        setStatusMessage('Pet deleted successfully!');
+        setStatusType('success');
+        setShowStatus(true);
+        setTimeout(() => setShowStatus(false), 3000);
+      } catch (error) {
+        console.error('Error deleting pet:', error);
+        setStatusMessage('Failed to delete pet. Please try again.');
+        setStatusType('danger');
+        setShowStatus(true);
+        setTimeout(() => setShowStatus(false), 3000);
+      }
+    }
+  };
+
   if (!user) return null;
 
   const handleDeleteAccount = async () => {
@@ -88,7 +107,7 @@ function Profile() {
       doc.text('Your Pets', 105, doc.lastAutoTable.finalY + 20, { align: 'center' });
 
       const petData = pets.map(pet => [
-        pet.petName,
+        pet.name,
         pet.breed,
         new Date(pet.birthday).toLocaleDateString(),
         pet.age,
@@ -443,43 +462,154 @@ function Profile() {
               </div>
             </div>
           ) : (
-            <div className="row">
+            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
               {pets.map(pet => (
-                <div key={pet._id} className="col-md-4 mb-3">
-                  <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
-                    {pet.petPhoto ? (
-                      <img 
-                        src={`http://localhost:5000${pet.petPhoto}`} 
-                        alt={pet.petName} 
-                        className="card-img-top" 
-                        style={{ 
-                          borderRadius: '15px 15px 0 0', 
-                          height: '180px', 
-                          objectFit: 'cover' 
-                        }} 
-                      />
-                    ) : (
-                      <div 
-                        className="d-flex align-items-center justify-content-center" 
-                        style={{ 
-                          borderRadius: '15px 15px 0 0', 
-                          height: '180px', 
-                          backgroundColor: '#e9ecef' 
-                        }}
-                      >
-                        <i className="fas fa-paw fa-3x text-secondary"></i>
+                <div key={pet._id} className="col">
+                  <div className="card h-100 shadow-sm" style={{ borderRadius: '15px', border: 'none', transition: 'transform 0.3s ease' }}>
+                    <div className="card-body p-4">
+                      <div className="text-center mb-3">
+                        {pet.photo ? (
+                          <img 
+                            src={`http://localhost:5000${pet.photo}`} 
+                            alt={pet.name} 
+                            className="img-fluid rounded mb-3" 
+                            style={{ 
+                              width: '150px', 
+                              height: '150px', 
+                              objectFit: 'cover',
+                              border: '3px solid #00c4cc',
+                              boxShadow: '0 4px 8px rgba(0, 196, 204, 0.2)'
+                            }} 
+                          />
+                        ) : (
+                          <div 
+                            className="mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                            style={{ 
+                              width: '150px', 
+                              height: '150px', 
+                              backgroundColor: '#e9ecef',
+                              border: '3px solid #00c4cc',
+                              borderRadius: '10px'
+                            }}
+                          >
+                            <i className="fas fa-paw fa-4x text-secondary"></i>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="card-body">
-                      <h5 className="card-title mb-2">{pet.petName}</h5>
-                      <p className="card-text mb-1"><strong>Breed:</strong> {pet.breed}</p>
-                      <p className="card-text mb-1"><strong>Age:</strong> {pet.age} years</p>
-                      <p className="card-text mb-1"><strong>Weight:</strong> {pet.weight} kg</p>
-                      {pet.specialConditions && (
-                        <p className="card-text mb-1">
-                          <strong>Special Conditions:</strong> {pet.specialConditions}
-                        </p>
-                      )}
+                      <div className="d-flex justify-content-between align-items-start mb-3">
+                        <h4 className="card-title fw-bold" style={{ color: '#00c4cc' }}>
+                          <i className="fas fa-paw me-2"></i>{pet.name}
+                        </h4>
+                        <div>
+                          <button
+                            className="btn btn-sm btn-outline-primary me-2"
+                            onClick={() => navigate(`/my-pets?edit=${pet._id}`)}
+                            style={{ borderRadius: '10px' }}
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDeletePet(pet._id)}
+                            style={{ borderRadius: '10px' }}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="pet-details">
+                        <div className="mb-2">
+                          <span className="fw-bold me-2"><i className="fas fa-dog me-2"></i>Type:</span>
+                          <span>{pet.type}</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="fw-bold me-2"><i className="fas fa-dog me-2"></i>Breed:</span>
+                          <span>{pet.breed}</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="fw-bold me-2"><i className="fas fa-calendar-alt me-2"></i>Birthday:</span>
+                          <span>{pet.birthday ? new Date(pet.birthday).toLocaleDateString() : 'Not set'}</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="fw-bold me-2"><i className="fas fa-birthday-cake me-2"></i>Age:</span>
+                          <span>{pet.age} years</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="fw-bold me-2"><i className="fas fa-weight me-2"></i>Weight:</span>
+                          <span>{pet.weight} kg</span>
+                        </div>
+                        {pet.specialConditions && pet.specialConditions.trim() !== '' && (
+                          <div className="mb-2">
+                            <span className="fw-bold me-2"><i className="fas fa-notes-medical me-2"></i>Special Needs:</span>
+                            <span className="text-muted">{pet.specialConditions}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Vaccination History Section */}
+                      <div className="vaccination-history mt-3">
+                        <h5 className="fw-bold" style={{ color: '#00c4cc' }}>
+                          <i className="fas fa-syringe me-2"></i>Recent Vaccinations
+                        </h5>
+                        {pet.vaccinations && pet.vaccinations.length > 0 ? (
+                          <div className="table-responsive">
+                            <table className="table table-sm">
+                              <thead>
+                                <tr>
+                                  <th>Name</th>
+                                  <th>Date</th>
+                                  <th>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {pet.vaccinations
+                                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                  .slice(0, 3)
+                                  .map(vaccination => (
+                                    <tr key={vaccination._id}>
+                                      <td>{vaccination.name}</td>
+                                      <td>{new Date(vaccination.date).toLocaleDateString()}</td>
+                                      <td>
+                                        <span className={`badge ${vaccination.isCompleted ? 'bg-success' : 'bg-warning'}`}>
+                                          {vaccination.isCompleted ? 'Completed' : 'Pending'}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                            {pet.vaccinations.length > 3 && (
+                              <div className="text-center">
+                                <small className="text-muted">
+                                  +{pet.vaccinations.length - 3} more vaccinations
+                                </small>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-2">
+                            <small className="text-muted">No vaccinations recorded</small>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-center mt-3">
+                        <button
+                          className="btn btn-outline-primary me-2"
+                          onClick={() => navigate(`/my-pets?updatePhoto=${pet._id}`)}
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-camera me-2"></i>Update Photo
+                        </button>
+                        <Link
+                          to={`/pets/${pet._id}/vaccinations`}
+                          className="btn btn-outline-success"
+                          style={{ borderRadius: '10px' }}
+                        >
+                          <i className="fas fa-syringe me-2"></i>Vaccinations
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

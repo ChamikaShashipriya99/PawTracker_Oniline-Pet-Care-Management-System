@@ -9,6 +9,8 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import speakeasy from 'speakeasy';
+import QRCode from 'qrcode';
 import {
   signupValidation,
   loginValidation,
@@ -256,14 +258,25 @@ router.put('/:id', upload.single('profilePhoto'), updateProfileValidation, async
 // Add pet
 router.post('/pets', upload.single('petPhoto'), addPetValidation, async (req, res) => {
   try {
+    const { userId, name, type, breed, birthday, age, weight, specialConditions } = req.body;
+    const petPhoto = req.file ? `/uploads/${req.file.filename}` : null;
+
     const pet = new Pet({
-      ...req.body,
-      petPhoto: req.file ? `/uploads/${req.file.filename}` : null,
-      owner: req.body.owner
+      name,
+      type,
+      breed,
+      birthday,
+      age,
+      weight,
+      specialConditions,
+      photo: petPhoto,
+      owner: userId
     });
+
     await pet.save();
     res.status(201).json(pet);
   } catch (error) {
+    console.error('Error adding pet:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -416,21 +429,36 @@ router.delete('/:id', async (req, res) => {
 // Get user's pets
 router.get('/pets/:userId', async (req, res) => {
   try {
-    const pets = await Pet.find({ userId: req.params.userId });
+    const pets = await Pet.find({ owner: req.params.userId });
     res.json(pets);
   } catch (error) {
+    console.error('Error fetching pets:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Update pet
 router.put('/pets/:id', upload.single('petPhoto'), async (req, res) => {
-  const { petName, breed, birthday, age, weight, specialConditions } = req.body;
-  const petPhoto = req.file ? `/uploads/${req.file.filename}` : req.body.petPhoto;
+  const { name, type, breed, birthday, age, weight, specialConditions } = req.body;
+  const petPhoto = req.file ? `/uploads/${req.file.filename}` : req.body.photo;
   try {
-    const pet = await Pet.findByIdAndUpdate(req.params.id, { petName, breed, birthday, age, weight, specialConditions, petPhoto }, { new: true });
+    const pet = await Pet.findByIdAndUpdate(
+      req.params.id,
+      { 
+        name,
+        type,
+        breed,
+        birthday,
+        age,
+        weight,
+        specialConditions,
+        photo: petPhoto
+      },
+      { new: true }
+    );
     res.json(pet);
   } catch (error) {
+    console.error('Error updating pet:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -547,12 +575,12 @@ router.post('/resend-verification', async (req, res) => {
 });
 
 // Update pet photo
-router.put('/pets/:id/photo', upload.single('petPhoto'), async (req, res) => {
+router.put('/pets/:id/photo', upload.single('photo'), async (req, res) => {
   try {
     const petId = req.params.id;
-    const petPhoto = req.file ? `/uploads/${req.file.filename}` : null;
+    const photo = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (!petPhoto) {
+    if (!photo) {
       return res.status(400).json({ error: 'No photo uploaded' });
     }
 
@@ -562,14 +590,14 @@ router.put('/pets/:id/photo', upload.single('petPhoto'), async (req, res) => {
     }
 
     // Delete old photo if exists
-    if (pet.petPhoto) {
-      const oldPhotoPath = path.join(__dirname, '..', pet.petPhoto);
+    if (pet.photo) {
+      const oldPhotoPath = path.join(__dirname, '..', pet.photo);
       if (fs.existsSync(oldPhotoPath)) {
         fs.unlinkSync(oldPhotoPath);
       }
     }
 
-    pet.petPhoto = petPhoto;
+    pet.photo = photo;
     await pet.save();
 
     res.json(pet);
@@ -726,6 +754,102 @@ router.post('/disable-2fa', async (req, res) => {
 
     res.json({ message: '2FA disabled successfully' });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add vaccination
+router.post('/pets/:id/vaccinations', async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    const vaccination = {
+      name: req.body.name,
+      date: req.body.date,
+      nextDueDate: req.body.nextDueDate,
+      notes: req.body.notes,
+      isCompleted: req.body.isCompleted
+    };
+
+    pet.vaccinations.push(vaccination);
+    await pet.save();
+
+    res.status(201).json(pet.vaccinations[pet.vaccinations.length - 1]);
+  } catch (error) {
+    console.error('Error adding vaccination:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update vaccination
+router.put('/pets/:id/vaccinations/:vaccinationId', async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    const vaccination = pet.vaccinations.id(req.params.vaccinationId);
+    if (!vaccination) {
+      return res.status(404).json({ error: 'Vaccination not found' });
+    }
+
+    vaccination.set(req.body);
+    await pet.save();
+
+    res.json(vaccination);
+  } catch (error) {
+    console.error('Error updating vaccination:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete vaccination
+router.delete('/pets/:id/vaccinations/:vaccinationId', async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    // Find the index of the vaccination to remove
+    const vaccinationIndex = pet.vaccinations.findIndex(v => v._id.toString() === req.params.vaccinationId);
+    if (vaccinationIndex === -1) {
+      return res.status(404).json({ error: 'Vaccination not found' });
+    }
+
+    // Remove the vaccination from the array using splice
+    pet.vaccinations.splice(vaccinationIndex, 1);
+    await pet.save();
+
+    res.json({ message: 'Vaccination deleted' });
+  } catch (error) {
+    console.error('Error deleting vaccination:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single pet by ID
+router.get('/pets/:id', async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    // Ensure vaccinations is an array and sort by date
+    if (pet.vaccinations && Array.isArray(pet.vaccinations)) {
+      pet.vaccinations.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else {
+      pet.vaccinations = [];
+    }
+
+    res.json(pet);
+  } catch (error) {
+    console.error('Error fetching pet:', error);
     res.status(500).json({ error: error.message });
   }
 });

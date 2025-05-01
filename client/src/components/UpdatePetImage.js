@@ -3,7 +3,7 @@ import axios from 'axios';
 
 function UpdatePetImage({ pet, onUpdate, onClose }) {
   const [petPhoto, setPetPhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(pet.petPhoto ? `http://localhost:5000${pet.petPhoto}` : null);
+  const [photoPreview, setPhotoPreview] = useState(pet.photo ? `http://localhost:5000${pet.photo}` : null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,7 +46,7 @@ function UpdatePetImage({ pet, onUpdate, onClose }) {
 
     try {
       const formData = new FormData();
-      formData.append('petPhoto', petPhoto);
+      formData.append('photo', petPhoto);
 
       const res = await axios.put(`http://localhost:5000/api/users/pets/${pet._id}/photo`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }

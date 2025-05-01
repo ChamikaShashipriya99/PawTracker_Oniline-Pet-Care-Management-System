@@ -73,12 +73,14 @@ export const updateProfileValidation = [
 
 // Add pet validation middleware
 export const addPetValidation = [
-  body('petName').notEmpty().withMessage('Pet name is required'),
+  body('name').notEmpty().withMessage('Pet name is required'),
+  body('type').notEmpty().withMessage('Pet type is required'),
   body('breed').notEmpty().withMessage('Breed is required'),
   body('birthday').optional().isDate().withMessage('Invalid date format'),
   body('age').optional().isNumeric().withMessage('Age must be a number'),
   body('weight').optional().isNumeric().withMessage('Weight must be a number'),
   body('specialConditions').optional().isString().withMessage('Special conditions must be text'),
+  body('userId').notEmpty().withMessage('User ID is required'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

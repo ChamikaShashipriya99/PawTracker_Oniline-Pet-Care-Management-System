@@ -7,7 +7,8 @@ function AddPet() {
   const user = JSON.parse(localStorage.getItem('user'));
 
   const [pet, setPet] = useState({
-    petName: '',
+    name: '',
+    type: '',
     breed: '',
     birthday: '',
     age: '',
@@ -39,10 +40,14 @@ function AddPet() {
     const lettersRegex = /^[A-Za-z\s]+$/;
     const today = new Date();
   
-    if (!pet.petName) {
-      newErrors.petName = "Pet name is required.";
-    } else if (!lettersRegex.test(pet.petName)) {
-      newErrors.petName = "Pet name must contain only letters.";
+    if (!pet.name) {
+      newErrors.name = "Pet name is required.";
+    } else if (!lettersRegex.test(pet.name)) {
+      newErrors.name = "Pet name must contain only letters.";
+    }
+
+    if (!pet.type) {
+      newErrors.type = "Pet type is required.";
     }
   
     if (!pet.breed) {
@@ -80,21 +85,29 @@ function AddPet() {
 
     const formData = new FormData();
     formData.append('userId', user._id);
-    for (const key in pet) {
-      formData.append(key, pet[key]);
-    }
+    formData.append('name', pet.name);
+    formData.append('type', pet.type);
+    formData.append('breed', pet.breed);
+    formData.append('birthday', pet.birthday);
+    formData.append('age', pet.age);
+    formData.append('weight', pet.weight);
+    formData.append('specialConditions', pet.specialConditions || '');
     if (petPhoto) {
       formData.append('petPhoto', petPhoto);
     }
 
     try {
-      await axios.post('http://localhost:5000/api/users/pets', formData, {
+      const response = await axios.post('http://localhost:5000/api/users/pets', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      alert('Pet added successfully!');
-      navigate('/profile');
+      
+      if (response.data) {
+        alert('Pet added successfully!');
+        navigate('/profile');
+      }
     } catch (error) {
-      alert('Failed to add pet: ' + error.message);
+      console.error('Error adding pet:', error);
+      alert('Failed to add pet: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -118,18 +131,42 @@ function AddPet() {
               <div className="form-floating">
                 <input
                   type="text"
-                  name="petName"
-                  className={`form-control ${errors.petName ? 'is-invalid' : ''}`}
-                  value={pet.petName}
+                  name="name"
+                  className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                  value={pet.name}
                   onChange={handleChange}
                   required
                   style={{ borderRadius: '10px', height: '50px' }}
                   placeholder="Pet Name"
                 />
                 <label>Pet Name</label>
-                {errors.petName && <div className="invalid-feedback">{errors.petName}</div>}
+                {errors.name && <div className="invalid-feedback">{errors.name}</div>}
               </div>
             </div>
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <select
+                  name="type"
+                  className={`form-control ${errors.type ? 'is-invalid' : ''}`}
+                  value={pet.type}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                >
+                  <option value="">Select Pet Type</option>
+                  <option value="Dog">Dog</option>
+                  <option value="Cat">Cat</option>
+                  <option value="Bird">Bird</option>
+                  <option value="Fish">Fish</option>
+                  <option value="Other">Other</option>
+                </select>
+                <label>Pet Type</label>
+                {errors.type && <div className="invalid-feedback">{errors.type}</div>}
+              </div>
+            </div>
+          </div>
+          
+          <div className="row">
             <div className="col-md-6 mb-4">
               <div className="form-floating">
                 <input
@@ -146,9 +183,6 @@ function AddPet() {
                 {errors.breed && <div className="invalid-feedback">{errors.breed}</div>}
               </div>
             </div>
-          </div>
-          
-          <div className="row">
             <div className="col-md-6 mb-4">
               <div className="form-floating">
                 <input
@@ -164,6 +198,9 @@ function AddPet() {
                 {errors.birthday && <div className="invalid-feedback">{errors.birthday}</div>}
               </div>
             </div>
+          </div>
+          
+          <div className="row">
             <div className="col-md-6 mb-4">
               <div className="form-floating">
                 <input
@@ -180,22 +217,21 @@ function AddPet() {
                 {errors.age && <div className="invalid-feedback">{errors.age}</div>}
               </div>
             </div>
-          </div>
-          
-          <div className="mb-4">
-            <div className="form-floating">
-              <input
-                type="number"
-                name="weight"
-                className={`form-control ${errors.weight ? 'is-invalid' : ''}`}
-                value={pet.weight}
-                onChange={handleChange}
-                required
-                style={{ borderRadius: '10px', height: '50px' }}
-                placeholder="Weight (kg)"
-              />
-              <label>Weight (kg)</label>
-              {errors.weight && <div className="invalid-feedback">{errors.weight}</div>}
+            <div className="col-md-6 mb-4">
+              <div className="form-floating">
+                <input
+                  type="number"
+                  name="weight"
+                  className={`form-control ${errors.weight ? 'is-invalid' : ''}`}
+                  value={pet.weight}
+                  onChange={handleChange}
+                  required
+                  style={{ borderRadius: '10px', height: '50px' }}
+                  placeholder="Weight (kg)"
+                />
+                <label>Weight (kg)</label>
+                {errors.weight && <div className="invalid-feedback">{errors.weight}</div>}
+              </div>
             </div>
           </div>
           
