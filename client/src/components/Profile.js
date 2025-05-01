@@ -500,22 +500,6 @@ function Profile() {
                         <h4 className="card-title fw-bold" style={{ color: '#00c4cc' }}>
                           <i className="fas fa-paw me-2"></i>{pet.name}
                         </h4>
-                        <div>
-                          <button
-                            className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => navigate(`/my-pets?edit=${pet._id}`)}
-                            style={{ borderRadius: '10px' }}
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDeletePet(pet._id)}
-                            style={{ borderRadius: '10px' }}
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </div>
                       </div>
                       
                       <div className="pet-details">
@@ -592,23 +576,6 @@ function Profile() {
                             <small className="text-muted">No vaccinations recorded</small>
                           </div>
                         )}
-                      </div>
-
-                      <div className="text-center mt-3">
-                        <button
-                          className="btn btn-outline-primary me-2"
-                          onClick={() => navigate(`/my-pets?updatePhoto=${pet._id}`)}
-                          style={{ borderRadius: '10px' }}
-                        >
-                          <i className="fas fa-camera me-2"></i>Update Photo
-                        </button>
-                        <Link
-                          to={`/pets/${pet._id}/vaccinations`}
-                          className="btn btn-outline-success"
-                          style={{ borderRadius: '10px' }}
-                        >
-                          <i className="fas fa-syringe me-2"></i>Vaccinations
-                        </Link>
                       </div>
                     </div>
                   </div>

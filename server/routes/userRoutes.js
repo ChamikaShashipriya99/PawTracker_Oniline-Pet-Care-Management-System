@@ -439,7 +439,7 @@ router.get('/pets/:userId', async (req, res) => {
 
 // Update pet
 router.put('/pets/:id', upload.single('petPhoto'), async (req, res) => {
-  const { name, type, breed, birthday, age, weight, specialConditions } = req.body;
+  const { name, type, breed, birthday, age, weight, specialNeeds } = req.body;
   const petPhoto = req.file ? `/uploads/${req.file.filename}` : req.body.photo;
   try {
     const pet = await Pet.findByIdAndUpdate(
@@ -451,7 +451,7 @@ router.put('/pets/:id', upload.single('petPhoto'), async (req, res) => {
         birthday,
         age,
         weight,
-        specialConditions,
+        specialNeeds,
         photo: petPhoto
       },
       { new: true }

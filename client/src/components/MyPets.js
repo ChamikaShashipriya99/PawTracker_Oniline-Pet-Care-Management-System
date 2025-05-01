@@ -95,6 +95,8 @@ function MyPets() {
       errorMessage = 'Age must be a positive number.';
     } else if (!editPet.weight || editPet.weight <= 0) {
       errorMessage = 'Weight must be a positive number.';
+    } else if (editPet.specialNeeds && !lettersRegex.test(editPet.specialNeeds)) {
+      errorMessage = 'Special needs must contain only letters and spaces.';
     }
   
     if (errorMessage) {
@@ -389,18 +391,12 @@ function MyPets() {
                         <span className="fw-bold me-2"><i className="fas fa-weight me-2"></i>Weight:</span>
                         <span>{pet.weight} kg</span>
                       </div>
-                      {pet.specialNeeds && pet.specialNeeds.trim() !== '' && (
+                      <div className="col-md-6">
                         <div className="mb-2">
-                          <span className="fw-bold me-2"><i className="fas fa-notes-medical me-2"></i>Special Needs:</span>
-                          <span className="text-muted">{pet.specialNeeds}</span>
+                          <span className="fw-bold me-2"><i className="fas fa-exclamation-triangle me-2"></i>Special Needs:</span>
+                          <span className="text-muted">{pet.specialNeeds || 'None'}</span>
                         </div>
-                      )}
-                      {pet.specialConditions && pet.specialConditions.trim() !== '' && (
-                        <div className="mb-2">
-                          <span className="fw-bold me-2"><i className="fas fa-exclamation-triangle me-2"></i>Special Conditions:</span>
-                          <span className="text-muted">{pet.specialConditions}</span>
-                        </div>
-                      )}
+                      </div>
                       {pet.medicalHistory && pet.medicalHistory.trim() !== '' && (
                         <div className="mb-2">
                           <span className="fw-bold me-2"><i className="fas fa-file-medical me-2"></i>Medical History:</span>
