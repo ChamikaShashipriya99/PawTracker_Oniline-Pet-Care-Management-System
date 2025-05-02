@@ -56,12 +56,12 @@ function BookAppointment() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        
+
         // Prevent changes to petOwner field
         if (name === 'petOwner') {
             return;
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [name]: value,
@@ -140,12 +140,12 @@ function BookAppointment() {
 
                 const response = await axios.post('http://localhost:5000/api/appointments', appointmentData, config);
                 setNotification({ message: 'Appointment booked successfully!', type: 'success' });
-                
+
                 // Redirect to MyAppointments page after a short delay
                 setTimeout(() => {
                     navigate('/my-appointments');
                 }, 1500);
-                
+
                 setFormData({
                     petOwner: '',
                     petName: '',

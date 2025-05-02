@@ -180,6 +180,7 @@ function MyAppointments() {
                     <p className="hero-subtitle">Manage and track all your pet care appointments here.</p>
                 </div>
             </section>
+            <br></br>
 
             {notification && <Notification message={notification} onClose={() => setNotification('')} />}
             {error && <div className="alert alert-danger">{error}</div>}
