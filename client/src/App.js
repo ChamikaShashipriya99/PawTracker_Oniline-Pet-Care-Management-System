@@ -213,12 +213,16 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
               <Route path="/my-feedback" element={<MyFeedback />} />
               <Route path="/submit-feedback" element={<FeedbackForm />} />
+            </>
+          )}
+          {isLoggedIn && isAdmin && (
+            <>
               <Route path="/admin-feedback" element={<AdminFeedback />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/admin/signup" element={<AdminSignup setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="*" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
         </Routes>
       </div>

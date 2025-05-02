@@ -52,6 +52,6 @@ feedbackSchema.pre('save', function(next) {
     next();
 });
 
-const Feedback = mongoose.model('Feedback', feedbackSchema);
+const Feedback = mongoose.model('feedbacks', feedbackSchema);
 
 module.exports = Feedback; 

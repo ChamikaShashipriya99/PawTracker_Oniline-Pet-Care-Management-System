@@ -1,0 +1,365 @@
+/* Common Container Styles */
+.feedback-form-container,
+.my-feedback-container,
+.admin-feedback-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-form-container {
+    max-width: 600px;
+}
+
+/* Common Header Styles */
+.feedback-form-container h2,
+.my-feedback-container h2,
+.admin-feedback-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* Common Message Styles */
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.success-message {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Loading and No Feedback States */
+.loading {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+    margin: 2rem 0;
+}
+
+.no-feedback {
+    text-align: center;
+    padding: 3rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+.no-feedback p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+/* Feedback Form Styles */
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+/* Rating Styles */
+.rating-input,
+.rating {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rating-input {
+    font-size: 2rem;
+}
+
+.rating {
+    font-size: 1.5rem;
+}
+
+.star {
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.3s ease;
+}
+
+.star.active {
+    color: #ffd700;
+}
+
+.star:hover {
+    color: #ffd700;
+}
+
+/* Button Styles */
+.submit-button,
+.submit-new-button,
+.reply-button,
+.delete-button,
+.status-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button,
+.submit-new-button {
+    background-color: #4a90e2;
+    color: white;
+}
+
+.submit-button:hover,
+.submit-new-button:hover {
+    background-color: #357abd;
+}
+
+.delete-button {
+    background-color: #ff5252;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.delete-button:hover {
+    background-color: #ff1744;
+}
+
+/* Feedback List Styles */
+.feedback-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.feedback-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Status Styles */
+.status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-approved {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-rejected {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.status-pending {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+/* Service Type Styles */
+.service-type {
+    color: #666;
+    font-size: 0.875rem;
+    text-transform: capitalize;
+    background-color: #f5f5f5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+/* Comment Styles */
+.comment {
+    color: #333;
+    line-height: 1.6;
+    margin: 1rem 0;
+}
+
+/* Footer Styles */
+.feedback-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.date {
+    color: #666;
+    font-size: 0.875rem;
+}
+
+/* Admin Specific Styles */
+.filter-controls {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.user-email {
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.status-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.status-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.status-button.approve {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-button.approve:hover,
+.status-button.approve.active {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.status-button.reject {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.status-button.reject:hover,
+.status-button.reject.active {
+    background-color: #c62828;
+    color: white;
+}
+
+/* Reply Section Styles */
+.reply-section {
+    margin: 15px 0;
+}
+
+.reply-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    resize: vertical;
+    margin-bottom: 10px;
+    font-family: inherit;
+}
+
+.reply-section textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.reply-button {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.reply-button:hover {
+    background-color: #0056b3;
+}
+
+.reply-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Admin Reply Styles */
+.admin-reply {
+    background-color: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+.admin-reply h4 {
+    color: #007bff;
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+}
+
+.admin-reply p {
+    margin: 0 0 10px 0;
+    color: #495057;
+}
+
+.admin-reply small {
+    color: #6c757d;
+    font-size: 0.8rem;
+} 

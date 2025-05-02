@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './MyFeedback.css';
+import './Feedback.css';
 
 const MyFeedback = () => {
     const navigate = useNavigate();
     const [feedbacks, setFeedbacks] = useState([]);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchFeedbacks();
     }, []);
+
+    const clearMessages = () => {
+        setTimeout(() => {
+            setSuccess('');
+            setError('');
+        }, 3000);
+    };
 
     const fetchFeedbacks = async () => {
         try {
@@ -20,21 +28,25 @@ const MyFeedback = () => {
                 navigate('/login');
                 return;
             }
-
+    
+            const user = JSON.parse(localStorage.getItem('user'))._id;
+            console.log("token : " + token + " userId : " + user);
+    
             const response = await axios.get('http://localhost:5000/api/feedback/my-feedback', {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
             });
-
-            console.log('Fetched feedbacks:', response.data); // Debug log
+    
+            console.log('Fetched feedbacks:', response.data);
             setFeedbacks(response.data);
             setError('');
         } catch (err) {
-            console.error('Error fetching feedback:', err); // Debug log
+            console.error('Error fetching feedback:', err);
             setError(err.response?.data?.message || 'Error fetching feedback');
         } finally {
             setLoading(false);
         }
     };
+    
 
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this feedback?')) {
@@ -48,9 +60,12 @@ const MyFeedback = () => {
             });
 
             setFeedbacks(feedbacks.filter(feedback => feedback._id !== id));
+            setSuccess('Feedback deleted successfully!');
             setError('');
+            clearMessages();
         } catch (err) {
             setError(err.response?.data?.message || 'Error deleting feedback');
+            clearMessages();
         }
     };
 
@@ -73,6 +88,7 @@ const MyFeedback = () => {
         <div className="my-feedback-container">
             <h2>My Feedback</h2>
             {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
             
             {feedbacks.length === 0 ? (
                 <div className="no-feedback">
@@ -104,6 +120,16 @@ const MyFeedback = () => {
                             </div>
                             
                             <p className="comment">{feedback.comment}</p>
+                            
+                            {feedback.adminReply && feedback.adminReply.message && (
+                                <div className="admin-reply">
+                                    <h4>Admin Reply:</h4>
+                                    <p>{feedback.adminReply.message}</p>
+                                    <small>
+                                        Replied on: {new Date(feedback.adminReply.repliedAt).toLocaleString()}
+                                    </small>
+                                </div>
+                            )}
                             
                             <div className="feedback-footer">
                                 <span className="date">

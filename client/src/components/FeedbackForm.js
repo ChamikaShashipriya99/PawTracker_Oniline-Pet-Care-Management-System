@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './FeedbackForm.css';
+import './Feedback.css';
 
 const FeedbackForm = () => {
     const navigate = useNavigate();
@@ -29,10 +29,18 @@ const FeedbackForm = () => {
                 navigate('/login');
                 return;
             }
+            const user = JSON.parse(localStorage.getItem('user'))._id;
 
-            console.log('Submitting feedback:', feedback); // Debug log
-            const response = await axios.post('http://localhost:5000/api/feedback', feedback, {
-                headers: { Authorization: `Bearer ${token}` }
+            const feedbackDetails = {
+                ...feedback,
+                user : user
+            }
+            console.log('Submitting feedback:', feedbackDetails); // Debug log
+            const response = await axios.post('http://localhost:5000/api/feedback', feedbackDetails, {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
 
             console.log('Feedback submission response:', response.data); // Debug log

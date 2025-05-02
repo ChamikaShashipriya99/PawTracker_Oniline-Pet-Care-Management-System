@@ -61,6 +61,7 @@ function Login({ setIsLoggedIn }) {
         setShow2FA(true);
       } else {
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('token',response.data.token)
         setIsLoggedIn(true);
         navigate('/profile');
       }

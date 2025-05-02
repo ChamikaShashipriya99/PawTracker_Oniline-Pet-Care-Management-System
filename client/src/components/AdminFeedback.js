@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './AdminFeedback.css';
+import './Feedback.css';
 
 const AdminFeedback = () => {
     const navigate = useNavigate();
     const [feedbacks, setFeedbacks] = useState([]);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [replyMessage, setReplyMessage] = useState({});
@@ -18,58 +19,124 @@ const AdminFeedback = () => {
     const fetchFeedbacks = async () => {
         try {
             const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/login');
+            const user = JSON.parse(localStorage.getItem('user'));
+            
+            if (!token || !user) {
+                setError('Please log in to continue');
                 return;
             }
 
             const response = await axios.get('http://localhost:5000/api/feedback/all', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });            
+    
             setFeedbacks(response.data);
             setError('');
         } catch (err) {
+            console.error('Error fetching feedbacks:', err);
             setError(err.response?.data?.message || 'Error fetching feedback');
         } finally {
             setLoading(false);
         }
     };
+    
+    
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.patch(
+            const user = JSON.parse(localStorage.getItem('user'));
+            
+            if (!token || !user) {
+                setError('Please log in to continue');
+                return;
+            }
+
+            const response = await axios.patch(
                 `http://localhost:5000/api/feedback/${id}/status`,
                 { status: newStatus },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            setFeedbacks(feedbacks.map(feedback =>
-                feedback._id === id ? { ...feedback, status: newStatus } : feedback
-            ));
-            setError('');
-        } catch (err) {
-            setError(err.response?.data?.message || 'Error updating feedback status');
-        }
-    };
-
-    const handleReplySubmit = async (id) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post(
-                `http://localhost:5000/api/feedback/${id}/reply`,
-                { message: replyMessage[id] },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    } 
+                }
             );
 
             setFeedbacks(feedbacks.map(feedback =>
                 feedback._id === id ? response.data : feedback
             ));
-            setReplyMessage({ ...replyMessage, [id]: '' });
+            setSuccess(`Feedback ${newStatus} successfully!`);
             setError('');
+            clearMessages();
         } catch (err) {
-            setError(err.response?.data?.message || 'Error submitting reply');
+            console.error('Error updating status:', err);
+            setError(err.response?.data?.message || 'Error updating feedback status');
+            clearMessages();
+        }
+    };
+
+    const clearMessages = () => {
+        setTimeout(() => {
+            setSuccess('');
+            setError('');
+        }, 3000);
+    };
+
+    const handleReplySubmit = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+            
+            if (!token || !user) {
+                setError('Please log in to continue');
+                return;
+            }
+
+            if (!user.isAdmin) {
+                setError('You do not have permission to reply to feedback');
+                return;
+            }
+
+            if (!replyMessage[id] || replyMessage[id].trim() === '') {
+                setError('Reply message cannot be empty');
+                clearMessages();
+                return;
+            }
+
+            const response = await axios.post(
+                `http://localhost:5000/api/feedback/${id}/reply`,
+                { message: replyMessage[id].trim() },
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    } 
+                }
+            );
+
+            if (response.data) {
+                setFeedbacks(feedbacks.map(feedback =>
+                    feedback._id === id ? response.data : feedback
+                ));
+                setReplyMessage({ ...replyMessage, [id]: '' });
+                setSuccess('Reply sent successfully!');
+                setError('');
+                clearMessages();
+            }
+        } catch (err) {
+            console.error('Error submitting reply:', err);
+            if (err.response?.status === 403) {
+                setError('You do not have permission to reply to feedback');
+            } else if (err.response?.status === 401) {
+                setError('Please log in to continue');
+            } else {
+                setError(err.response?.data?.message || 'Error submitting reply');
+            }
+            clearMessages();
         }
     };
 
@@ -97,6 +164,7 @@ const AdminFeedback = () => {
         <div className="admin-feedback-container">
             <h2>Feedback Management</h2>
             {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
 
             <div className="filter-controls">
                 <select
@@ -146,7 +214,7 @@ const AdminFeedback = () => {
 
                                 <p className="comment">{feedback.comment}</p>
 
-                                {feedback.adminReply && (
+                                {feedback.adminReply && feedback.adminReply.message && (
                                     <div className="admin-reply">
                                         <h4>Admin Reply:</h4>
                                         <p>{feedback.adminReply.message}</p>
@@ -183,12 +251,14 @@ const AdminFeedback = () => {
                                         <button
                                             onClick={() => handleStatusUpdate(feedback._id, 'approved')}
                                             className={`status-button approve ${feedback.status === 'approved' ? 'active' : ''}`}
+                                            disabled={feedback.status === 'approved'}
                                         >
                                             Approve
                                         </button>
                                         <button
                                             onClick={() => handleStatusUpdate(feedback._id, 'rejected')}
                                             className={`status-button reject ${feedback.status === 'rejected' ? 'active' : ''}`}
+                                            disabled={feedback.status === 'rejected'}
                                         >
                                             Reject
                                         </button>

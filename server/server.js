@@ -12,6 +12,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+process.env.JWT_SECRET = 'pawtracker_secret_key_2024';
+
 // Serve static files from 'uploads' directory
 app.use('/uploads', express.static('uploads'));
 
