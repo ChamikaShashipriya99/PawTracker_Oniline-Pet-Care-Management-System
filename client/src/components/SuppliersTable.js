@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, Button, Modal, Form, Row, Col } from 'react-bootstrap';
-import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaBox, FaPen, FaTrash, FaDownload, FaSearch } from 'react-icons/fa';
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaBox, FaPen, FaTrash, FaDownload, FaSearch, FaStore, FaTruck, FaStoreAlt } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const SUPPLIERS_ENDPOINT = `${API_URL}/suppliers`;
@@ -220,6 +220,44 @@ function SuppliersTable() {
     }
   };
 
+  const handleToggleStatus = async (supplier) => {
+    try {
+      setLoading(true);
+      const newStatus = supplier.status === 'active' ? 'inactive' : 'active';
+      
+      // Create updated supplier data
+      const updatedSupplier = {
+        name: supplier.name,
+        email: supplier.email,
+        phone: supplier.phone || '',
+        address: supplier.address || '',
+        products: supplier.products || '',
+        logo: supplier.logo || '',
+        status: newStatus
+      };
+
+      // Make API call to update supplier
+      const response = await axios.put(`${SUPPLIERS_ENDPOINT}/${supplier._id}`, updatedSupplier);
+      
+      if (response.data) {
+        // Update the local state with the new supplier data
+        setSuppliers(prevSuppliers => 
+          prevSuppliers.map(s => 
+            s._id === supplier._id ? { ...s, status: newStatus } : s
+          )
+        );
+      }
+      
+      // Show success message
+      setError(null);
+    } catch (err) {
+      console.error('Error updating supplier status:', err);
+      setError(err.response?.data?.message || 'Failed to update supplier status. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredSuppliers = suppliers.filter(supplier => {
     const searchLower = searchQuery.toLowerCase();
     return (
@@ -252,6 +290,43 @@ function SuppliersTable() {
             {error}
           </div>
         )}
+      </div>
+
+      {/* Supplier Count Cards */}
+      <div className="row mb-4">
+        <div className="col-md-4">
+          <div className="supplier-count-card total">
+            <div className="count-icon">
+              <FaStore size={24} />
+            </div>
+            <div className="count-info">
+              <h3>{suppliers.length}</h3>
+              <p>Total Suppliers</p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="supplier-count-card active">
+            <div className="count-icon">
+              <FaTruck size={24} />
+            </div>
+            <div className="count-info">
+              <h3>{suppliers.filter(s => s.status === 'active').length}</h3>
+              <p>Active Suppliers</p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="supplier-count-card inactive">
+            <div className="count-icon">
+              <FaStoreAlt size={24} />
+            </div>
+            <div className="count-info">
+              <h3>{suppliers.filter(s => s.status === 'inactive').length}</h3>
+              <p>Inactive Suppliers</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="search-container mb-4">
@@ -301,87 +376,99 @@ function SuppliersTable() {
           </div>
         </div>
       ) : (
-        <Row xs={1} md={2} lg={3} className="g-4">
-          {filteredSuppliers.map((supplier) => {
-            console.log('Rendering supplier:', supplier.name, 'Logo:', supplier.logo ? 'Present' : 'None');
-            return (
-              <Col key={supplier._id}>
-                <Card className="supplier-card h-100">
-                  <Card.Body>
-                    <div className="d-flex justify-content-between align-items-start mb-3">
-                      <div className="d-flex align-items-center">
-                        {supplier.logo && supplier.logo.length > 0 ? (
-                          <div className="supplier-logo-container me-3">
-                            <img 
-                              src={supplier.logo} 
-                              alt={`${supplier.name} logo`}
-                              className="supplier-logo"
-                              onError={(e) => {
-                                console.error('Error loading logo for:', supplier.name);
-                                e.target.style.display = 'none';
-                                e.target.parentElement.style.display = 'none';
-                              }}
-                            />
-                          </div>
+        <div className="table-responsive">
+          <table className="table table-hover supplier-table">
+            <thead>
+              <tr>
+                <th>Logo</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Products</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredSuppliers.map((supplier) => (
+                <tr key={supplier._id} className={supplier.status === 'inactive' ? 'inactive-row' : ''}>
+                  <td>
+                    {supplier.logo && supplier.logo.length > 0 ? (
+                      <div className="supplier-logo-container">
+                        <img 
+                          src={supplier.logo} 
+                          alt={`${supplier.name} logo`}
+                          className="supplier-logo"
+                          onError={(e) => {
+                            console.error('Error loading logo for:', supplier.name);
+                            e.target.style.display = 'none';
+                            e.target.parentElement.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="supplier-logo-placeholder">
+                        {supplier.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </td>
+                  <td>{supplier.name}</td>
+                  <td>{supplier.email}</td>
+                  <td>{supplier.phone || '-'}</td>
+                  <td>{supplier.address || '-'}</td>
+                  <td>{supplier.products || '-'}</td>
+                  <td>
+                    <span className={`status-badge ${supplier.status}`}>
+                      {supplier.status === 'active' ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <Button 
+                        variant={supplier.status === 'active' ? 'danger' : 'success'}
+                        size="sm" 
+                        className="status-toggle-btn"
+                        onClick={() => handleToggleStatus(supplier)}
+                        disabled={loading}
+                      >
+                        {supplier.status === 'active' ? (
+                          <>
+                            <FaStoreAlt className="me-1" />
+                            Deactivate
+                          </>
                         ) : (
-                          <div className="supplier-logo-placeholder me-3">
-                            {supplier.name.charAt(0).toUpperCase()}
-                          </div>
+                          <>
+                            <FaStore className="me-1" />
+                            Activate
+                          </>
                         )}
-                        <Card.Title className="supplier-name mb-0">{supplier.name}</Card.Title>
-                      </div>
-                      <div className="action-buttons">
-                        <Button 
-                          variant="light"
-                          size="sm" 
-                          className="edit-btn me-2"
-                          onClick={() => openEdit(supplier)} 
-                          disabled={loading}
-                        >
-                          <FaPen />
-                        </Button>
-                        <Button 
-                          variant="light"
-                          size="sm" 
-                          className="delete-btn"
-                          onClick={() => handleDelete(supplier._id)} 
-                          disabled={loading}
-                        >
-                          <FaTrash />
-                        </Button>
-                      </div>
+                      </Button>
+                      <Button 
+                        variant="primary"
+                        size="sm" 
+                        className="edit-btn me-2"
+                        onClick={() => openEdit(supplier)} 
+                        disabled={loading}
+                      >
+                        <FaPen />
+                      </Button>
+                      <Button 
+                        variant="danger"
+                        size="sm" 
+                        className="delete-btn"
+                        onClick={() => handleDelete(supplier._id)} 
+                        disabled={loading}
+                      >
+                        <FaTrash />
+                      </Button>
                     </div>
-
-                    <div className="supplier-details">
-                      <div className="detail-item">
-                        <FaEnvelope className="detail-icon" />
-                        <span className="detail-text">{supplier.email}</span>
-                      </div>
-                      {supplier.phone && (
-                        <div className="detail-item">
-                          <FaPhone className="detail-icon" />
-                          <span className="detail-text">{supplier.phone}</span>
-                        </div>
-                      )}
-                      {supplier.address && (
-                        <div className="detail-item">
-                          <FaMapMarkerAlt className="detail-icon" />
-                          <span className="detail-text">{supplier.address}</span>
-                        </div>
-                      )}
-                      {supplier.products && (
-                        <div className="detail-item">
-                          <FaBox className="detail-icon" />
-                          <span className="detail-text">{supplier.products}</span>
-                        </div>
-                      )}
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            );
-          })}
-        </Row>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Add Supplier Modal */}
@@ -689,28 +776,47 @@ function SuppliersTable() {
             background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
           }
 
-          .supplier-card {
+          .supplier-table {
             background: white;
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            transition: all 0.3s ease;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
           }
 
-          .supplier-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+          .supplier-table thead {
+            background: #f8f9fa;
           }
 
-          .supplier-card .card-body {
-            padding: 1.5rem;
+          .supplier-table th {
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 1rem;
+            border-bottom: 2px solid #dee2e6;
+          }
+
+          .supplier-table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
+          }
+
+          .supplier-table tbody tr:hover {
+            background-color: #f8f9fa;
+          }
+
+          .inactive-row {
+            background-color: #f8f9fa;
+            opacity: 0.8;
+          }
+
+          .inactive-row:hover {
+            opacity: 1;
           }
 
           .supplier-logo-container {
-            width: 64px;
-            height: 64px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           }
@@ -719,303 +825,99 @@ function SuppliersTable() {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
-          }
-
-          .supplier-logo:hover {
-            transform: scale(1.05);
           }
 
           .supplier-logo-placeholder {
-            width: 64px;
-            height: 64px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.75rem;
+            font-size: 1.25rem;
             font-weight: 600;
             color: #6c757d;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           }
 
-          .supplier-name {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 0.5rem;
-          }
-
-          .supplier-details {
-            margin-top: 1.5rem;
-            display: grid;
-            gap: 1rem;
-          }
-
-          .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0.75rem;
-            background: #f8f9fa;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-          }
-
-          .detail-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-          }
-
-          .detail-icon {
-            color: #0d6efd;
-            font-size: 1.1rem;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(13, 110, 253, 0.1);
-            border-radius: 8px;
-            padding: 4px;
-          }
-
-          .detail-text {
-            color: #495057;
-            font-size: 0.95rem;
+          .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
             font-weight: 500;
+            display: inline-block;
+          }
+
+          .status-badge.active {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+          }
+
+          .status-badge.inactive {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
           }
 
           .action-buttons {
             display: flex;
             gap: 8px;
+            justify-content: flex-start;
+            align-items: center;
+          }
+
+          .status-toggle-btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 100px;
+            justify-content: center;
+            color: white;
+          }
+
+          .status-toggle-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+          }
+
+          .status-toggle-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
           }
 
           .edit-btn, .delete-btn {
             padding: 8px;
-            border-radius: 10px;
-            border: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-          }
-
-          .edit-btn {
-            background: rgba(13, 110, 253, 0.1);
-            color: #0d6efd;
-          }
-
-          .delete-btn {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-          }
-
-          .edit-btn:hover {
-            background: #0d6efd;
-            color: white;
-            transform: translateY(-2px);
-          }
-
-          .delete-btn:hover {
-            background: #dc3545;
-            color: white;
-            transform: translateY(-2px);
-          }
-
-          /* Modal Styles */
-          .modal-content {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-          }
-
-          .modal-header {
-            padding: 1.5rem 1.5rem 1rem;
-          }
-
-          .modal-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
-          }
-
-          .modal-body {
-            padding: 1.5rem;
-          }
-
-          .form-label {
-            font-weight: 500;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-          }
-
-          .form-label::after {
-            content: "*";
-            color: #dc3545;
-            margin-left: 4px;
-          }
-
-          .form-label:not([for="phone"]):not([for="address"]):not([for="products"])::after {
-            display: none;
-          }
-
-          .form-input {
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-            background-color: #f8f9fa;
-          }
-
-          .form-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-            background-color: #fff;
-          }
-
-          .form-input::placeholder {
-            color: #adb5bd;
-          }
-
-          textarea.form-input {
-            resize: vertical;
-            min-height: 100px;
-          }
-
-          /* Logo Upload Styles */
-          .logo-upload-container {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-          }
-
-          .logo-upload-container:hover {
-            border-color: #0d6efd;
-            background: rgba(13, 110, 253, 0.05);
-          }
-
-          .logo-upload-area {
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-          }
-
-          .upload-placeholder {
-            text-align: center;
-            padding: 2rem;
-          }
-
-          .upload-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #6c757d;
-          }
-
-          .upload-placeholder p {
-            margin-bottom: 0.5rem;
-            color: #495057;
-            font-weight: 500;
-          }
-
-          .upload-placeholder .text-muted {
-            font-size: 0.875rem;
-          }
-
-          .logo-preview {
-            position: relative;
-            width: 100%;
-            max-width: 200px;
-            margin: 0 auto;
-          }
-
-          .logo-preview img {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-          }
-
-          .remove-logo {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(255,255,255,0.9);
             border-radius: 8px;
-            padding: 4px 8px;
-            font-size: 0.875rem;
-            color: #dc3545;
             border: none;
             transition: all 0.3s ease;
-          }
-
-          .remove-logo:hover {
-            background: #dc3545;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
             color: white;
           }
 
-          .modal-footer {
-            padding: 1rem 1.5rem 1.5rem;
-          }
-
-          .cancel-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 500;
-            background: #f8f9fa;
-            border: none;
-            color: #495057;
-            transition: all 0.3s ease;
-          }
-
-          .cancel-btn:hover {
-            background: #e9ecef;
+          .edit-btn:hover, .delete-btn:hover {
             transform: translateY(-2px);
+            opacity: 0.9;
           }
 
-          .submit-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 500;
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-            border: none;
-            transition: all 0.3s ease;
-          }
-
-          .submit-btn:hover {
-            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
-            transform: translateY(-2px);
-          }
-
-          .submit-btn:disabled {
-            background: #e9ecef;
-            transform: none;
-          }
-
-          /* Responsive Form Adjustments */
           @media (max-width: 768px) {
-            .modal-body {
-              padding: 1rem;
+            .action-buttons {
+              flex-direction: column;
+              align-items: stretch;
             }
 
-            .form-input {
-              font-size: 16px;
-            }
-
-            .logo-upload-area {
-              min-height: 150px;
-            }
-
-            .upload-icon {
-              font-size: 2rem;
+            .status-toggle-btn {
+              width: 100%;
+              margin-bottom: 0.5rem;
             }
           }
 
@@ -1143,6 +1045,78 @@ function SuppliersTable() {
 
             .clear-search {
               right: 0.75rem;
+            }
+          }
+
+          .supplier-count-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+          }
+
+          .supplier-count-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+          }
+
+          .supplier-count-card.total {
+            border-left: 5px solid #0d6efd;
+          }
+
+          .supplier-count-card.active {
+            border-left: 5px solid #28a745;
+          }
+
+          .supplier-count-card.inactive {
+            border-left: 5px solid #dc3545;
+          }
+
+          .count-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+          }
+
+          .supplier-count-card.total .count-icon {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+          }
+
+          .supplier-count-card.active .count-icon {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+          }
+
+          .supplier-count-card.inactive .count-icon {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+          }
+
+          .count-info h3 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+            color: #2c3e50;
+          }
+
+          .count-info p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.95rem;
+          }
+
+          @media (max-width: 768px) {
+            .supplier-count-card {
+              margin-bottom: 1rem;
             }
           }
         `}

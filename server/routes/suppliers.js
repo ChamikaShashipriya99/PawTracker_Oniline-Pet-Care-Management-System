@@ -69,11 +69,18 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Supplier not found' });
     }
 
+    // Update supplier fields
     supplier.name = req.body.name;
     supplier.email = req.body.email;
     supplier.phone = req.body.phone || '';
     supplier.address = req.body.address || '';
     supplier.products = req.body.products || '';
+    supplier.logo = req.body.logo || '';
+    
+    // Update status if provided, otherwise keep existing status
+    if (req.body.status) {
+      supplier.status = req.body.status;
+    }
 
     const updatedSupplier = await supplier.save();
     res.json(updatedSupplier);
