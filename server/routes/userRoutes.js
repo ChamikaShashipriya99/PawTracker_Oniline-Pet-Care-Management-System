@@ -46,33 +46,29 @@ if (!fs.existsSync('uploads')) {
 // Serve uploaded files statically
 router.use('/uploads', express.static('uploads'));
 
-// Email configuration - Using Ethereal Email for testing
+// Email configuration - Using real email service
 let transporter;
 
-// Create a test account on Ethereal Email
-const createTestAccount = async () => {
+// Initialize the transporter with your email service
+const initializeEmailTransporter = () => {
   try {
-    const testAccount = await nodemailer.createTestAccount();
-    console.log('Ethereal Email test account created:', testAccount.user);
-    
+    // Gmail configuration with App Password
     transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-  auth: {
-        user: testAccount.user,
-        pass: testAccount.pass
+      service: 'gmail',
+      auth: {
+        user: 'samankumara990209@gmail.com',
+        pass: 'lbcyivjbrwnktwgk' // App Password
       }
     });
     
-    console.log('Ethereal Email transporter created successfully');
+    console.log('Gmail transporter created with direct configuration');
   } catch (error) {
-    console.error('Error creating Ethereal Email test account:', error);
+    console.error('Error creating email transporter:', error);
   }
 };
 
 // Initialize the transporter
-createTestAccount();
+initializeEmailTransporter();
 
 // Regular user signup with photo
 router.post('/signup', upload.single('profilePhoto'), signupValidation, async (req, res) => {
@@ -154,14 +150,13 @@ router.post('/login', loginValidation, async (req, res) => {
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
         
-        const info = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
         console.log('Verification email sent successfully to:', user.email);
         
         return res.status(403).json({ 
           message: 'Email not verified', 
           email: user.email,
-          needsVerification: true,
-          previewUrl: nodemailer.getTestMessageUrl(info)
+          needsVerification: true
         });
       } catch (emailError) {
         console.error('Error sending verification email:', emailError);
@@ -343,10 +338,9 @@ router.post('/forgot-password', forgotPasswordValidation, async (req, res) => {
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     res.json({ 
-      message: 'Password reset email sent',
-      previewUrl: nodemailer.getTestMessageUrl(info)
+      message: 'Password reset email sent'
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -557,12 +551,11 @@ router.post('/resend-verification', async (req, res) => {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
-      const info = await transporter.sendMail(mailOptions);
+      await transporter.sendMail(mailOptions);
       console.log('Verification email resent successfully to:', email);
       
       res.json({ 
-        message: 'Verification code resent. Please check your email.',
-        previewUrl: nodemailer.getTestMessageUrl(info)
+        message: 'Verification code resent. Please check your email.'
       });
     } catch (emailError) {
       console.error('Error sending verification email:', emailError);
