@@ -48,38 +48,45 @@ function SuppliersTable() {
   };
 
   const handleAdd = async () => {
-    // Clear previous error
     setError(null);
-
     // Validate required fields
     if (!form.name.trim()) {
       setError('Supplier name is required');
       return;
     }
-
     if (!form.email.trim()) {
       setError('Supplier email is required');
       return;
     }
-
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email.trim())) {
       setError('Please enter a valid email address');
       return;
     }
-
     try {
       setLoading(true);
-      console.log('Sending supplier data with logo:', form.logo ? 'Logo present' : 'No logo');
-      const response = await axios.post(SUPPLIERS_ENDPOINT, form);
-      
-      console.log('Server response:', response.data);
+      // Convert products object to string with category labels
+      let productsString = '';
+      if (typeof form.products === 'object' && form.products !== null) {
+        const parts = [];
+        if (form.products.supplements) parts.push(`Supplements: ${form.products.supplements}`);
+        if (form.products.medicine) parts.push(`Medicine: ${form.products.medicine}`);
+        if (form.products.cages) parts.push(`Cages: ${form.products.cages}`);
+        if (form.products.food) parts.push(`Food: ${form.products.food}`);
+        if (form.products.other) parts.push(`Other: ${form.products.other}`);
+        productsString = parts.join(', ');
+      } else {
+        productsString = form.products || '';
+      }
+      const response = await axios.post(SUPPLIERS_ENDPOINT, {
+        ...form,
+        products: productsString
+      });
       setShowAdd(false);
       setForm({ name: '', email: '', phone: '', address: '', products: { supplements: '', medicine: '', cages: '', food: '', other: '' }, logo: '' });
       await fetchSuppliers();
     } catch (err) {
-      console.error('Error adding supplier:', err);
       setError(
         err.response?.data?.message || 
         'Failed to add supplier. Please check your input and try again.'
@@ -90,45 +97,45 @@ function SuppliersTable() {
   };
 
   const handleEdit = async () => {
-    // Clear previous error
     setError(null);
-
     // Validate required fields
     if (!form.name.trim()) {
       setError('Supplier name is required');
       return;
     }
-
     if (!form.email.trim()) {
       setError('Supplier email is required');
       return;
     }
-
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email.trim())) {
       setError('Please enter a valid email address');
       return;
     }
-
     try {
       setLoading(true);
+      // Convert products object to string with category labels
+      let productsString = '';
+      if (typeof form.products === 'object' && form.products !== null) {
+        const parts = [];
+        if (form.products.supplements) parts.push(`Supplements: ${form.products.supplements}`);
+        if (form.products.medicine) parts.push(`Medicine: ${form.products.medicine}`);
+        if (form.products.cages) parts.push(`Cages: ${form.products.cages}`);
+        if (form.products.food) parts.push(`Food: ${form.products.food}`);
+        if (form.products.other) parts.push(`Other: ${form.products.other}`);
+        productsString = parts.join(', ');
+      } else {
+        productsString = form.products || '';
+      }
       await axios.put(`${SUPPLIERS_ENDPOINT}/${current._id}`, {
         ...form,
-        name: form.name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
-        address: form.address.trim(),
-        products: form.products.supplements + ',' + form.products.medicine + ',' + form.products.cages + ',' + form.products.food + ',' + form.products.other
+        products: productsString
       });
-      
       setShowEdit(false);
       setForm({ name: '', email: '', phone: '', address: '', products: { supplements: '', medicine: '', cages: '', food: '', other: '' }, logo: '' });
       await fetchSuppliers();
-      
-      // Show success message (you can add a success toast here if you want)
     } catch (err) {
-      console.error('Error updating supplier:', err);
       setError(
         err.response?.data?.message || 
         'Failed to update supplier. Please check your input and try again.'
