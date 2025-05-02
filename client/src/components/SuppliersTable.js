@@ -17,7 +17,13 @@ function SuppliersTable() {
     email: '',
     phone: '',
     address: '',
-    products: '',
+    products: {
+      supplements: '',
+      medicine: '',
+      cages: '',
+      food: '',
+      other: ''
+    },
     logo: ''
   });
   const [error, setError] = useState(null);
@@ -70,7 +76,7 @@ function SuppliersTable() {
       
       console.log('Server response:', response.data);
       setShowAdd(false);
-      setForm({ name: '', email: '', phone: '', address: '', products: '', logo: '' });
+      setForm({ name: '', email: '', phone: '', address: '', products: { supplements: '', medicine: '', cages: '', food: '', other: '' }, logo: '' });
       await fetchSuppliers();
     } catch (err) {
       console.error('Error adding supplier:', err);
@@ -113,11 +119,11 @@ function SuppliersTable() {
         email: form.email.trim(),
         phone: form.phone.trim(),
         address: form.address.trim(),
-        products: form.products.trim()
+        products: form.products.supplements + ',' + form.products.medicine + ',' + form.products.cages + ',' + form.products.food + ',' + form.products.other
       });
       
       setShowEdit(false);
-      setForm({ name: '', email: '', phone: '', address: '', products: '', logo: '' });
+      setForm({ name: '', email: '', phone: '', address: '', products: { supplements: '', medicine: '', cages: '', food: '', other: '' }, logo: '' });
       await fetchSuppliers();
       
       // Show success message (you can add a success toast here if you want)
@@ -190,11 +196,15 @@ function SuppliersTable() {
         Email: supplier.email,
         Phone: supplier.phone || 'N/A',
         Address: supplier.address || 'N/A',
-        Products: supplier.products || 'N/A'
+        Supplements: supplier.products.supplements || 'N/A',
+        Medicine: supplier.products.medicine || 'N/A',
+        Cages: supplier.products.cages || 'N/A',
+        Food: supplier.products.food || 'N/A',
+        Other: supplier.products.other || 'N/A'
       }));
 
       // Convert to CSV
-      const headers = ['Name', 'Email', 'Phone', 'Address', 'Products'];
+      const headers = ['Name', 'Email', 'Phone', 'Address', 'Supplements', 'Medicine', 'Cages', 'Food', 'Other'];
       const csvContent = [
         headers.join(','),
         ...data.map(row => 
@@ -231,7 +241,7 @@ function SuppliersTable() {
         email: supplier.email,
         phone: supplier.phone || '',
         address: supplier.address || '',
-        products: supplier.products || '',
+        products: supplier.products.supplements + ',' + supplier.products.medicine + ',' + supplier.products.cages + ',' + supplier.products.food + ',' + supplier.products.other,
         logo: supplier.logo || '',
         status: newStatus
       };
@@ -265,9 +275,44 @@ function SuppliersTable() {
       supplier.email.toLowerCase().includes(searchLower) ||
       (supplier.phone && supplier.phone.toLowerCase().includes(searchLower)) ||
       (supplier.address && supplier.address.toLowerCase().includes(searchLower)) ||
-      (supplier.products && supplier.products.toLowerCase().includes(searchLower))
+      (supplier.products.supplements && supplier.products.supplements.toLowerCase().includes(searchLower)) ||
+      (supplier.products.medicine && supplier.products.medicine.toLowerCase().includes(searchLower)) ||
+      (supplier.products.cages && supplier.products.cages.toLowerCase().includes(searchLower)) ||
+      (supplier.products.food && supplier.products.food.toLowerCase().includes(searchLower)) ||
+      (supplier.products.other && supplier.products.other.toLowerCase().includes(searchLower))
     );
   });
+
+  // Add this function to categorize products
+  const categorizeProducts = (productsString) => {
+    const categories = {
+      supplements: [],
+      medicine: [],
+      cages: [],
+      food: [],
+      other: []
+    };
+
+    if (productsString) {
+      const products = productsString.split(',').map(p => p.trim());
+      products.forEach(product => {
+        const lowerProduct = product.toLowerCase();
+        if (lowerProduct.includes('supplement') || lowerProduct.includes('vitamin')) {
+          categories.supplements.push(product);
+        } else if (lowerProduct.includes('medicine') || lowerProduct.includes('drug')) {
+          categories.medicine.push(product);
+        } else if (lowerProduct.includes('cage') || lowerProduct.includes('kennel')) {
+          categories.cages.push(product);
+        } else if (lowerProduct.includes('food') || lowerProduct.includes('feed')) {
+          categories.food.push(product);
+        } else {
+          categories.other.push(product);
+        }
+      });
+    }
+
+    return categories;
+  };
 
   if (loading && !suppliers.length) {
     return (
@@ -385,87 +430,138 @@ function SuppliersTable() {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Address</th>
-                <th>Products</th>
+                <th>Supplements</th>
+                <th>Medicine</th>
+                <th>Cages</th>
+                <th>Food</th>
+                <th>Other</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSuppliers.map((supplier) => (
-                <tr key={supplier._id} className={supplier.status === 'inactive' ? 'inactive-row' : ''}>
-                  <td>
-                    {supplier.logo && supplier.logo.length > 0 ? (
-                      <div className="supplier-logo-container">
-                        <img 
-                          src={supplier.logo} 
-                          alt={`${supplier.name} logo`}
-                          className="supplier-logo"
-                          onError={(e) => {
-                            console.error('Error loading logo for:', supplier.name);
-                            e.target.style.display = 'none';
-                            e.target.parentElement.style.display = 'none';
-                          }}
-                        />
+              {filteredSuppliers.map((supplier) => {
+                const productCategories = categorizeProducts(supplier.products);
+                return (
+                  <tr key={supplier._id} className={supplier.status === 'inactive' ? 'inactive-row' : ''}>
+                    <td>
+                      {supplier.logo && supplier.logo.length > 0 ? (
+                        <div className="supplier-logo-container">
+                          <img 
+                            src={supplier.logo} 
+                            alt={`${supplier.name} logo`}
+                            className="supplier-logo"
+                            onError={(e) => {
+                              console.error('Error loading logo for:', supplier.name);
+                              e.target.style.display = 'none';
+                              e.target.parentElement.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="supplier-logo-placeholder">
+                          {supplier.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </td>
+                    <td>{supplier.name}</td>
+                    <td>{supplier.email}</td>
+                    <td>{supplier.phone || '-'}</td>
+                    <td>{supplier.address || '-'}</td>
+                    <td>
+                      {productCategories.supplements.length > 0 ? (
+                        <div className="product-category">
+                          {productCategories.supplements.map((product, index) => (
+                            <span key={index} className="product-tag">• {product}</span>
+                          ))}
+                        </div>
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {productCategories.medicine.length > 0 ? (
+                        <div className="product-category">
+                          {productCategories.medicine.map((product, index) => (
+                            <span key={index} className="product-tag">• {product}</span>
+                          ))}
+                        </div>
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {productCategories.cages.length > 0 ? (
+                        <div className="product-category">
+                          {productCategories.cages.map((product, index) => (
+                            <span key={index} className="product-tag">• {product}</span>
+                          ))}
+                        </div>
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {productCategories.food.length > 0 ? (
+                        <div className="product-category">
+                          {productCategories.food.map((product, index) => (
+                            <span key={index} className="product-tag">• {product}</span>
+                          ))}
+                        </div>
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {productCategories.other.length > 0 ? (
+                        <div className="product-category">
+                          {productCategories.other.map((product, index) => (
+                            <span key={index} className="product-tag">• {product}</span>
+                          ))}
+                        </div>
+                      ) : '-'}
+                    </td>
+                    <td>
+                      <span className={`status-badge ${supplier.status}`}>
+                        {supplier.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <Button 
+                          variant={supplier.status === 'active' ? 'danger' : 'success'}
+                          size="sm" 
+                          className="status-toggle-btn"
+                          onClick={() => handleToggleStatus(supplier)}
+                          disabled={loading}
+                        >
+                          {supplier.status === 'active' ? (
+                            <>
+                              <FaStoreAlt className="me-1" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <FaStore className="me-1" />
+                              Activate
+                            </>
+                          )}
+                        </Button>
+                        <Button 
+                          variant="primary"
+                          size="sm" 
+                          className="edit-btn me-2"
+                          onClick={() => openEdit(supplier)} 
+                          disabled={loading}
+                        >
+                          <FaPen />
+                        </Button>
+                        <Button 
+                          variant="danger"
+                          size="sm" 
+                          className="delete-btn"
+                          onClick={() => handleDelete(supplier._id)} 
+                          disabled={loading}
+                        >
+                          <FaTrash />
+                        </Button>
                       </div>
-                    ) : (
-                      <div className="supplier-logo-placeholder">
-                        {supplier.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </td>
-                  <td>{supplier.name}</td>
-                  <td>{supplier.email}</td>
-                  <td>{supplier.phone || '-'}</td>
-                  <td>{supplier.address || '-'}</td>
-                  <td>{supplier.products || '-'}</td>
-                  <td>
-                    <span className={`status-badge ${supplier.status}`}>
-                      {supplier.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <Button 
-                        variant={supplier.status === 'active' ? 'danger' : 'success'}
-                        size="sm" 
-                        className="status-toggle-btn"
-                        onClick={() => handleToggleStatus(supplier)}
-                        disabled={loading}
-                      >
-                        {supplier.status === 'active' ? (
-                          <>
-                            <FaStoreAlt className="me-1" />
-                            Deactivate
-                          </>
-                        ) : (
-                          <>
-                            <FaStore className="me-1" />
-                            Activate
-                          </>
-                        )}
-                      </Button>
-                      <Button 
-                        variant="primary"
-                        size="sm" 
-                        className="edit-btn me-2"
-                        onClick={() => openEdit(supplier)} 
-                        disabled={loading}
-                      >
-                        <FaPen />
-                      </Button>
-                      <Button 
-                        variant="danger"
-                        size="sm" 
-                        className="delete-btn"
-                        onClick={() => handleDelete(supplier._id)} 
-                        disabled={loading}
-                      >
-                        <FaTrash />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -570,14 +666,73 @@ function SuppliersTable() {
               <div className="col-12">
                 <Form.Group>
                   <Form.Label className="form-label">Products</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    value={form.products}
-                    onChange={(e) => setForm({ ...form, products: e.target.value })}
-                    className="form-input"
-                    placeholder="Enter supplied products (comma separated)"
-                  />
+                  <div className="product-categories-input">
+                    <div className="mb-3">
+                      <Form.Label>Supplements</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.supplements}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, supplements: e.target.value }
+                        })}
+                        placeholder="Enter supplements (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Medicine</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.medicine}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, medicine: e.target.value }
+                        })}
+                        placeholder="Enter medicines (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Cages</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.cages}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, cages: e.target.value }
+                        })}
+                        placeholder="Enter cages (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Food</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.food}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, food: e.target.value }
+                        })}
+                        placeholder="Enter food items (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Other Products</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.other}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, other: e.target.value }
+                        })}
+                        placeholder="Enter other products (comma separated)"
+                      />
+                    </div>
+                  </div>
                 </Form.Group>
               </div>
             </div>
@@ -701,14 +856,73 @@ function SuppliersTable() {
               <div className="col-12">
                 <Form.Group>
                   <Form.Label className="form-label">Products</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    value={form.products}
-                    onChange={(e) => setForm({ ...form, products: e.target.value })}
-                    className="form-input"
-                    placeholder="Enter supplied products (comma separated)"
-                  />
+                  <div className="product-categories-input">
+                    <div className="mb-3">
+                      <Form.Label>Supplements</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.supplements}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, supplements: e.target.value }
+                        })}
+                        placeholder="Enter supplements (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Medicine</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.medicine}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, medicine: e.target.value }
+                        })}
+                        placeholder="Enter medicines (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Cages</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.cages}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, cages: e.target.value }
+                        })}
+                        placeholder="Enter cages (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Food</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.food}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, food: e.target.value }
+                        })}
+                        placeholder="Enter food items (comma separated)"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <Form.Label>Other Products</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={form.products.other}
+                        onChange={(e) => setForm({
+                          ...form,
+                          products: { ...form.products, other: e.target.value }
+                        })}
+                        placeholder="Enter other products (comma separated)"
+                      />
+                    </div>
+                  </div>
                 </Form.Group>
               </div>
             </div>
@@ -1117,6 +1331,45 @@ function SuppliersTable() {
           @media (max-width: 768px) {
             .supplier-count-card {
               margin-bottom: 1rem;
+            }
+          }
+
+          .product-category {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .product-tag {
+            font-size: 0.875rem;
+            color: #495057;
+            display: block;
+            line-height: 1.4;
+          }
+
+          .product-categories-input {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 12px;
+          }
+
+          .product-categories-input .form-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+          }
+
+          .product-categories-input .form-control {
+            font-size: 0.9rem;
+          }
+
+          @media (max-width: 768px) {
+            .supplier-table {
+              font-size: 0.875rem;
+            }
+
+            .product-tag {
+              font-size: 0.8rem;
             }
           }
         `}

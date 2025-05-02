@@ -9,6 +9,15 @@ import 'jspdf-autotable';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const INVENTORY_ENDPOINT = `${API_URL}/inventory`;
 
+// Define allowed categories for dropdown
+const STORE_CATEGORIES = [
+  'SUPPLEMENTS',
+  'MEDICINE',
+  'CAGES',
+  'FOOD',
+  'OTHER'
+];
+
 function InventoryTable() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
@@ -408,13 +417,19 @@ function InventoryTable() {
                   <div className="col-md-6">
                     <Form.Group>
                       <Form.Label>Category</Form.Label>
-                      <Form.Control 
-                        value={form.category} 
+                      <Form.Control
+                        as="select"
+                        value={form.category}
                         onChange={e => setForm({ ...form, category: e.target.value })}
                         disabled={loading}
                         className="form-input"
-                        placeholder="Enter category"
-                      />
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        {STORE_CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </Form.Control>
                     </Form.Group>
                   </div>
                   <div className="col-12">
@@ -541,13 +556,19 @@ function InventoryTable() {
                   <div className="col-md-6">
                     <Form.Group>
                       <Form.Label className="form-label">Category</Form.Label>
-                      <Form.Control 
-                        value={form.category} 
+                      <Form.Control
+                        as="select"
+                        value={form.category}
                         onChange={e => setForm({ ...form, category: e.target.value })}
                         disabled={loading}
                         className="form-input"
-                        placeholder="Enter category"
-                      />
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        {STORE_CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </Form.Control>
                     </Form.Group>
                   </div>
                   <div className="col-12">
