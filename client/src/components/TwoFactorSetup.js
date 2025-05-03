@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function TwoFactorSetup({ user, onClose, onStatusChange }) {
-  const [step, setStep] = useState('initial');
+  // Check if user already has 2FA enabled and set initial UI accordingly
+  const initialStep = user.twoFactorEnabled ? 'manage' : 'initial';
+  
+  const [step, setStep] = useState(initialStep);
   const [qrCode, setQrCode] = useState('');
   const [secret, setSecret] = useState('');
   const [backupCodes, setBackupCodes] = useState([]);
@@ -10,6 +13,7 @@ function TwoFactorSetup({ user, onClose, onStatusChange }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGenerate2FA = async () => {
     try {
@@ -55,6 +59,7 @@ function TwoFactorSetup({ user, onClose, onStatusChange }) {
   };
 
   const handleDisable2FA = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/api/users/disable-2fa', {
         userId: user._id,
@@ -79,6 +84,8 @@ function TwoFactorSetup({ user, onClose, onStatusChange }) {
       }, 3000);
     } catch (error) {
       setError(error.response?.data?.error || 'Error disabling 2FA');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,6 +115,71 @@ function TwoFactorSetup({ user, onClose, onStatusChange }) {
               </div>
             )}
 
+            {step === 'manage' && (
+              <div>
+                <div className="text-center mb-4">
+                  <div className="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" 
+                       style={{ width: '80px', height: '80px', backgroundColor: '#e6f7ff' }}>
+                    <i className="fas fa-shield-alt fa-2x text-primary"></i>
+                  </div>
+                  <h5>Disable Two-Factor Authentication</h5>
+                  <p className="text-muted">
+                    To disable 2FA, please enter the verification code from your authenticator app.
+                  </p>
+                </div>
+                
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  handleDisable2FA();
+                }}>
+                  <div className="mb-3">
+                    <label className="form-label">Enter verification code from your authenticator app</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={token}
+                      onChange={(e) => setToken(e.target.value)}
+                      required
+                      style={{ borderRadius: '10px' }}
+                      placeholder="Enter 6-digit code"
+                      maxLength="6"
+                    />
+                  </div>
+                  
+                  <div className="alert alert-warning">
+                    <i className="fas fa-exclamation-triangle me-2"></i>
+                    Warning: Disabling 2FA will make your account less secure. We strongly recommend keeping it enabled.
+                  </div>
+                  
+                  <div className="d-grid gap-2">
+                    <button
+                      type="submit"
+                      className="btn btn-danger"
+                      disabled={isLoading}
+                      style={{ borderRadius: '10px' }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Processing...
+                        </>
+                      ) : (
+                        'Disable 2FA'
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={onClose}
+                      style={{ borderRadius: '10px' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+            
             {step === 'initial' && (
               <div>
                 <p className="mb-4">
