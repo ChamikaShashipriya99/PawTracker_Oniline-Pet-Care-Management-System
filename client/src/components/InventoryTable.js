@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import SuppliersTable from './SuppliersTable';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const INVENTORY_ENDPOINT = `${API_URL}/inventory`;
@@ -19,6 +20,7 @@ const STORE_CATEGORIES = [
 ];
 
 function InventoryTable() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,7 +32,14 @@ function InventoryTable() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory');
 
-  useEffect(() => { fetchItems(); }, []);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.isAdmin) {
+      navigate('/admin/login');
+      return;
+    }
+    fetchItems();
+  }, [navigate]);
 
   useEffect(() => {
     const results = items.filter(item =>
@@ -248,6 +257,11 @@ function InventoryTable() {
 
   return (
     <div className="container mt-5">
+      <div className="d-flex align-items-center mb-4" style={{ justifyContent: 'flex-end' }}>
+        <Button onClick={() => window.open('/inventory/report', '_blank')} variant="warning" className="ms-2" style={{ fontWeight: 500, borderRadius: '8px' }}>
+          <i className="fas fa-file-alt me-2"></i>Report
+        </Button>
+      </div>
       <Tabs
         activeKey={activeTab}
         onSelect={(k) => setActiveTab(k)}

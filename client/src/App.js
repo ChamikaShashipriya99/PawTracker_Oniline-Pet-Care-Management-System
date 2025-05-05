@@ -27,6 +27,7 @@ import ProductView from './components/ProductView';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Button } from 'react-bootstrap';
+import InventoryReport from './components/InventoryReport';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -183,6 +184,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/inventory">Inventory</Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/admin/payment-dashboard">Payment</Link>
+                </li>
+                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
@@ -225,6 +229,8 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
           {isAdmin && (
             <>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/inventory" element={<InventoryTable />} />
+              <Route path="/inventory/report" element={<InventoryReport />} />
             </>
           )}
           <Route path="/admin/payment-dashboard" element={<AdminPaymentDashboard />} />

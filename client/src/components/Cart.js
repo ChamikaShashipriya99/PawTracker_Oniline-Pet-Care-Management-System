@@ -22,14 +22,9 @@ function Cart() {
   };
 
   const handleCheckout = () => {
-    // Here you can add checkout logic
-    alert('Proceeding to checkout...');
-    // You can navigate to a checkout page or show a payment modal
-    // For now, we'll just clear the cart
-    localStorage.removeItem('cart');
-    setCart([]);
-    // You can redirect to a thank you page or back to store
-    navigate('/store');
+    localStorage.setItem('checkoutAmount', getTotal().toFixed(2));
+    localStorage.setItem('checkoutPurpose', 'store_purchase');
+    navigate('/payment-checkout');
   };
 
   if (cart.length === 0) {

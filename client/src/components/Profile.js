@@ -41,6 +41,18 @@ function Profile() {
     }
   };
 
+  const handleDeletePet = async (id) => {
+    if (window.confirm('Are you sure you want to delete this pet?')) {
+      try {
+        await axios.delete(`http://localhost:5000/api/users/pets/${id}`);
+        setPets(pets.filter(pet => pet._id !== id));
+        alert('Pet deleted successfully!');
+      } catch (error) {
+        alert('Delete failed: ' + error.message);
+      }
+    }
+  };
+
   const handleDownloadProfile = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);

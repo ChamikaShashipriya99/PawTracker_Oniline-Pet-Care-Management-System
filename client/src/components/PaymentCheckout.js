@@ -6,6 +6,8 @@ import PaymentConfirmation from './PaymentConfirmation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Payment.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 // Validate customer information for edit form
 const validateCustomerInfo = (info, field = null) => {
@@ -58,6 +60,15 @@ const PaymentCheckout = () => {
       toast.error('Please login to access the payment page');
       navigate('/login');
       return;
+    }
+    // Auto-fill amount and purpose from localStorage if available
+    const checkoutAmount = localStorage.getItem('checkoutAmount');
+    if (checkoutAmount && !customerInfo.amount) {
+      setCustomerInfo((prev) => ({ ...prev, amount: checkoutAmount }));
+    }
+    const checkoutPurpose = localStorage.getItem('checkoutPurpose');
+    if (checkoutPurpose && !customerInfo.purpose) {
+      setCustomerInfo((prev) => ({ ...prev, purpose: checkoutPurpose }));
     }
   }, [navigate]);
 

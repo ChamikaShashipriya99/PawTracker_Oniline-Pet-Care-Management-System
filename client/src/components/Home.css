@@ -1,11 +1,9 @@
-<<<<<<< HEAD
 /* Existing styles */
 .home-container {
   font-family: 'Arial', sans-serif;
   color: #333;
 }
 
-=======
 /* Home container styles */
 .home-container {
   font-family: 'Arial', sans-serif;
@@ -14,43 +12,30 @@
 }
 
 /* Hero section styles */
->>>>>>> Inventory
 .hero-section {
   background: linear-gradient(135deg, #00c4cc, #007bff);
   color: white;
   padding: 100px 0;
   text-align: center;
-<<<<<<< HEAD
-=======
   margin-bottom: 50px;
->>>>>>> Inventory
 }
 
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
-<<<<<<< HEAD
-=======
   padding: 0 20px;
->>>>>>> Inventory
 }
 
 .hero-title {
   font-size: 3rem;
   margin-bottom: 20px;
-<<<<<<< HEAD
-=======
   font-weight: bold;
->>>>>>> Inventory
 }
 
 .hero-subtitle {
   font-size: 1.5rem;
   margin-bottom: 30px;
-<<<<<<< HEAD
-=======
   opacity: 0.9;
->>>>>>> Inventory
 }
 
 .hero-btn {
@@ -61,30 +46,17 @@
   border-radius: 25px;
   font-size: 1.2rem;
   cursor: pointer;
-<<<<<<< HEAD
-  transition: background-color 0.3s;
-=======
   transition: background-color 0.3s, transform 0.2s;
->>>>>>> Inventory
 }
 
 .hero-btn:hover {
   background-color: #e04e2d;
-<<<<<<< HEAD
+  transform: translateY(-2px);
 }
 
 .content-section, .featured-pets-section {
   padding: 60px 0;
-=======
-  transform: translateY(-2px);
-}
-
-/* Content section styles */
-.content-section,
-.featured-pets-section {
-  padding: 60px 0;
   background-color: #f8f9fa;
->>>>>>> Inventory
 }
 
 .section-title {
@@ -92,25 +64,17 @@
   font-size: 2.5rem;
   color: #007bff;
   margin-bottom: 40px;
-<<<<<<< HEAD
-}
-
-=======
   font-weight: bold;
 }
 
 /* Card styles */
->>>>>>> Inventory
 .card {
   border: none;
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
-<<<<<<< HEAD
-=======
   background-color: white;
   height: 100%;
->>>>>>> Inventory
 }
 
 .hover-card:hover {
@@ -126,33 +90,19 @@
   font-size: 1.5rem;
   color: #00c4cc;
   margin-bottom: 15px;
-<<<<<<< HEAD
-=======
   font-weight: bold;
->>>>>>> Inventory
 }
 
 .card-body p {
   font-size: 1rem;
   color: #555;
-<<<<<<< HEAD
-=======
   line-height: 1.6;
->>>>>>> Inventory
 }
 
 .card-link {
   color: #007bff;
   text-decoration: none;
   font-weight: bold;
-<<<<<<< HEAD
-}
-
-.card-link:hover {
-  text-decoration: underline;
-}
-
-=======
   display: inline-block;
   margin-top: 10px;
   transition: color 0.3s;
@@ -173,25 +123,11 @@
 }
 
 /* Animation */
->>>>>>> Inventory
 .fade-in {
   animation: fadeIn 1s ease-in;
 }
 
 @keyframes fadeIn {
-<<<<<<< HEAD
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-/* New styles for images */
-.card-img-top {
-  width: 100%;
-  height: 200px; /* Fixed height for consistency */
-  object-fit: cover; /* Ensures images scale nicely */
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-=======
   0% {
     opacity: 0;
     transform: translateY(20px);
@@ -215,5 +151,4 @@
   .section-title {
     font-size: 2rem;
   }
->>>>>>> Inventory
 }

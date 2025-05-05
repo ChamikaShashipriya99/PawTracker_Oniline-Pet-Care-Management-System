@@ -660,31 +660,6 @@ function AdminDashboard() {
             </form>
           </div>
         </div>
-
-        <div className="card shadow-sm mb-4" style={{ borderRadius: '15px', border: 'none' }}>
-          <div className="card-body">
-            <h5 className="card-title mb-4" style={{ color: '#007bff' }}>
-              <i className="fas fa-tachometer-alt me-2"></i>Quick Actions
-            </h5>
-            <div className="row g-3">
-              <div className="col-md-4 col-sm-6">
-                <Link to="/admin/payment-dashboard" className="btn btn-primary w-100" style={{ borderRadius: '8px', background: 'linear-gradient(135deg, #007bff, #00c4cc)' }}>
-                  <i className="fas fa-credit-card me-2"></i>Manage Payments
-                </Link>
-              </div>
-              <div className="col-md-4 col-sm-6">
-                <Link to="/admin/refund-dashboard" className="btn btn-primary w-100" style={{ borderRadius: '8px', background: 'linear-gradient(135deg, #007bff, #00c4cc)' }}>
-                  <i className="fas fa-undo me-2"></i>Manage Refunds
-                </Link>
-              </div>
-              <div className="col-md-4 col-sm-6">
-                <Link to="/admin/dashboard" className="btn btn-primary w-100" style={{ borderRadius: '8px', background: 'linear-gradient(135deg, #007bff, #00c4cc)' }}>
-                  <i className="fas fa-cog me-2"></i>System Settings
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
       <br></br>
       <ToastContainer />
