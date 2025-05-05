@@ -106,6 +106,7 @@ function Profile() {
 
   return (
     <div className="container mt-5">
+<<<<<<< HEAD
       <div className="card shadow-lg p-4" style={{ borderRadius: '15px', border: 'none' }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Profile 🐾</h2>
@@ -414,10 +415,29 @@ function Profile() {
                 </Link>
               </div>
             </div>
+=======
+      <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
+        <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Profile 🐾</h2>
+        <div className="card-body">
+          {user.profilePhoto && (
+            <div className="text-center mb-4">
+              <img src={`http://localhost:5000${user.profilePhoto}`} alt="Profile" className="img-fluid rounded-circle" style={{ maxWidth: '150px', border: '2px solid #007bff' }} />
+            </div>
+          )}
+          <p><strong>First Name:</strong> {user.firstName}</p>
+          <p><strong>Last Name:</strong> {user.lastName}</p>
+          <p><strong>Username:</strong> {user.username}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Phone:</strong> {user.phone}</p>
+          <h3 className="mt-4" style={{ color: '#007bff' }}>My Pets</h3>
+          {pets.length === 0 ? (
+            <p>No pets added yet.</p>
+>>>>>>> Inventory
           ) : (
             <div className="row">
               {pets.map(pet => (
                 <div key={pet._id} className="col-md-4 mb-3">
+<<<<<<< HEAD
                   <div className="card h-100" style={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
                     {pet.petPhoto ? (
                       <img 
@@ -452,12 +472,31 @@ function Profile() {
                           <strong>Special Conditions:</strong> {pet.specialConditions}
                         </p>
                       )}
+=======
+                  <div className="card" style={{ borderRadius: '10px' }}>
+                    {pet.petPhoto && (
+                      <img src={`http://localhost:5000${pet.petPhoto}`} alt={pet.petName} className="card-img-top" style={{ borderRadius: '10px 10px 0 0', maxHeight: '150px', objectFit: 'cover' }} />
+                    )}
+                    <div className="card-body">
+                      <h5 className="card-title">{pet.petName}</h5>
+                      <p className="card-text"><strong>Breed:</strong> {pet.breed}</p>
+>>>>>>> Inventory
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
+<<<<<<< HEAD
+=======
+          <div className="d-flex justify-content-between flex-wrap mt-4">
+            <Link to="/update-profile" className="btn btn-primary m-1" style={{ borderRadius: '10px' }}>Update Profile</Link>
+            <Link to="/add-pet" className="btn btn-success m-1" style={{ borderRadius: '10px' }}>Add Pet</Link>
+            <Link to="/my-pets" className="btn btn-info m-1" style={{ borderRadius: '10px' }}>My Pets</Link>
+            <button onClick={handleDownloadProfile} className="btn btn-success m-1" style={{ borderRadius: '10px' }}>Download Profile Details</button>
+            <button onClick={handleDeleteAccount} className="btn btn-danger m-1" style={{ borderRadius: '10px' }}>Delete Profile</button>
+          </div>
+>>>>>>> Inventory
         </div>
       </div>
       <br></br>

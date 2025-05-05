@@ -20,6 +20,13 @@ import PaymentHistory from './components/PaymentHistory';
 import AdminRefundDashboard from './components/AdminRefundDashboard';
 import AdminPaymentDashboard from './components/AdminPaymentDashboard';
 import PaymentConfirmation from './components/PaymentConfirmation';
+import InventoryTable from './components/InventoryTable';
+import Store from './components/Store';
+import Cart from './components/Cart';
+import ProductView from './components/ProductView';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { Button } from 'react-bootstrap';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -52,6 +59,21 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
     }
   }, [navigate, setIsLoggedIn, setIsAdmin]);
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Inventory List', 14, 16);
+    doc.autoTable({
+      head: [['ID', 'Name', 'Category']],
+      body: [
+        ['1', 'Sample', 'Category1'],
+        // ...your data
+      ],
+      startY: 24,
+      styles: { fontSize: 10 }
+    });
+    doc.save('inventory.pdf');
+  };
+
   return (
     <>
       {(!isLoggedIn || !isAdmin) && (
@@ -74,10 +96,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       <Link className="nav-link" to="/store">Store</Link>
                     </li>
                     <li className="nav-item dropdown">
-                      <a className="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
+                      <button className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Services
-                      </a>
-                      <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
+                      </button>
+                      <ul className="dropdown-menu">
                         <li><Link className="dropdown-item" to="/services/veterinary">Veterinary Service</Link></li>
                         <li><Link className="dropdown-item" to="/services/grooming">Grooming</Link></li>
                         <li><Link className="dropdown-item" to="/services/training">Pet Training</Link></li>
@@ -89,7 +111,6 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                     <li className="nav-item">
                       <Link className="nav-link" to="/faq">FAQ</Link>
                     </li>
-                    {/* Add Payment link next to FAQ */}
                     <li className="nav-item">
                       <Link className="nav-link" to="/payment-checkout">Payment</Link>
                     </li>
@@ -123,10 +144,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       </Link>
                     </li>
                     <li className="nav-item dropdown">
-                      <a className="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                      <button className="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Profile
-                      </a>
-                      <ul className="dropdown-menu" aria-labelledby="profileDropdown">
+                      </button>
+                      <ul className="dropdown-menu">
                         <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
                         <li><Link className="dropdown-item" to="/my-appointments">My Appointments</Link></li>
                         <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
@@ -159,7 +180,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/admin/payment-dashboard">Payments</Link>
+                  <Link className="nav-link" to="/inventory">Inventory</Link>
                 </li>
                 <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
@@ -186,7 +207,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="/add-pet" element={<AddPet />} />
               <Route path="/my-pets" element={<MyPets />} />
-              <Route path="/store" element={<div>Store Page</div>} />
+              <Route path="/store" element={<Store />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/product/:id" element={<ProductView />} />
               <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />
               <Route path="/services/training" element={<div>Pet Training Page</div>} />
@@ -224,10 +247,10 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <div className="col-md-4">
                 <h5>Quick Links</h5>
                 <ul className="list-unstyled">
-                  <li><a href="#" className="text-white">Pet Health Tips</a></li>
-                  <li><a href="#" className="text-white">Find a Vet</a></li>
-                  <li><a href="#" className="text-white">Pet Adoption</a></li>
-                  <li><a href="#" className="text-white">Customer Reviews</a></li>
+                  <li><button className="btn btn-link text-white p-0">Pet Health Tips</button></li>
+                  <li><button className="btn btn-link text-white p-0">Find a Vet</button></li>
+                  <li><button className="btn btn-link text-white p-0">Pet Adoption</button></li>
+                  <li><button className="btn btn-link text-white p-0">Customer Reviews</button></li>
                 </ul>
               </div>
               <div className="col-md-4">
@@ -236,9 +259,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                 <p>Phone: (123) 456-7890</p>
                 <p>Address: 123 Pet Street, Animal City, PC 12345</p>
                 <div>
-                  <a href="#" className="text-white mx-2">Facebook</a>
-                  <a href="#" className="text-white mx-2">Twitter</a>
-                  <a href="#" className="text-white mx-2">Instagram</a>
+                  <button className="btn btn-link text-white mx-2 p-0">Facebook</button>
+                  <button className="btn btn-link text-white mx-2 p-0">Twitter</button>
+                  <button className="btn btn-link text-white mx-2 p-0">Instagram</button>
                 </div>
               </div>
             </div>
@@ -253,9 +276,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
           <div className="container">
             <p>🐾 Admin Control Center © 2025</p>
             <p>
-              <a href="#" className="text-white mx-2">Admin Guide</a> |
-              <a href="#" className="text-white mx-2">System Logs</a> |
-              <a href="#" className="text-white mx-2">Support</a>
+              <button className="btn btn-link text-white mx-2 p-0">Admin Guide</button> |
+              <button className="btn btn-link text-white mx-2 p-0">System Logs</button> |
+              <button className="btn btn-link text-white mx-2 p-0">Support</button>
             </p>
             <p>Email: admin@petcare.com | Phone: (987) 654-3210</p>
           </div>

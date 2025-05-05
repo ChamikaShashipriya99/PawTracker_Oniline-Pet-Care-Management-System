@@ -43,6 +43,7 @@ function Login({ setIsLoggedIn }) {
     
     try {
       const res = await axios.post('http://localhost:5000/api/users/login', formData);
+<<<<<<< HEAD
       
       // Check if user needs verification
       if (res.data.needsVerification) {
@@ -78,6 +79,14 @@ function Login({ setIsLoggedIn }) {
       } else {
         alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
       }
+=======
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      setIsLoggedIn(true);
+      alert('Login successful!');
+      navigate('/profile');
+    } catch (error) {
+      alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
+>>>>>>> Inventory
     }
   };
 

@@ -10,8 +10,11 @@ function UpdateProfile() {
     password: '', // New password field (optional)
     confirmPassword: '' // Confirm password field (optional)
   });
+<<<<<<< HEAD
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(user.profilePhoto ? `http://localhost:5000${user.profilePhoto}` : null);
+=======
+>>>>>>> Inventory
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -19,6 +22,7 @@ function UpdateProfile() {
     setErrors({ ...errors, [e.target.name]: '' }); // Clear error on change
   };
 
+<<<<<<< HEAD
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -39,6 +43,8 @@ function UpdateProfile() {
     }
   };
 
+=======
+>>>>>>> Inventory
   const validateForm = () => {
     const newErrors = {};
     const nameRegex = /^[A-Za-z]+$/;
@@ -79,6 +85,7 @@ function UpdateProfile() {
     }
 
     try {
+<<<<<<< HEAD
       // Create FormData object for multipart/form-data submission
       const formDataToSend = new FormData();
       
@@ -96,6 +103,9 @@ function UpdateProfile() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
+=======
+      const res = await axios.put(`http://localhost:5000/api/users/${user._id}`, dataToSend);
+>>>>>>> Inventory
       localStorage.setItem('user', JSON.stringify(res.data));
       alert('Profile updated successfully!');
       navigate('/profile');
@@ -106,6 +116,7 @@ function UpdateProfile() {
 
   return (
     <div className="container mt-5">
+<<<<<<< HEAD
       <div className="card shadow-lg p-4" style={{ maxWidth: '600px', margin: '0 auto', borderRadius: '15px', border: 'none' }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Update Profile 🐾</h2>
@@ -310,6 +321,108 @@ function UpdateProfile() {
               onClick={() => navigate('/profile')}
             >
               <i className="fas fa-times me-2"></i> Cancel
+=======
+      <div className="card shadow p-4" style={{ maxWidth: '500px', margin: '0 auto', borderRadius: '15px' }}>
+        <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Update Profile 🐾</h2>
+        <form onSubmit={handleSave}>
+          <div className="mb-3">
+            <label>First Name</label>
+            <input
+              type="text"
+              name="firstName"
+              className="form-control"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+              style={{ borderRadius: '10px' }}
+            />
+            {errors.firstName && <small className="text-danger">{errors.firstName}</small>}
+          </div>
+          <div className="mb-3">
+            <label>Last Name</label>
+            <input
+              type="text"
+              name="lastName"
+              className="form-control"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+              style={{ borderRadius: '10px' }}
+            />
+            {errors.lastName && <small className="text-danger">{errors.lastName}</small>}
+          </div>
+          <div className="mb-3">
+            <label>Username</label>
+            <input
+              type="text"
+              name="username"
+              className="form-control"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              style={{ borderRadius: '10px' }}
+            />
+            {errors.username && <small className="text-danger">{errors.username}</small>}
+          </div>
+          <div className="mb-3">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              className="form-control"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              style={{ borderRadius: '10px' }}
+            />
+            {errors.email && <small className="text-danger">{errors.email}</small>}
+          </div>
+          <div className="mb-3">
+            <label>Phone Number</label>
+            <input
+              type="tel"
+              name="phone"
+              className="form-control"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              style={{ borderRadius: '10px' }}
+            />
+            {errors.phone && <small className="text-danger">{errors.phone}</small>}
+          </div>
+          <div className="mb-3">
+            <label>New Password (optional)</label>
+            <input
+              type="password"
+              name="password"
+              className="form-control"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter new password"
+              style={{ borderRadius: '10px' }}
+            />
+            {errors.password && <small className="text-danger">{errors.password}</small>}
+          </div>
+          <div className="mb-3">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              className="form-control"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm new password"
+              style={{ borderRadius: '10px' }}
+            />
+            {errors.confirmPassword && <small className="text-danger">{errors.confirmPassword}</small>}
+          </div>
+          <div className="d-flex justify-content-between">
+            <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>
+              Save
+            </button>
+            <button type="button" className="btn btn-secondary" style={{ borderRadius: '10px' }} onClick={() => navigate('/profile')}>
+              Cancel
+>>>>>>> Inventory
             </button>
           </div>
         </form>

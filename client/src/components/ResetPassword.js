@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+<<<<<<< HEAD
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+=======
+>>>>>>> Inventory
 
 function ResetPassword({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
@@ -23,6 +26,7 @@ function ResetPassword({ setIsLoggedIn }) {
     if (!formData.password) {
       newErrors.password = 'Password is required.';
       valid = false;
+<<<<<<< HEAD
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters long.';
       valid = false;
@@ -37,6 +41,10 @@ function ResetPassword({ setIsLoggedIn }) {
       valid = false;
     } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
       newErrors.password = 'Password must contain at least one special character.';
+=======
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long.';
+>>>>>>> Inventory
       valid = false;
     }
 
@@ -86,7 +94,10 @@ function ResetPassword({ setIsLoggedIn }) {
               style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }}
             />
             {errors.password && <small className="text-danger">{errors.password}</small>}
+<<<<<<< HEAD
             <PasswordStrengthIndicator password={formData.password} />
+=======
+>>>>>>> Inventory
           </div>
           <div className="mb-3">
             <input
