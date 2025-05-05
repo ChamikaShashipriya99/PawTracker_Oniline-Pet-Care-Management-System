@@ -1,29 +1,35 @@
-/* Existing styles */
+/* Home container styles */
 .home-container {
   font-family: 'Arial', sans-serif;
   color: #333;
+  padding-top: 60px;
 }
 
+/* Hero section styles */
 .hero-section {
   background: linear-gradient(135deg, #00c4cc, #007bff);
   color: white;
   padding: 100px 0;
   text-align: center;
+  margin-bottom: 50px;
 }
 
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 
 .hero-title {
   font-size: 3rem;
   margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .hero-subtitle {
   font-size: 1.5rem;
   margin-bottom: 30px;
+  opacity: 0.9;
 }
 
 .hero-btn {
@@ -34,15 +40,19 @@
   border-radius: 25px;
   font-size: 1.2rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .hero-btn:hover {
   background-color: #e04e2d;
+  transform: translateY(-2px);
 }
 
-.content-section, .featured-pets-section {
+/* Content section styles */
+.content-section,
+.featured-pets-section {
   padding: 60px 0;
+  background-color: #f8f9fa;
 }
 
 .section-title {
@@ -50,13 +60,17 @@
   font-size: 2.5rem;
   color: #007bff;
   margin-bottom: 40px;
+  font-weight: bold;
 }
 
+/* Card styles */
 .card {
   border: none;
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
+  background-color: white;
+  height: 100%;
 }
 
 .hover-card:hover {
@@ -72,37 +86,65 @@
   font-size: 1.5rem;
   color: #00c4cc;
   margin-bottom: 15px;
+  font-weight: bold;
 }
 
 .card-body p {
   font-size: 1rem;
   color: #555;
+  line-height: 1.6;
 }
 
 .card-link {
   color: #007bff;
   text-decoration: none;
   font-weight: bold;
+  display: inline-block;
+  margin-top: 10px;
+  transition: color 0.3s;
 }
 
 .card-link:hover {
-  text-decoration: underline;
+  color: #0056b3;
+  text-decoration: none;
 }
 
+/* Image styles */
+.card-img-top {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+/* Animation */
 .fade-in {
   animation: fadeIn 1s ease-in;
 }
 
 @keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* New styles for images */
-.card-img-top {
-  width: 100%;
-  height: 200px; /* Fixed height for consistency */
-  object-fit: cover; /* Ensures images scale nicely */
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
 }
