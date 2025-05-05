@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -23,11 +23,31 @@ function AddPet() {
     return null;
   }
 
+  const calculateAge = (birthday) => {
+    if (!birthday) return '';
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleChange = (e) => {
-    setPet({ ...pet, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const newPet = { ...pet, [name]: value };
+    
+    // If birthday changes, calculate age
+    if (name === 'birthday') {
+      newPet.age = calculateAge(value);
+    }
+
+    setPet(newPet);
 
     // Clear error when user starts typing
-    setErrors({ ...errors, [e.target.name]: '' });
+    setErrors({ ...errors, [name]: '' });
   };
 
   const handleFileChange = (e) => {
@@ -63,7 +83,7 @@ function AddPet() {
     }
   
     if (!pet.age || pet.age <= 0) {
-      newErrors.age = "Age must be a positive number.";
+      newErrors.age = "Age cannot be calculated from birthday.";
     }
   
     if (!pet.weight || pet.weight <= 0) {
