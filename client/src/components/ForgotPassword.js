@@ -6,20 +6,14 @@ function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-<<<<<<< HEAD
   const [previewUrl, setPreviewUrl] = useState('');
-=======
->>>>>>> Inventory
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setEmail(e.target.value);
     setError('');
     setMessage('');
-<<<<<<< HEAD
     setPreviewUrl('');
-=======
->>>>>>> Inventory
   };
 
   const validateForm = () => {
@@ -42,7 +36,6 @@ function ForgotPassword() {
       const res = await axios.post('http://localhost:5000/api/users/forgot-password', { email });
       setMessage(res.data.message);
       setEmail('');
-<<<<<<< HEAD
       
       // If we have a preview URL (from Ethereal Email), set it
       if (res.data.previewUrl) {
@@ -52,10 +45,6 @@ function ForgotPassword() {
       console.error('Forgot password error:', error);
       const errorMessage = error.response?.data?.message || error.response?.data?.error || 'An error occurred. Please try again.';
       setError(errorMessage);
-=======
-    } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred. Please try again.');
->>>>>>> Inventory
     }
   };
 
@@ -82,7 +71,6 @@ function ForgotPassword() {
             Send Reset Link
           </button>
         </form>
-<<<<<<< HEAD
         {previewUrl && (
           <div className="mt-3 text-center">
             <p className="text-info">
@@ -93,8 +81,6 @@ function ForgotPassword() {
             </a>
           </div>
         )}
-=======
->>>>>>> Inventory
         <p className="text-center mt-3" style={{ color: '#555' }}>
           Back to <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>Login</Link>
         </p>
