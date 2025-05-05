@@ -89,7 +89,6 @@ function MyPets() {
 
   return (
     <div className="container mt-5">
-<<<<<<< HEAD
       <div className="card shadow-lg p-4" style={{ borderRadius: '15px', border: 'none' }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="fw-bold" style={{ color: '#00c4cc', margin: 0 }}>
@@ -173,218 +172,91 @@ function MyPets() {
                 </div>
               </div>
             ))}
-=======
-      <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
-        <h2 className="text-center mb-4" style={{ color: '#007bff' }}>My Pets 🐾</h2>
-        {pets.length === 0 ? (
-          <p className="text-center">No pets added yet.</p>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>Pet Name</th>
-                  <th>Breed</th>
-                  <th>Birthday</th>
-                  <th>Age</th>
-                  <th>Weight</th>
-                  <th>Special Conditions</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pets.map(pet => (
-                  <tr key={pet._id}>
-                    <td>{pet.petName}</td>
-                    <td>{pet.breed}</td>
-                    <td>{new Date(pet.birthday).toLocaleDateString()}</td>
-                    <td>{pet.age}</td>
-                    <td>{pet.weight} kg</td>
-                    <td>{pet.specialConditions || 'None'}</td>
-                    <td>
-                      <button
-                        className="btn btn-primary btn-sm me-2"
-                        onClick={() => handleEditPet(pet)}
-                        style={{ borderRadius: '10px' }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDeletePet(pet._id)}
-                        style={{ borderRadius: '10px' }}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
->>>>>>> Inventory
           </div>
         )}
 
         {editPet && (
-<<<<<<< HEAD
-          <div className="mt-5">
-            <div className="card shadow-sm" style={{ borderRadius: '15px', border: 'none' }}>
-              <div className="card-header bg-white py-3" style={{ borderRadius: '15px 15px 0 0' }}>
-                <h3 className="fw-bold mb-0" style={{ color: '#00c4cc' }}>
-                  <i className="fas fa-edit me-2"></i>Edit Pet
-                </h3>
-              </div>
-              <div className="card-body p-4">
-                <form onSubmit={handleUpdatePet}>
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Pet Name</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-paw"></i></span>
-                        <input 
-                          type="text" 
-                          name="petName" 
-                          className="form-control" 
-                          value={editPet.petName} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
+          <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Edit Pet</h5>
+                  <button type="button" className="btn-close" onClick={() => setEditPet(null)}></button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleUpdatePet}>
+                    <div className="mb-3">
+                      <label className="form-label">Pet Name</label>
+                      <input
+                        type="text"
+                        name="petName"
+                        className="form-control"
+                        value={editPet.petName}
+                        onChange={handleChangeEditPet}
+                        required
+                      />
                     </div>
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Breed</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-dog"></i></span>
-                        <input 
-                          type="text" 
-                          name="breed" 
-                          className="form-control" 
-                          value={editPet.breed} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
+                    <div className="mb-3">
+                      <label className="form-label">Breed</label>
+                      <input
+                        type="text"
+                        name="breed"
+                        className="form-control"
+                        value={editPet.breed}
+                        onChange={handleChangeEditPet}
+                        required
+                      />
                     </div>
-                  </div>
-                  
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Birthday</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-calendar-alt"></i></span>
-                        <input 
-                          type="date" 
-                          name="birthday" 
-                          className="form-control" 
-                          value={editPet.birthday.split('T')[0]} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
+                    <div className="mb-3">
+                      <label className="form-label">Birthday</label>
+                      <input
+                        type="date"
+                        name="birthday"
+                        className="form-control"
+                        value={editPet.birthday.split('T')[0]}
+                        onChange={handleChangeEditPet}
+                        required
+                      />
                     </div>
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Age</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-birthday-cake"></i></span>
-                        <input 
-                          type="number" 
-                          name="age" 
-                          className="form-control" 
-                          value={editPet.age} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
+                    <div className="mb-3">
+                      <label className="form-label">Age (years)</label>
+                      <input
+                        type="number"
+                        name="age"
+                        className="form-control"
+                        value={editPet.age}
+                        onChange={handleChangeEditPet}
+                        required
+                      />
                     </div>
-                  </div>
-                  
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Weight (kg)</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-weight"></i></span>
-                        <input 
-                          type="number" 
-                          name="weight" 
-                          className="form-control" 
-                          value={editPet.weight} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
+                    <div className="mb-3">
+                      <label className="form-label">Weight (kg)</label>
+                      <input
+                        type="number"
+                        name="weight"
+                        className="form-control"
+                        value={editPet.weight}
+                        onChange={handleChangeEditPet}
+                        required
+                      />
                     </div>
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Special Conditions</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-notes-medical"></i></span>
-                        <textarea 
-                          name="specialConditions" 
-                          className="form-control" 
-                          value={editPet.specialConditions || ''} 
-                          onChange={handleChangeEditPet} 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
+                    <div className="mb-3">
+                      <label className="form-label">Special Conditions</label>
+                      <textarea
+                        name="specialConditions"
+                        className="form-control"
+                        value={editPet.specialConditions || ''}
+                        onChange={handleChangeEditPet}
+                      />
                     </div>
-                  </div>
-                  
-                  <div className="d-flex justify-content-end mt-4">
-                    <button 
-                      type="button" 
-                      className="btn btn-outline-secondary me-2" 
-                      onClick={() => setEditPet(null)} 
-                      style={{ borderRadius: '10px' }}
-                    >
-                      <i className="fas fa-times me-2"></i>Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary" 
-                      style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
-                    >
-                      <i className="fas fa-save me-2"></i>Update Pet
-                    </button>
-                  </div>
-                </form>
+                    <div className="text-end">
+                      <button type="button" className="btn btn-secondary me-2" onClick={() => setEditPet(null)}>Cancel</button>
+                      <button type="submit" className="btn btn-primary">Update</button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
-=======
-          <div className="mt-4">
-            <h3 style={{ color: '#007bff' }}>Edit Pet</h3>
-            <form onSubmit={handleUpdatePet}>
-              <div className="mb-3">
-              <label>Pet Name</label>
-                <input type="text" name="petName" className="form-control" value={editPet.petName} onChange={handleChangeEditPet} required style={{ borderRadius: '10px' }} />
-              </div>
-              <div className="mb-3">
-              <label>Breed</label>
-                <input type="text" name="breed" className="form-control" value={editPet.breed} onChange={handleChangeEditPet} required style={{ borderRadius: '10px' }} />
-              </div>
-              <div className="mb-3">
-              <label>Birthday</label>
-                <input type="date" name="birthday" className="form-control" value={editPet.birthday.split('T')[0]} onChange={handleChangeEditPet} required style={{ borderRadius: '10px' }} />
-              </div>
-              <div className="mb-3">
-              <label>Age</label>
-                <input type="number" name="age" className="form-control" value={editPet.age} onChange={handleChangeEditPet} required style={{ borderRadius: '10px' }} />
-              </div>
-              <div className="mb-3">
-              <label>Weight</label>
-                <input type="number" name="weight" className="form-control" value={editPet.weight} onChange={handleChangeEditPet} required style={{ borderRadius: '10px' }} />
-              </div>
-              <div className="mb-3">
-              <label>Special Conditions</label>
-                <textarea name="specialConditions" className="form-control" value={editPet.specialConditions || ''} onChange={handleChangeEditPet} style={{ borderRadius: '10px' }} />
-              </div>
-              <button type="submit" className="btn btn-primary me-2" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>Update</button>
-              <button type="button" className="btn btn-secondary" onClick={() => setEditPet(null)} style={{ borderRadius: '10px' }}>Cancel</button>
-            </form>
->>>>>>> Inventory
           </div>
         )}
       </div>
