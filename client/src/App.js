@@ -186,6 +186,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin-feedback">Feedback Management</Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/admin-add">Advertisements</Link>
+                </li>
+                <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
                 </li>
               </ul>
