@@ -1,18 +1,39 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const auth = (req, res, next) => {
+const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
+    const authHeader = req.header('Authorization');
+    if (!authHeader) {
       return res.status(401).json({ message: 'No authentication token, access denied' });
     }
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
-    next();
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: 'Invalid token format' });
+    }
+
+    try {
+      const verified = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(verified._id || verified.id);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      req.user = {
+        id: user._id,
+        isAdmin: user.isAdmin
+      };
+      
+      next();
+    } catch (verifyError) {
+      console.error('Token verification error:', verifyError);
+      return res.status(401).json({ message: 'Token verification failed, authorization denied' });
+    }
   } catch (error) {
-    res.status(401).json({ message: 'Token verification failed, authorization denied' });
+    console.error('Auth middleware error:', error);
+    res.status(500).json({ message: 'Server error during authentication' });
   }
 };
 

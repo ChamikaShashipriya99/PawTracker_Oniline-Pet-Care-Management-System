@@ -167,7 +167,7 @@ router.post('/login', loginValidation, async (req, res) => {
         });
       }
     }
-    
+    const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn : '1d'});
     res.json({ 
       user: { 
         _id: user._id, 
@@ -182,7 +182,8 @@ router.post('/login', loginValidation, async (req, res) => {
         twoFactorEnabled: user.twoFactorEnabled,
         twoFactorVerified: user.twoFactorVerified,
         createdAt: user.createdAt
-      } 
+      },
+      token 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -197,6 +198,9 @@ router.post('/admin/login', loginValidation, async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
+    
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
     res.json({ 
       user: { 
         _id: user._id, 
@@ -208,10 +212,12 @@ router.post('/admin/login', loginValidation, async (req, res) => {
         isAdmin: user.isAdmin, 
         profilePhoto: user.profilePhoto,
         createdAt: user.createdAt
-      } 
+      }, 
+      token 
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Admin login error:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
