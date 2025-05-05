@@ -7,15 +7,12 @@ const multer = require('multer');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-<<<<<<< HEAD
 const jwt = require('jsonwebtoken');
 
 // Ensure JWT secret is always set
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = 'pawtracker_secret_key_2024';
 }
-=======
->>>>>>> Inventory
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -37,7 +34,6 @@ if (!fs.existsSync('uploads')) {
 // Serve uploaded files statically
 router.use('/uploads', express.static('uploads'));
 
-<<<<<<< HEAD
 // Email configuration - Using Ethereal Email for testing
 let transporter;
 
@@ -51,7 +47,7 @@ const createTestAccount = async () => {
       host: 'smtp.ethereal.email',
       port: 587,
       secure: false,
-  auth: {
+      auth: {
         user: testAccount.user,
         pass: testAccount.pass
       }
@@ -65,22 +61,11 @@ const createTestAccount = async () => {
 
 // Initialize the transporter
 createTestAccount();
-=======
-// Email configuration
-const transporter = nodemailer.createTransport({
-  service: 'Gmail',
-  auth: {
-    user: 'myactualemail@gmail.com', // Your actual Gmail address
-    pass: 'abcd-efgh-ijkl-mnop'      // Your Gmail App Password
-  }
-});
->>>>>>> Inventory
 
 // Regular user signup with photo
 router.post('/signup', upload.single('profilePhoto'), async (req, res) => {
   const { firstName, lastName, username, email, phone, password } = req.body;
   const profilePhoto = req.file ? `/uploads/${req.file.filename}` : null;
-<<<<<<< HEAD
   
   try {
     // Check if user already exists
@@ -157,14 +142,6 @@ router.post('/signup', upload.single('profilePhoto'), async (req, res) => {
     }
   } catch (error) {
     console.error('Error during signup:', error);
-=======
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, profilePhoto });
-    await user.save();
-    res.status(201).json({ message: 'User created', user: { ...user.toObject(), password: undefined } });
-  } catch (error) {
->>>>>>> Inventory
     res.status(500).json({ error: error.message });
   }
 });
@@ -190,7 +167,6 @@ router.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-<<<<<<< HEAD
     
     // Check if user is verified
     if (!user.isVerified) {
@@ -279,10 +255,6 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-=======
-    res.json({ user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, username: user.username, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto } });
-  } catch (error) {
->>>>>>> Inventory
     res.status(500).json({ error: error.message });
   }
 });
@@ -295,7 +267,6 @@ router.post('/admin/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
-<<<<<<< HEAD
 
     // Generate JWT token with admin information
     const token = jwt.sign(
@@ -323,9 +294,6 @@ router.post('/admin/login', async (req, res) => {
         profilePhoto: user.profilePhoto 
       } 
     });
-=======
-    res.json({ user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, username: user.username, email: user.email, phone: user.phone, isAdmin: user.isAdmin, profilePhoto: user.profilePhoto } });
->>>>>>> Inventory
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -334,7 +302,6 @@ router.post('/admin/login', async (req, res) => {
 // Forgot Password
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
-<<<<<<< HEAD
   console.log('Forgot password request for email:', email);
   
   try {
@@ -344,13 +311,6 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     console.log('User found:', user._id);
-=======
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
->>>>>>> Inventory
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = Date.now() + 3600000;
@@ -358,18 +318,11 @@ router.post('/forgot-password', async (req, res) => {
     user.resetToken = resetToken;
     user.resetTokenExpiry = resetTokenExpiry;
     await user.save();
-<<<<<<< HEAD
     console.log('Reset token saved for user:', user._id);
 
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
     const mailOptions = {
       from: '"PawTracker" <noreply@pawtracker.com>',
-=======
-
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
-    const mailOptions = {
-      from: 'myactualemail@gmail.com',
->>>>>>> Inventory
       to: email,
       subject: 'Password Reset Request',
       html: `
@@ -379,7 +332,6 @@ router.post('/forgot-password', async (req, res) => {
       `
     };
 
-<<<<<<< HEAD
     console.log('Attempting to send email to:', email);
     try {
       if (!transporter) {
@@ -402,12 +354,6 @@ router.post('/forgot-password', async (req, res) => {
   } catch (error) {
     console.error('Server error details:', error);
     res.status(500).json({ message: 'An error occurred', error: error.message });
-=======
-    await transporter.sendMail(mailOptions);
-    res.json({ message: 'Reset link sent to your email' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
->>>>>>> Inventory
   }
 });
 
@@ -460,11 +406,7 @@ router.post('/admin/add', async (req, res) => {
 });
 
 // Update user (admin or self, with password update)
-<<<<<<< HEAD
 router.put('/:id', upload.single('profilePhoto'), async (req, res) => {
-=======
-router.put('/:id', async (req, res) => {
->>>>>>> Inventory
   const { password, ...otherFields } = req.body; // Separate password from other fields
   try {
     const updateData = { ...otherFields };
@@ -474,7 +416,6 @@ router.put('/:id', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData.password = hashedPassword;
     }
-<<<<<<< HEAD
     
     // If a new profile photo was uploaded, update the profilePhoto field
     if (req.file) {
@@ -506,18 +447,6 @@ router.put('/:id', async (req, res) => {
     res.json(updatedUser);
   } catch (error) {
     console.error('Error updating user:', error);
-=======
-
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    // Return user data without the password
-    const { password: _, ...userWithoutPassword } = user.toObject();
-    res.json(userWithoutPassword);
-  } catch (error) {
->>>>>>> Inventory
     res.status(500).json({ error: error.message });
   }
 });
@@ -577,7 +506,6 @@ router.delete('/pets/:id', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // Verify email
 router.post('/verify-email', async (req, res) => {
   const { email, code } = req.body;
@@ -679,6 +607,4 @@ router.post('/resend-verification', async (req, res) => {
   }
 });
 
-=======
->>>>>>> Inventory
 module.exports = router;
