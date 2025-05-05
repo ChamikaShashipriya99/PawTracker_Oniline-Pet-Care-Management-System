@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-<<<<<<< HEAD
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
-=======
->>>>>>> Inventory
 
 function Signup({ setIsLoggedIn }) {
   const navigate = useNavigate();
@@ -34,15 +31,11 @@ function Signup({ setIsLoggedIn }) {
     if (!user.username.match(/^[A-Za-z0-9]{4,}$/)) newErrors.username = "Username must be at least 4 characters and alphanumeric.";
     if (!user.email.match(/^\S+@\S+\.\S+$/)) newErrors.email = "Enter a valid email address.";
     if (!user.phone.match(/^\d{10}$/)) newErrors.phone = "Phone number must be 10 digits.";
-<<<<<<< HEAD
     if (user.password.length < 8) newErrors.password = "Password must be at least 8 characters long.";
     if (!/\d/.test(user.password)) newErrors.password = "Password must contain at least one number.";
     if (!/[a-z]/.test(user.password)) newErrors.password = "Password must contain at least one lowercase letter.";
     if (!/[A-Z]/.test(user.password)) newErrors.password = "Password must contain at least one uppercase letter.";
     if (!/[^A-Za-z0-9]/.test(user.password)) newErrors.password = "Password must contain at least one special character.";
-=======
-    if (user.password.length < 6) newErrors.password = "Password must be at least 6 characters long.";
->>>>>>> Inventory
     if (profilePhoto && !profilePhoto.type.startsWith('image/')) newErrors.profilePhoto = "Only image files are allowed.";
     
     setErrors(newErrors);
@@ -54,22 +47,15 @@ function Signup({ setIsLoggedIn }) {
     if (!validateForm()) return;
 
     const formData = new FormData();
-<<<<<<< HEAD
     Object.keys(user).forEach(key => {
       formData.append(key, user[key]);
     });
-=======
-    for (const key in user) {
-      formData.append(key, user[key]);
-    }
->>>>>>> Inventory
     if (profilePhoto) {
       formData.append('profilePhoto', profilePhoto);
     }
 
     try {
       const res = await axios.post('http://localhost:5000/api/users/signup', formData, {
-<<<<<<< HEAD
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -90,16 +76,6 @@ function Signup({ setIsLoggedIn }) {
       });
     } catch (error) {
       alert('Registration failed: ' + (error.response?.data?.error || 'Unknown error'));
-=======
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      setIsLoggedIn(true);
-      alert('Signup successful!');
-      navigate('/Login');
-    } catch (error) {
-      alert('Signup failed: ' + error.message);
->>>>>>> Inventory
     }
   };
 
@@ -136,10 +112,7 @@ function Signup({ setIsLoggedIn }) {
             <div className="col-md-6 mb-3">
               <input type="password" name="password" className="form-control" placeholder="Password" value={user.password} onChange={handleChange} required style={{ borderRadius: '10px' }} />
               {errors.password && <small className="text-danger">{errors.password}</small>}
-<<<<<<< HEAD
               <PasswordStrengthIndicator password={user.password} />
-=======
->>>>>>> Inventory
             </div>
           </div>
           <div className="mb-3">
