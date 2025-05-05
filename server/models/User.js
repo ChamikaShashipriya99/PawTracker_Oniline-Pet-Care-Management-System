@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
   isAdmin: { type: Boolean, default: false },
   profilePhoto: { type: String },
   resetToken: { type: String }, 
-<<<<<<< HEAD
   resetTokenExpiry: { type: Date },
   isVerified: { type: Boolean, default: false },
   verificationCode: { type: String },
@@ -24,9 +23,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-=======
-  resetTokenExpiry: { type: Date } 
->>>>>>> Inventory
 });
 
 module.exports = mongoose.model('User', userSchema);
