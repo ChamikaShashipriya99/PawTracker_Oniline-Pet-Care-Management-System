@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import Inventory from '../models/Inventory.js';
+
 const router = express.Router();
-const Inventory = require('../models/Inventory');
 
 // Get all items
 router.get('/', async (req, res) => {
@@ -14,7 +15,14 @@ router.get('/', async (req, res) => {
 
 // Add new item
 router.post('/', async (req, res) => {
-  const item = new Inventory(req.body);
+  const item = new Inventory({
+    name: req.body.name,
+    category: req.body.category,
+    description: req.body.description,
+    quantity: req.body.quantity,
+    price: req.body.price
+  });
+
   try {
     const newItem = await item.save();
     res.status(201).json(newItem);
@@ -55,4 +63,4 @@ router.post('/:id/stock', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

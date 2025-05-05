@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator');
+import { body, validationResult } from 'express-validator';
 
 // Validation middleware to check for errors
 const validate = (req, res, next) => {
@@ -274,7 +274,7 @@ const forgotPasswordValidation = [
   validate
 ];
 
-module.exports = {
+export {
   signupValidation,
   loginValidation,
   adminSignupValidation,

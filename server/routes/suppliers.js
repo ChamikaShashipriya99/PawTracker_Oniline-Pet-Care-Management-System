@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import Supplier from '../models/Supplier.js';
+
 const router = express.Router();
-const Supplier = require('../models/Supplier');
 
 // Get all suppliers
 router.get('/', async (req, res) => {
@@ -106,4 +107,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 
