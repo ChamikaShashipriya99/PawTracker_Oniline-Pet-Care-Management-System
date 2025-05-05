@@ -247,28 +247,23 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/advertisements/add" element={<AddAdvertisement />} />
               <Route path="/advertisements/my-ads" element={<MyAdvertisement />} />
               <Route path="/advertisements/edit/:id" element={<EditAdvertisement />} />
-=======
               <Route path="/store" element={<Store />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/product/:id" element={<ProductView />} />
->>>>>>> origin/Inventory
               <Route path="/services/veterinary" element={<div>Veterinary Service Page</div>} />
               <Route path="/services/grooming" element={<div>Grooming Page</div>} />
               <Route path="/services/training" element={<div>Pet Training Page</div>} />
-              <Route path="/advertising" element={<div>Advertising Page</div>} />
+              <Route path="/advertising" element={<CreateAdvertisement/>} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/ad-dashboard" element={<AdvertistmentDashboard/>} />
-              <Route path="/faq" element={<div>FAQ Page</div>} />
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
               <Route path="/my-advertisements" element={<MyAdvertisement/>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
-<<<<<<< HEAD
-              <Route path="/advertising" element={<CreateAdvertisement/>}/>
-              <Route path="/show-add" element={<ShowAdvertisement/>}/>
-              <Route path="/delete-add" element={<DeleteAdvertisement/>}/>
-              <Route path="/edit-add/:id" element={<EditAdvertisement/>}/>
-              <Route path="/admin-add" element={<AdminAdvertisement/>}/>
+              <Route path="/show-add" element={<ShowAdvertisement/>} />
+              <Route path="/delete-add" element={<DeleteAdvertisement/>} />
+              <Route path="/edit-add/:id" element={<EditAdvertisement/>} />
+              <Route path="/admin-add" element={<AdminAdvertisement/>} />
               <Route path="/my-feedback" element={<MyFeedback />} />
               <Route path="/submit-feedback" element={<FeedbackForm />} />
             </>
@@ -277,9 +272,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
             <>
               <Route path="/admin-feedback" element={<AdminFeedback />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
-=======
               <Route path="/inventory" element={<InventoryTable />} />
->>>>>>> origin/Inventory
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
