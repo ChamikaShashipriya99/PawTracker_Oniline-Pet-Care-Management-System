@@ -15,9 +15,8 @@ import ResetPassword from './components/ResetPassword';
 import EmailVerification from './components/EmailVerification';
 import FAQ from './components/FAQ';
 import Contact from './components/Contact';
-<<<<<<< HEAD
 import CreateAdvertisement from './components/CreateAdvertisement';
-import AdvertisementDashboard from './components/AdvertistmentDashboard';
+import AdvertistmentDashboard from './components/AdvertistmentDashboard';
 import MyAdvertisement from './components/MyAdvertisement';
 import ShowAdvertisement from './components/ShowAdvertisement';
 import DeleteAdvertisement from './components/DeleteAdvertisement';
@@ -25,11 +24,9 @@ import EditAdvertisement from './components/EditAdvertisement';
 import AdminAdvertisement from './components/AdminAdvertisement';
 import AddAdvertisement from './components/AddAdvertisement';
 import Vaccinations from './components/Vaccinations';
-=======
 import FeedbackForm from './components/FeedbackForm';
 import MyFeedback from './components/MyFeedback';
-import AdminFeedback from './components/AdminFeedback'; 
->>>>>>> origin/Feedback
+import AdminFeedback from './components/AdminFeedback';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -117,11 +114,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                       <Link className="nav-link" to="/faq">FAQ</Link>
                     </li>
                     <li className="nav-item">
-<<<<<<< HEAD
-                      <Link className="nav-link" to="/feedback">Feedback</Link>
-=======
                       <Link className="nav-link" to="/submit-feedback">Feedback</Link>
->>>>>>> origin/Feedback
                     </li>
                   </>
                 )}
@@ -190,11 +183,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="nav-item">
-<<<<<<< HEAD
-                  <Link className="nav-link" to="/admin-add">Advertisement</Link>
-=======
                   <Link className="nav-link" to="/admin-feedback">Feedback Management</Link>
->>>>>>> origin/Feedback
                 </li>
                 <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
@@ -232,19 +221,16 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
               <Route path="/advertising" element={<div>Advertising Page</div>} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/ad-dashboard" element={<AdvertisementDashboard/>} />
+              <Route path="/ad-dashboard" element={<AdvertistmentDashboard/>} />
               <Route path="/faq" element={<div>FAQ Page</div>} />
               <Route path="/my-appointments" element={<div>My Appointments Page</div>} />
               <Route path="/my-advertisements" element={<MyAdvertisement/>} />
               <Route path="/my-payments" element={<div>My Payments Page</div>} />
-<<<<<<< HEAD
               <Route path="/advertising" element={<CreateAdvertisement/>}/>
               <Route path="/show-add" element={<ShowAdvertisement/>}/>
               <Route path="/delete-add" element={<DeleteAdvertisement/>}/>
               <Route path="/edit-add/:id" element={<EditAdvertisement/>}/>
               <Route path="/admin-add" element={<AdminAdvertisement/>}/>
-            
-=======
               <Route path="/my-feedback" element={<MyFeedback />} />
               <Route path="/submit-feedback" element={<FeedbackForm />} />
             </>
@@ -253,7 +239,6 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
             <>
               <Route path="/admin-feedback" element={<AdminFeedback />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
->>>>>>> origin/Feedback
             </>
           )}
           <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />

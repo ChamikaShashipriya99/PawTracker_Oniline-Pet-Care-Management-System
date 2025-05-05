@@ -2,6 +2,7 @@ import express from 'express';
 import User from '../models/User.js';
 import Pet from '../models/Pet.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import path from 'path';
 import nodemailer from 'nodemailer';

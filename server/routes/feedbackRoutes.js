@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import Feedback from '../models/Feedback.js';
+import auth from '../middleware/auth.js';
+import User from '../models/User.js';
+
 const router = express.Router();
-const Feedback = require('../models/Feedback');
-const auth = require('../middleware/auth');
-const User = require('../models/User');
 
 // Create new feedback
 router.post('/', auth, async (req, res) => {
@@ -143,4 +144,4 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
-module.exports = router; 
+export default router; 
