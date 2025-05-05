@@ -185,7 +185,7 @@ const AdminRefundDashboard = () => {
         refund.refundId,
         refund.transactionId,
         refund.email,
-        `LKR ${refund.amount.toFixed(2)}`,
+        `Rs. ${refund.amount.toFixed(2)}`,
         refund.createdAt ? new Date(refund.createdAt).toLocaleDateString() : '—',
         refund.actionDate ? new Date(refund.actionDate).toLocaleDateString() : '—',
         refund.reason,
@@ -371,7 +371,7 @@ const AdminRefundDashboard = () => {
                         <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{refund.refundId}</td>
                         <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{refund.transactionId}</td>
                         <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{refund.email}</td>
-                        <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{`LKR ${refund.amount.toFixed(2)}`}</td>
+                        <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{`Rs. ${refund.amount.toFixed(2)}`}</td>
                         <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{refund.reason}</td>
                         <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{formatDateTime(refund.createdAt)}</td>
                         <td style={{ padding: '8px', fontSize: '0.95rem', textAlign: 'center' }}>{refund.actionDate ? formatDateTime(refund.actionDate) : '—'}</td>

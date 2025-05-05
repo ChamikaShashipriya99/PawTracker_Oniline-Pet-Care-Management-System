@@ -41,7 +41,7 @@ const PaymentConfirmation = () => {
               <strong>Transaction ID:</strong> {payment.transactionId}
             </p>
             <p className="mb-2">
-              <strong>Amount:</strong> LKR {payment.amount?.toFixed(2)}
+              <strong>Amount:</strong> Rs. {payment.amount?.toFixed(2)}
             </p>
             <p className="mb-2">
               <strong>Payment Method:</strong> {payment.payment_method}

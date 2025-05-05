@@ -110,7 +110,7 @@ const PaymentHistory = () => {
   });
   const [notifications, setNotifications] = useState([]);
   const [lastChecked, setLastChecked] = useState(new Date().toISOString());
-  const [currencySymbol, setCurrencySymbol] = useState('LKR ');
+  const [currencySymbol, setCurrencySymbol] = useState('Rs. ');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState({ key: 'paymentDate', direction: 'desc' });
@@ -493,7 +493,7 @@ const PaymentHistory = () => {
     ];
       const tableRows = filteredPayments.map(payment => [
       payment.transactionId,
-        `LKR ${parseFloat(payment.amount).toFixed(2)}`,
+        `Rs. ${parseFloat(payment.amount).toFixed(2)}`,
         payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : '—',
         payment.status.charAt(0).toUpperCase() + payment.status.slice(1),
       payment.purpose,

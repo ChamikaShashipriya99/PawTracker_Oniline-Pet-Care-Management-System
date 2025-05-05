@@ -111,7 +111,7 @@ const AdminPaymentDashboard = () => {
         payment.transactionId,
         payment.userId,
         payment.email,
-        `LKR ${payment.amount.toFixed(2)}`,
+        `Rs. ${payment.amount.toFixed(2)}`,
         payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : '—',
         payment.status.charAt(0).toUpperCase() + payment.status.slice(1),
         payment.purpose,
@@ -288,7 +288,7 @@ const AdminPaymentDashboard = () => {
                         <td style={{ padding: '12px', fontSize: '0.9rem' }}>{payment.transactionId}</td>
                         <td style={{ padding: '12px', fontSize: '0.9rem' }}>{payment.userId}</td>
                         <td style={{ padding: '12px', fontSize: '0.9rem' }}>{payment.email}</td>
-                        <td style={{ padding: '12px', fontSize: '0.9rem' }}>{`LKR ${payment.amount.toFixed(2)}`}</td>
+                        <td style={{ padding: '12px', fontSize: '0.9rem' }}>{`Rs. ${payment.amount.toFixed(2)}`}</td>
                         <td style={{ padding: '12px', fontSize: '0.9rem' }}>{formatDateTime(payment.paymentDate)}</td>
                         <td style={{ padding: '12px', fontSize: '0.9rem' }}>
                           <span className={`badge ${payment.status === 'paid' ? 'bg-success' : payment.status === 'failed' ? 'bg-danger' : 'bg-warning'} p-2`}>
