@@ -89,6 +89,15 @@ function MyAppointments() {
 
     const handleViewAppointment = (id) => navigate(`/view-appointment/${id}`);
     const handleEditAppointment = (id) => navigate(`/edit-appointment/${id}`);
+    
+    const handleProceedToPay = (appointmentId) => {
+        // You can implement payment processing logic here
+        // For now, we'll just show an alert
+        alert(`Proceeding to payment for appointment ${appointmentId}`);
+        // In a real implementation, you would navigate to a payment page or open a payment modal
+        // navigate(`/payment/${appointmentId}`);
+    };
+    
     const handleDeleteAppointment = async (id) => {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
             try {
@@ -125,18 +134,19 @@ function MyAppointments() {
         doc.text('Appointment Details', 105, 30, { align: 'center' });
 
         // Table
-        const tableData = [[
-            `${appointment.serviceType}${appointment.trainingType !== 'N/A' ? ` (${appointment.trainingType})` : ''}`,
-            `${formatDate(appointment.date)} at ${appointment.time}`,
-            appointment.status,
-            `${appointment.petOwner}`,
-            appointment.petName,
-            appointment.notes || 'N/A'
-        ]];
+        const tableData = [
+            ['Service', `${appointment.serviceType}${appointment.trainingType !== 'N/A' ? ` (${appointment.trainingType})` : ''}`],
+            ['Date & Time', `${formatDate(appointment.date)} at ${appointment.time}`],
+            ['Amount', `Rs. ${appointment.amount || 'N/A'}`],
+            ['Status', appointment.status],
+            ['Pet Owner', appointment.petOwner],
+            ['Pet Name', appointment.petName],
+            ['Notes', appointment.notes || 'N/A']
+        ];
 
         autoTable(doc, {
             startY: 40,
-            head: [['Service', 'Date & Time', 'Status', 'Pet Owner', 'Pet Name', 'Notes']],
+            head: [['Detail', 'Information']],
             body: tableData,
             theme: 'grid',
             styles: { fontSize: 10, cellPadding: 3 },
@@ -272,6 +282,7 @@ function MyAppointments() {
                                                 <th>Pet Owner</th>
                                                 <th>Pet Name</th>
                                                 <th>Date & Time</th>
+                                                <th>Amount (Rs.)</th>
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -286,6 +297,7 @@ function MyAppointments() {
                                                     <td>{appointment.petOwner}</td>
                                                     <td>{appointment.petName}</td>
                                                     <td>{formatDate(appointment.date)} at {appointment.time}</td>
+                                                    <td>{appointment.amount || 'N/A'}</td>
                                                     <td className={`status-${appointment.status.toLowerCase()}`}>{appointment.status}</td>
                                                     <td>
                                                         <div className="action-buttons">
@@ -301,6 +313,15 @@ function MyAppointments() {
                                                                         Cancel
                                                                     </button>
                                                                 </>
+                                                            )}
+                                                            {appointment.status === 'Approved' && (
+                                                                <button 
+                                                                    className="hero-btn pay-button" 
+                                                                    onClick={() => handleProceedToPay(appointment._id)}
+                                                                    style={{ backgroundColor: '#4CAF50' }}
+                                                                >
+                                                                    Proceed to Pay
+                                                                </button>
                                                             )}
                                                             <button className="hero-btn download-button" onClick={() => downloadPDF(appointment)}>
                                                                 Download PDF

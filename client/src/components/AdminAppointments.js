@@ -191,7 +191,7 @@ function AdminAppointments() {
             `${appointment.serviceType}${appointment.trainingType !== 'N/A' ? ` (${appointment.trainingType})` : ''}`,
             `${formatDate(appointment.date)} at ${appointment.time}`,
             appointment.status,
-            `Rs.${appointment.amount ?? 'N/A'}`,
+            `Rs.${appointment.amount || 'N/A'}`,
             appointment.petOwner,
             appointment.petName,
             appointment.notes || 'N/A'
@@ -239,7 +239,7 @@ function AdminAppointments() {
             `${appointment.serviceType}${appointment.trainingType !== 'N/A' ? ` (${appointment.trainingType})` : ''}`,
             `${formatDate(appointment.date)} at ${appointment.time}`,
             appointment.status,
-            `Rs.${appointment.amount ?? 'N/A'}`,
+            `Rs.${appointment.amount || 'N/A'}`,
             appointment.petOwner,
             appointment.petName,
             appointment.notes || 'N/A'
@@ -461,7 +461,7 @@ function AdminAppointments() {
                                                     <td>{appointment.petOwner}</td>
                                                     <td>{appointment.petName}</td>
                                                     <td className={`status-${appointment.status.toLowerCase()}`}>{appointment.status}</td>
-                                                    <td>Rs.{appointment.amount ?? 'N/A'}</td>
+                                                    <td>Rs.{appointment.amount || 'N/A'}</td>
                                                     <td>
                                                         <div className="d-flex flex-column align-items-start gap-1">
                                                             {isFinalStatus(appointment.status) ? (
@@ -529,7 +529,7 @@ function AdminAppointments() {
                                 <p><strong>Pet Owner:</strong> {selectedAppointment.petOwner}</p>
                                 <p><strong>Pet Name:</strong> {selectedAppointment.petName}</p>
                                 <p><strong>Status:</strong> {selectedAppointment.status}</p>
-                                <p><strong>Amount:</strong> Rs.{selectedAppointment.amount ?? 'N/A'}</p>
+                                <p><strong>Amount:</strong> Rs.{selectedAppointment.amount || 'N/A'}</p>
                                 <p><strong>Notes:</strong> {selectedAppointment.notes || 'N/A'}</p>
                             </div>
                             <div className="modal-footer">

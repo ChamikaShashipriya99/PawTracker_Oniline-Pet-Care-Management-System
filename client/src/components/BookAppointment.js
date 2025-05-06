@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Service.css';
@@ -22,21 +22,67 @@ function BookAppointment() {
         petOwner: userName,
         petName: '',
         serviceType: initialServiceType,
-        trainingType: initialTrainingType,
+        trainingType: initialServiceType === 'Pet Training' ? (initialTrainingType || 'Private') : 'N/A',
         date: '',
         time: '',
-        notes: ''
+        notes: '',
+        amount: 0
     });
+
+    // Calculate initial amount when component mounts or initial values change
+    useEffect(() => {
+        if (initialServiceType) {
+            const trainingType = initialServiceType === 'Pet Training' ? (initialTrainingType || 'Private') : 'N/A';
+            const calculatedAmount = calculateAmount(initialServiceType, trainingType);
+            setFormData(prev => ({
+                ...prev,
+                amount: calculatedAmount,
+                trainingType: trainingType
+            }));
+        }
+    }, [initialServiceType, initialTrainingType]);
     const [errors, setErrors] = useState({});
     const [notification, setNotification] = useState({ message: '', type: '' });
 
+    const calculateAmount = (serviceType, trainingType = 'N/A') => {
+        console.log('Calculating amount for:', { serviceType, trainingType });
+        switch (serviceType) {
+            case 'Vet Service':
+                return 5000;
+            case 'Pet Grooming':
+                return 4500;
+            case 'Pet Training':
+                // Check for exact string match
+                if (trainingType === 'Private') {
+                    return 7500;
+                } else if (trainingType === 'Group') {
+                    return 3500;
+                }
+                // Default to private training amount if training type is not set
+                return 7500;
+            default:
+                return 0;
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
+        
+        const updatedFormData = {
+            ...formData,
             [name]: value,
             ...(name === 'serviceType' && value !== 'Pet Training' ? { trainingType: 'N/A' } : {})
-        }));
+        };
+
+        // Recalculate amount when service type or training type changes
+        if (name === 'serviceType' || name === 'trainingType') {
+            updatedFormData.amount = calculateAmount(
+                name === 'serviceType' ? value : formData.serviceType,
+                name === 'trainingType' ? value : formData.trainingType
+            );
+        }
+
+        setFormData(updatedFormData);
         setErrors(prev => ({ ...prev, [name]: '' }));
         setNotification({ message: '', type: '' });
     };
@@ -244,7 +290,42 @@ function BookAppointment() {
                                     ></textarea>
                                 </div>
 
-                                <button type="submit" className="hero-btn submit-button">Confirm Appointment</button>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '20px',
+                                    marginTop: '20px',
+                                    flexWrap: 'wrap'
+                                }}>
+                                    {formData.amount > 0 && (
+                                        <div style={{
+                                            padding: '10px 15px',
+                                            backgroundColor: '#f8f9fa',
+                                            borderRadius: '5px',
+                                            border: '1px solid #dee2e6',
+                                            fontSize: '1.1em',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px'
+                                        }}>
+                                            <span>Service Charge:</span>
+                                            <span style={{ 
+                                                color: '#28a745',
+                                                fontWeight: 'bold',
+                                                fontSize: '1.2em'
+                                            }}>
+                                                Rs. {formData.amount.toLocaleString()}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <button 
+                                        type="submit" 
+                                        className="hero-btn submit-button"
+                                        style={{ margin: 0 }}
+                                    >
+                                        Confirm Appointment
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>

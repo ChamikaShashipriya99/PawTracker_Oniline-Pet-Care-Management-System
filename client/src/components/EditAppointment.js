@@ -312,7 +312,7 @@ function EditAppointment() {
                                 </div>
 
                                 <div className="amount-display">
-                                    Total Amount: Rs.{amount ?? 'N/A'}
+                                    Total Amount: Rs.{amount || 'N/A'}
                                 </div>
 
                                 <div className="action-buttons">

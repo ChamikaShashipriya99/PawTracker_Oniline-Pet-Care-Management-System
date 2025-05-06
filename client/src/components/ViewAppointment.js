@@ -181,7 +181,7 @@ function ViewAppointment() {
                             </div>
                             <div className="detail-item">
                                 <span className="detail-label">Amount:</span>
-                                <span className="detail-value">Rs.{appointment.amount ?? 'N/A'}</span>
+                                <span className="detail-value">Rs.{appointment.amount || 'N/A'}</span>
                             </div>
                             {appointment.notes && (
                                 <div className="detail-item">

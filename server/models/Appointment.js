@@ -38,6 +38,11 @@ const appointmentSchema = new mongoose.Schema({
         required: [true, 'Time is required'],
         match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
     },
+    amount: {
+        type: Number,
+        required: [true, 'Amount is required'],
+        min: [0, 'Amount cannot be negative']
+    },
     notes: {
         type: String,
         trim: true,
