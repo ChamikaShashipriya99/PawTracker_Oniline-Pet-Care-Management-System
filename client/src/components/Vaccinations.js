@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 function Vaccinations() {
   const { id } = useParams();
@@ -20,7 +21,7 @@ function Vaccinations() {
   useEffect(() => {
     const fetchPet = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/pets/${id}`);
+        const res = await axios.get(`${config.API_URL}/users/pets/${id}`);
         if (!res.data) {
           throw new Error('Pet not found');
         }
@@ -74,7 +75,7 @@ function Vaccinations() {
         isCompleted: Boolean(newVaccination.isCompleted)
       };
 
-      const res = await axios.post(`http://localhost:5000/api/users/pets/${id}/vaccinations`, formattedVaccination);
+      const res = await axios.post(`${config.API_URL}/users/pets/${id}/vaccinations`, formattedVaccination);
       
       // Add the new vaccination to the beginning of the list and sort
       const updatedVaccinations = [...vaccinations, res.data].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -103,7 +104,7 @@ function Vaccinations() {
   const handleDeleteVaccination = async (vaccinationId) => {
     if (window.confirm('Are you sure you want to delete this vaccination?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/users/pets/${id}/vaccinations/${vaccinationId}`);
+        await axios.delete(`${config.API_URL}/users/pets/${id}/vaccinations/${vaccinationId}`);
         setVaccinations(vaccinations.filter(v => v._id !== vaccinationId));
         setStatusMessage('Vaccination deleted successfully!');
         setStatusType('success');
@@ -127,7 +128,7 @@ function Vaccinations() {
         isCompleted: Boolean(updatedData.isCompleted)
       };
 
-      const res = await axios.put(`http://localhost:5000/api/users/pets/${id}/vaccinations/${vaccinationId}`, formattedData);
+      const res = await axios.put(`${config.API_URL}/users/pets/${id}/vaccinations/${vaccinationId}`, formattedData);
       
       // Update the vaccinations list and maintain sort order
       const updatedVaccinations = vaccinations.map(v => 

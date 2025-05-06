@@ -316,7 +316,7 @@ function MyPets() {
                     <div className="text-center mb-3">
                       {pet.photo ? (
                         <img 
-                          src={`${config.API_URL}${pet.photo}`} 
+                          src={`${config.UPLOADS_URL}${pet.photo}`} 
                           alt={pet.name} 
                           className="img-fluid rounded mb-3" 
                           style={{ 

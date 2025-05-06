@@ -4,6 +4,7 @@ import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import TwoFactorSetup from './TwoFactorSetup';
+import config from '../config';
 
 function Profile() {
   const user = JSON.parse(localStorage.getItem('user'));
@@ -22,7 +23,7 @@ function Profile() {
 
     const fetchPets = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/pets/${user._id}`);
+        const res = await axios.get(`${config.API_URL}/users/pets/${user._id}`);
         setPets(res.data);
       } catch (error) {
         console.error('Failed to fetch pets:', error.message);
@@ -43,7 +44,7 @@ function Profile() {
   const handleDeletePet = async (petId) => {
     if (window.confirm('Are you sure you want to delete this pet?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/users/pets/${petId}`);
+        await axios.delete(`${config.API_URL}/users/pets/${petId}`);
         setPets(pets.filter(pet => pet._id !== petId));
         setStatusMessage('Pet deleted successfully!');
         setStatusType('success');
@@ -64,7 +65,7 @@ function Profile() {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
-        await axios.delete(`http://localhost:5000/api/users/${user._id}`);
+        await axios.delete(`${config.API_URL}/users/${user._id}`);
         localStorage.removeItem('user');
         alert('Account deleted successfully!');
         navigate('/login');
@@ -259,7 +260,7 @@ function Profile() {
               <div className="card-body text-center">
                 {user.profilePhoto ? (
                   <img 
-                    src={`http://localhost:5000${user.profilePhoto}`} 
+                    src={`${config.UPLOADS_URL}${user.profilePhoto}`} 
                     alt="Profile" 
                     className="img-fluid rounded-circle mb-3" 
                     style={{ 
@@ -554,7 +555,7 @@ function Profile() {
                       <div className="text-center mb-3">
                         {pet.photo ? (
                           <img 
-                            src={`http://localhost:5000${pet.photo}`} 
+                            src={`${config.UPLOADS_URL}${pet.photo}`} 
                             alt={pet.name} 
                             className="img-fluid rounded mb-3" 
                             style={{ 

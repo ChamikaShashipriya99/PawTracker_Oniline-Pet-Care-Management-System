@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 function TwoFactorSetup({ user, onClose, onStatusChange }) {
   // Check if user already has 2FA enabled and set initial UI accordingly
@@ -17,7 +18,7 @@ function TwoFactorSetup({ user, onClose, onStatusChange }) {
 
   const handleGenerate2FA = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/users/generate-2fa', {
+      const response = await axios.post(`${config.API_URL}/users/generate-2fa`, {
         userId: user._id
       });
       setQrCode(response.data.qrCode);
@@ -32,7 +33,7 @@ function TwoFactorSetup({ user, onClose, onStatusChange }) {
   const handleVerifySetup = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/users/verify-2fa-setup', {
+      const response = await axios.post(`${config.API_URL}/users/verify-2fa-setup`, {
         userId: user._id,
         token
       });
@@ -61,7 +62,7 @@ function TwoFactorSetup({ user, onClose, onStatusChange }) {
   const handleDisable2FA = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/users/disable-2fa', {
+      const response = await axios.post(`${config.API_URL}/users/disable-2fa`, {
         userId: user._id,
         token
       });
