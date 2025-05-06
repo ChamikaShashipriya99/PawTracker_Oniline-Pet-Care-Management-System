@@ -13,7 +13,7 @@ const ShowAdvertisement = () => {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`http://localhost:5000/advertisements/details/${id}`)
+      .get(`${config.API_URL}/advertisements/details/${id}`)
       .then((response) => {
         setAdvertisement(response.data);
         setLoading(false);
@@ -93,7 +93,7 @@ const ShowAdvertisement = () => {
                       <div className="detail-row">
                         <span className="detail-label">Image:</span>
                         <img
-                          src={`${config.API_URL}/uploads/${advertisement.photo}`}
+                          src={`${config.UPLOADS_URL}/uploads/${advertisement.photo}`}
                           alt={advertisement.heading}
                           className="detail-img"
                         />

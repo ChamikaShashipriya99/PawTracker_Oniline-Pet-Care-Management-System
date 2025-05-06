@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 function UpdateProfile() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ function UpdateProfile() {
     confirmPassword: '' // Confirm password field (optional)
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(user.profilePhoto ? `http://localhost:5000${user.profilePhoto}` : null);
+  const [photoPreview, setPhotoPreview] = useState(user.profilePhoto ? `${config.UPLOADS_URL}${user.profilePhoto}` : null);
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -41,16 +42,16 @@ function UpdateProfile() {
 
   const validateForm = () => {
     const newErrors = {};
-    const nameRegex = /^[A-Za-z]+$/;
-    const usernameRegex = /^[A-Za-z0-9]+$/;
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const usernameRegex = /^[A-Za-z0-9_]+$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/;
+    const phoneRegex = /^[\d\s-+()]+$/;
 
-    if (!nameRegex.test(formData.firstName)) newErrors.firstName = "First name must contain only letters.";
-    if (!nameRegex.test(formData.lastName)) newErrors.lastName = "Last name must contain only letters.";
-    if (!usernameRegex.test(formData.username)) newErrors.username = "Username must be alphanumeric.";
+    if (!nameRegex.test(formData.firstName)) newErrors.firstName = "First name must contain only letters and spaces.";
+    if (!nameRegex.test(formData.lastName)) newErrors.lastName = "Last name must contain only letters and spaces.";
+    if (!usernameRegex.test(formData.username)) newErrors.username = "Username must be alphanumeric with optional underscores.";
     if (!emailRegex.test(formData.email)) newErrors.email = "Invalid email format.";
-    if (!phoneRegex.test(formData.phone)) newErrors.phone = "Phone number must be 10 digits.";
+    if (!phoneRegex.test(formData.phone)) newErrors.phone = "Invalid phone number format.";
 
     // Password validation (only if user is updating it)
     if (formData.password) {
@@ -92,7 +93,7 @@ function UpdateProfile() {
         formDataToSend.append('profilePhoto', profilePhoto);
       }
       
-      const res = await axios.put(`http://localhost:5000/api/users/${user._id}`, formDataToSend, {
+      const res = await axios.put(`${config.API_URL}/users/${user._id}`, formDataToSend, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -120,7 +121,7 @@ function UpdateProfile() {
         
         <form onSubmit={handleSave}>
           <div className="card mb-4" style={{ borderRadius: '10px', backgroundColor: '#f8f9fa' }}>
-            <div className="card-body text-center">
+            <div className="card-body">
               <h5 className="card-title mb-3" style={{ color: '#007bff' }}>Profile Photo</h5>
               <div className="mb-3">
                 {photoPreview ? (
@@ -289,7 +290,7 @@ function UpdateProfile() {
             </div>
           </div>
           
-          <div className="d-flex justify-content-between mt-4">
+          <div className="d-flex justify-content-end">
             <button 
               type="submit" 
               className="btn btn-primary px-4 py-2" 
@@ -305,7 +306,7 @@ function UpdateProfile() {
             </button>
             <button 
               type="button" 
-              className="btn btn-outline-secondary px-4 py-2" 
+              className="btn btn-outline-secondary px-4 py-2 ms-2" 
               style={{ borderRadius: '10px' }} 
               onClick={() => navigate('/profile')}
             >
@@ -314,8 +315,6 @@ function UpdateProfile() {
           </div>
         </form>
       </div>
-      <br></br>
-      <br></br>
     </div>
   );
 }

@@ -96,7 +96,7 @@ const AdminAdvertisement = () => {
                           <td>
                             {ad.photo && (
                               <img
-                                src={`${config.API_URL}/uploads/${ad.photo}`}
+                                src={`${config.UPLOADS_URL}/uploads/${ad.photo}`}
                                 alt={ad.heading}
                                 className="img-thumbnail"
                                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
