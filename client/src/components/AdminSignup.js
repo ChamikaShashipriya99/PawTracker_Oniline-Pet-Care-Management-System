@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 function AdminSignup() {
   const [formData, setFormData] = useState({
@@ -45,7 +46,7 @@ function AdminSignup() {
     if (!validateForm()) return;
 
     try {
-      await axios.post('http://localhost:5000/api/users/admin/signup', formData);
+      await axios.post(`${config.API_URL}/users/admin/signup`, formData);
       alert('Admin signup successful! Please login.');
       navigate('/admin/login');
     } catch (error) {

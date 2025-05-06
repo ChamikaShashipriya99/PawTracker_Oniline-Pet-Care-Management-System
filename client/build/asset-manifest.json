@@ -1,0 +1,36 @@
+{
+  "files": {
+    "main.css": "/static/css/main.75a993ca.css",
+    "main.js": "/static/js/main.17330cee.js",
+    "static/js/239.4cd860a8.chunk.js": "/static/js/239.4cd860a8.chunk.js",
+    "static/js/977.bf1a6408.chunk.js": "/static/js/977.bf1a6408.chunk.js",
+    "static/js/732.f2fa3afe.chunk.js": "/static/js/732.f2fa3afe.chunk.js",
+    "static/media/emergency.jpg": "/static/media/emergency.279946adcc79a004060b.jpg",
+    "static/media/blog.jpg": "/static/media/blog.c82102d5bf285b812f74.jpg",
+    "static/media/Pet1.jpg": "/static/media/Pet1.1a8da96b9e82d9e713fc.jpg",
+    "static/media/Cat.jpg": "/static/media/Cat.a01085e6736970304e27.jpg",
+    "static/media/testimonials.jpg": "/static/media/testimonials.df0acde544f0612e5096.jpg",
+    "static/media/luna.jpg": "/static/media/luna.3d86f919e8fd2ec6ead9.jpg",
+    "static/media/health-tips.jpg": "/static/media/health-tips.a270187f148186ab1a27.jpg",
+    "static/media/Dog.jpg": "/static/media/Dog.317c09c41e1a870ea0d9.jpg",
+    "static/media/adoption.jpg": "/static/media/adoption.a1c3a8e5701d7800c0e3.jpg",
+    "static/media/Max.jpg": "/static/media/Max.3f76f85d53c3216faf83.jpg",
+    "static/media/Pet3.jpg": "/static/media/Pet3.ef094b36be0d85ac3712.jpg",
+    "static/media/Pet4.jpg": "/static/media/Pet4.4261aac1c414de7a8248.jpg",
+    "static/media/Pet6.jpg": "/static/media/Pet6.4676ab33c353ef2c133e.jpg",
+    "static/media/Pet5.jpg": "/static/media/Pet5.30283cc098fd3d1cda17.jpg",
+    "static/media/Pet8.jpg": "/static/media/Pet8.6c697afdb484d60cbdeb.jpg",
+    "static/media/Pet2.jpg": "/static/media/Pet2.3f6bde5619a7026dce6b.jpg",
+    "static/media/Pet7.jpg": "/static/media/Pet7.7c4404344258acb283f9.jpg",
+    "static/media/Rex.jpg": "/static/media/Rex.6f6c194f669c03582ce2.jpg",
+    "index.html": "/index.html",
+    "main.75a993ca.css.map": "/static/css/main.75a993ca.css.map",
+    "main.17330cee.js.map": "/static/js/main.17330cee.js.map",
+    "239.4cd860a8.chunk.js.map": "/static/js/239.4cd860a8.chunk.js.map",
+    "732.f2fa3afe.chunk.js.map": "/static/js/732.f2fa3afe.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.75a993ca.css",
+    "static/js/main.17330cee.js"
+  ]
+}

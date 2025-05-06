@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import config from '../config';
 
 function ResetPassword({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
@@ -57,7 +58,7 @@ function ResetPassword({ setIsLoggedIn }) {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post(`http://localhost:5000/api/users/reset-password/${token}`, { password: formData.password });
+      const res = await axios.post(`${config.API_URL}/users/reset-password/${token}`, { password: formData.password });
       setMessage(res.data.message);
       setFormData({ password: '', confirmPassword: '' });
       setTimeout(() => {
