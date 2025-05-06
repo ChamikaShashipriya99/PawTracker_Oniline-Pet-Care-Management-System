@@ -10,6 +10,7 @@ import { BiUserCircle } from "react-icons/bi";
 import { LuType } from "react-icons/lu";
 import "./Advertisement.css";
 import config from '../config';
+import Pet1Image from "../assets/Pet1.jpg";
 
 const AdvertisingDashboard = () => {
   const lostAndFoundSample = [
@@ -131,16 +132,18 @@ const AdvertisingDashboard = () => {
 
   return (
     <div className="home-container">
-      <section className="hero-section">
-        <div className="hero-content fade-in">
-          <h1 className="hero-title">Advertising Dashboard 🐾</h1>
-          <p className="hero-subtitle">Connect with pet lovers through our advertisement hub.</p>
-        </div>
+      <section className="hero-section" style={{ backgroundImage: `url(${Pet1Image})` }}>
+        <div className="hero-overlay">
+          <div className="hero-content fade-in">
+            <h1 className="hero-title">Advertising Dashboard 🐾</h1>
+            <p className="hero-subtitle">Connect with pet lovers through our advertisement hub.</p>
+          </div>
 
-        <div className="dashboard-actions">
-          <Link to="/advertisements/add">
-            <button className="hero-btn">Create Advertisement</button>
-          </Link>
+          <div className="dashboard-actions">
+            <Link to="/advertisements/add">
+              <button className="hero-btn">Create Advertisement</button>
+            </Link>
+          </div>
         </div>
       </section>
 
