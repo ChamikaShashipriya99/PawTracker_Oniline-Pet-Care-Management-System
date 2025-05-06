@@ -25,7 +25,7 @@ const MyAdvertisement = () => {
 
     setLoading(true);
     axios
-      .get(`http://localhost:5000/api/advertisements/my-ads/${encodeURIComponent(email)}`)
+      .get(`${config.API_URL}/advertisements/my-ads/${encodeURIComponent(email)}`)
       .then((response) => {
         setAdvertisements(response.data.data || []);
         setLoading(false);
@@ -44,10 +44,10 @@ const MyAdvertisement = () => {
     if (window.confirm('Are you sure you want to delete this advertisement?')) {
       try {
         setLoading(true);
-        await axios.delete(`http://localhost:5000/api/advertisements/delete/${id}`);
+        await axios.delete(`${config.API_URL}/advertisements/delete/${id}`);
         enqueueSnackbar('Advertisement deleted successfully', { variant: 'success' });
         // Refresh the advertisements list
-        const response = await axios.get(`http://localhost:5000/api/advertisements/my-ads/${encodeURIComponent(email)}`);
+        const response = await axios.get(`${config.API_URL}/advertisements/my-ads/${encodeURIComponent(email)}`);
         setAdvertisements(response.data.data || []);
       } catch (error) {
         console.error('Delete Error:', error.response?.data || error.message);
@@ -105,7 +105,7 @@ const MyAdvertisement = () => {
                         <div className="card h-100 shadow-sm">
                           {ad.photo && (
                             <img
-                              src={`${config.API_URL}/uploads/${ad.photo}`}
+                              src={`${config.UPLOADS_URL}/uploads/${ad.photo}`}
                               alt={ad.heading}
                               className="card-img-top"
                               style={{ height: '200px', objectFit: 'cover' }}

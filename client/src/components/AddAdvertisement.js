@@ -4,6 +4,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
+import config from "../config";
 
 const AddAdvertisement = () => {
   const [formData, setFormData] = useState({
@@ -77,7 +78,7 @@ const AddAdvertisement = () => {
       });
       formDataToSend.append("photo", photo);
 
-      const response = await axios.post("http://localhost:5000/api/advertisements", formDataToSend, {
+      const response = await axios.post(`${config.API_URL}/advertisements`, formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data"
         }

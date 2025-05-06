@@ -4,6 +4,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
+import config from '../config';
 
 const EditAdvertisement = () => {
   const [name, setName] = useState("");
@@ -38,7 +39,7 @@ const EditAdvertisement = () => {
       // If no data in state, fetch from API
       setLoading(true);
       axios
-        .get(`http://localhost:5000/api/advertisements/details/${id}`)
+        .get(`${config.API_URL}/advertisements/details/${id}`)
         .then((response) => {
           const ad = response.data;
           setName(ad.name || "");
@@ -60,16 +61,16 @@ const EditAdvertisement = () => {
   }, [id, location.state, enqueueSnackbar]);
 
   const handleEditAdvertisement = () => {
-    if (!/^[A-Za-z\s]+$/.test(name)) {
-      enqueueSnackbar("Please enter a valid name (letters and spaces only)", { variant: "error" });
+    if (!name.trim()) {
+      enqueueSnackbar("Please enter a valid name", { variant: "error" });
       return;
     }
     if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(email)) {
       enqueueSnackbar("Please enter a valid email address", { variant: "error" });
       return;
     }
-    if (!/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(contactNumber)) {
-      enqueueSnackbar("Please enter a valid phone number (e.g., 123-456-7890)", { variant: "error" });
+    if (!contactNumber.trim()) {
+      enqueueSnackbar("Please enter a valid phone number", { variant: "error" });
       return;
     }
     if (!["Sell a Pet", "Lost Pet", "Found Pet"].includes(advertisementType)) {
@@ -102,7 +103,7 @@ const EditAdvertisement = () => {
     setLoading(true);
 
     axios
-      .put(`http://localhost:5000/api/advertisements/edit/${id}`, formData, {
+      .put(`${config.API_URL}/advertisements/edit/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(() => {
@@ -171,7 +172,7 @@ const EditAdvertisement = () => {
                           {existingImage && (
                             <div className="text-center mb-3">
                               <img
-                                src={`http://localhost:5000/uploads/${existingImage}`}
+                                src={`${config.UPLOADS_URL}/uploads/${existingImage}`}
                                 alt="Current"
                                 className="img-fluid rounded shadow-sm"
                                 style={{ maxHeight: '200px', objectFit: 'cover' }}

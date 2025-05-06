@@ -48,7 +48,7 @@ const AdvertisingDashboard = () => {
     const fetchApprovedAds = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/advertisements");
+        const response = await axios.get(`${config.API_URL}/advertisements`);
         const approved = response.data.data.filter(ad => ad.status === "Approved");
         setApprovedAds(approved);
       } catch (error) {
@@ -85,7 +85,7 @@ const AdvertisingDashboard = () => {
         <div className="modal-body">
           {book.photo && (
             <img
-              src={book._id.startsWith("sample") ? book.photo : `${config.API_URL}/uploads/${book.photo}`}
+              src={book._id.startsWith("sample") ? book.photo : `${config.UPLOADS_URL}/uploads/${book.photo}`}
               alt={book.heading}
               className="modal-img"
             />
@@ -224,7 +224,7 @@ const AdvertisingDashboard = () => {
                           >
                             {ad.photo && (
                               <img
-                                src={`http://localhost:5000/uploads/${ad.photo}`}
+                                src={`${config.UPLOADS_URL}/uploads/${ad.photo}`}
                                 alt={ad.heading}
                                 className="card-img-top"
                               />

@@ -4,6 +4,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
+import config from '../config';
 
 const CreateAdvertisement = () => {
   const [name, setName] = useState("");
@@ -56,16 +57,16 @@ const CreateAdvertisement = () => {
 
   const handleSaveAdvertisement = () => {
     // Client-side validation
-    if (!/^[A-Za-z\s]+$/.test(name)) {
-      enqueueSnackbar("Please enter a valid name (letters and spaces only)", { variant: "error" });
+    if (!name.trim()) {
+      enqueueSnackbar("Please enter a valid name", { variant: "error" });
       return;
     }
     if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(email)) {
       enqueueSnackbar("Please enter a valid email address", { variant: "error" });
       return;
     }
-    if (!/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(contactNumber)) {
-      enqueueSnackbar("Please enter a valid phone number (e.g., 123-456-7890)", { variant: "error" });
+    if (!contactNumber.trim()) {
+      enqueueSnackbar("Please enter a valid phone number", { variant: "error" });
       return;
     }
     if (!["Sell a Pet", "Lost Pet", "Found Pet"].includes(advertisementType)) {
@@ -102,7 +103,7 @@ const CreateAdvertisement = () => {
     setLoading(true);
 
     axios
-      .post("http://localhost:5000/api/advertisements", formData, {
+      .post(`${config.API_URL}/advertisements`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((response) => {

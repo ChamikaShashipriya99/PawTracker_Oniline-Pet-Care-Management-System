@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
+import config from '../config';
 
 function ProductView() {
   const { id } = useParams();
@@ -14,7 +15,7 @@ function ProductView() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/inventory/${id}`);
+        const response = await axios.get(`${config.API_URL}/inventory/${id}`);
         setProduct(response.data);
         setLoading(false);
       } catch (err) {
