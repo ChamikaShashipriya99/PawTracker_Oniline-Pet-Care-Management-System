@@ -8,6 +8,7 @@ function AdminLogin({ setIsLoggedIn }) {
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,22 +60,37 @@ function AdminLogin({ setIsLoggedIn }) {
               value={formData.email} 
               onChange={handleChange} 
               required 
+              style={{ borderRadius: '10px' }}
             />
             {errors.email && <small className="text-danger">{errors.email}</small>}
           </div>
-          <div className="mb-3">
+          <div className="mb-3 position-relative">
             <input 
-              type="password" 
+              type={showPassword ? "text" : "password"} 
               name="password" 
               className="form-control" 
               placeholder="Password" 
               value={formData.password} 
               onChange={handleChange} 
               required 
+              style={{ borderRadius: '10px', paddingRight: '40px' }}
             />
+            <button
+              type="button"
+              className="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ 
+                color: '#6c757d',
+                padding: '0.375rem',
+                marginRight: '0.5rem',
+                zIndex: 2
+              }}
+            >
+              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
             {errors.password && <small className="text-danger">{errors.password}</small>}
           </div>
-          <button type="submit" className="btn btn-primary w-100">Login</button>
+          <button type="submit" className="btn btn-primary w-100" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>Login</button>
         </form>
         <p className="text-center mt-3">
           No admin account? <Link to="/admin/signup">Sign up here</Link>

@@ -11,6 +11,7 @@ function Login({ setIsLoggedIn }) {
   const [isLoading, setIsLoading] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
   const [userFor2FA, setUserFor2FA] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -106,17 +107,30 @@ function Login({ setIsLoggedIn }) {
             />
             {errors.email && <small className="text-danger">{errors.email}</small>}
           </div>
-          <div className="mb-3">
+          <div className="mb-3 position-relative">
             <input 
-              type="password" 
+              type={showPassword ? "text" : "password"} 
               name="password" 
               className="form-control" 
               placeholder="Password" 
               value={formData.password} 
               onChange={handleChange} 
               required 
-              style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }} 
+              style={{ borderRadius: '10px', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)', paddingRight: '40px' }} 
             />
+            <button
+              type="button"
+              className="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ 
+                color: '#6c757d',
+                padding: '0.375rem',
+                marginRight: '0.5rem',
+                zIndex: 2
+              }}
+            >
+              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
             {errors.password && <small className="text-danger">{errors.password}</small>}
           </div>
           <button type="submit" className="btn btn-primary w-100" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }} disabled={isLoading}>

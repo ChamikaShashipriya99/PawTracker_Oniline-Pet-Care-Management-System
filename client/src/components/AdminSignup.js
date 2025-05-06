@@ -9,6 +9,10 @@ function AdminSignup() {
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirmPassword: false
+  });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -55,34 +59,78 @@ function AdminSignup() {
         <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Admin Sign Up 🐾</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <input type="text" name="firstName" className="form-control" placeholder="First Name" value={formData.firstName} onChange={handleChange} required />
+            <input type="text" name="firstName" className="form-control" placeholder="First Name" value={formData.firstName} onChange={handleChange} required style={{ borderRadius: '10px' }} />
             {errors.firstName && <small className="text-danger">{errors.firstName}</small>}
           </div>
           <div className="mb-3">
-            <input type="text" name="lastName" className="form-control" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required />
+            <input type="text" name="lastName" className="form-control" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required style={{ borderRadius: '10px' }} />
             {errors.lastName && <small className="text-danger">{errors.lastName}</small>}
           </div>
           <div className="mb-3">
-            <input type="text" name="username" className="form-control" placeholder="Username" value={formData.username} onChange={handleChange} required />
+            <input type="text" name="username" className="form-control" placeholder="Username" value={formData.username} onChange={handleChange} required style={{ borderRadius: '10px' }} />
             {errors.username && <small className="text-danger">{errors.username}</small>}
           </div>
           <div className="mb-3">
-            <input type="email" name="email" className="form-control" placeholder="Email" value={formData.email} onChange={handleChange} required />
+            <input type="email" name="email" className="form-control" placeholder="Email" value={formData.email} onChange={handleChange} required style={{ borderRadius: '10px' }} />
             {errors.email && <small className="text-danger">{errors.email}</small>}
           </div>
           <div className="mb-3">
-            <input type="tel" name="phone" className="form-control" placeholder="Phone Number" value={formData.phone} onChange={handleChange} required />
+            <input type="tel" name="phone" className="form-control" placeholder="Phone Number" value={formData.phone} onChange={handleChange} required style={{ borderRadius: '10px' }} />
             {errors.phone && <small className="text-danger">{errors.phone}</small>}
           </div>
-          <div className="mb-3">
-            <input type="password" name="password" className="form-control" placeholder="Password" value={formData.password} onChange={handleChange} required />
+          <div className="mb-3 position-relative">
+            <input 
+              type={showPassword.password ? "text" : "password"} 
+              name="password" 
+              className="form-control" 
+              placeholder="Password" 
+              value={formData.password} 
+              onChange={handleChange} 
+              required 
+              style={{ borderRadius: '10px', paddingRight: '40px' }}
+            />
+            <button
+              type="button"
+              className="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+              onClick={() => setShowPassword({ ...showPassword, password: !showPassword.password })}
+              style={{ 
+                color: '#6c757d',
+                padding: '0.375rem',
+                marginRight: '0.5rem',
+                zIndex: 2
+              }}
+            >
+              <i className={`fas ${showPassword.password ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
             {errors.password && <small className="text-danger">{errors.password}</small>}
           </div>
-          <div className="mb-3">
-            <input type="password" name="confirmPassword" className="form-control" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} required />
+          <div className="mb-3 position-relative">
+            <input 
+              type={showPassword.confirmPassword ? "text" : "password"} 
+              name="confirmPassword" 
+              className="form-control" 
+              placeholder="Confirm Password" 
+              value={formData.confirmPassword} 
+              onChange={handleChange} 
+              required 
+              style={{ borderRadius: '10px', paddingRight: '40px' }}
+            />
+            <button
+              type="button"
+              className="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+              onClick={() => setShowPassword({ ...showPassword, confirmPassword: !showPassword.confirmPassword })}
+              style={{ 
+                color: '#6c757d',
+                padding: '0.375rem',
+                marginRight: '0.5rem',
+                zIndex: 2
+              }}
+            >
+              <i className={`fas ${showPassword.confirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
             {errors.confirmPassword && <small className="text-danger">{errors.confirmPassword}</small>}
           </div>
-          <button type="submit" className="btn btn-primary w-100">Sign Up</button>
+          <button type="submit" className="btn btn-primary w-100" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>Sign Up</button>
         </form>
         <p className="text-center mt-3">
           Already have an admin account? <Link to="/admin/login">Login here</Link>

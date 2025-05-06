@@ -16,6 +16,7 @@ function Signup({ setIsLoggedIn }) {
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -100,8 +101,30 @@ function Signup({ setIsLoggedIn }) {
               <input type="tel" name="phone" className="form-control" placeholder="Phone" value={user.phone} onChange={handleChange} required style={{ borderRadius: '10px' }} />
               {errors.phone && <small className="text-danger">{errors.phone}</small>}
             </div>
-            <div className="col-md-6 mb-3">
-              <input type="password" name="password" className="form-control" placeholder="Password" value={user.password} onChange={handleChange} required style={{ borderRadius: '10px' }} />
+            <div className="col-md-6 mb-3 position-relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                name="password" 
+                className="form-control" 
+                placeholder="Password" 
+                value={user.password} 
+                onChange={handleChange} 
+                required 
+                style={{ borderRadius: '10px', paddingRight: '40px' }} 
+              />
+              <button
+                type="button"
+                className="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ 
+                  color: '#6c757d',
+                  padding: '0.375rem',
+                  marginRight: '0.5rem',
+                  zIndex: 2
+                }}
+              >
+                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              </button>
               {errors.password && <small className="text-danger">{errors.password}</small>}
               <PasswordStrengthIndicator password={user.password} />
             </div>
