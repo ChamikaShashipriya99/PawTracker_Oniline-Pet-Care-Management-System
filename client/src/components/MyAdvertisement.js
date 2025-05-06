@@ -4,6 +4,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
+import config from '../config';
 
 const MyAdvertisement = () => {
   const [advertisements, setAdvertisements] = useState([]);
@@ -104,7 +105,7 @@ const MyAdvertisement = () => {
                         <div className="card h-100 shadow-sm">
                           {ad.photo && (
                             <img
-                              src={`http://localhost:5000/uploads/${ad.photo}`}
+                              src={`${config.API_URL}/uploads/${ad.photo}`}
                               alt={ad.heading}
                               className="card-img-top"
                               style={{ height: '200px', objectFit: 'cover' }}

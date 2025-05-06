@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaBox, FaPen, FaTrash, FaDownload, FaSearch, FaStore, FaTruck, FaStoreAlt } from 'react-icons/fa';
+import config from '../config';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-const SUPPLIERS_ENDPOINT = `${API_URL}/suppliers`;
+const SUPPLIERS_ENDPOINT = `${config.API_URL}/suppliers`;
 
 function SuppliersTable() {
   const [suppliers, setSuppliers] = useState([]);

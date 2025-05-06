@@ -3,11 +3,11 @@ import axios from 'axios';
 import { Table, Button, Modal, Form, InputGroup, Tabs, Tab } from 'react-bootstrap';
 import * as XLSX from 'xlsx';
 import SuppliersTable from './SuppliersTable';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import config from '../config';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-const INVENTORY_ENDPOINT = `${API_URL}/inventory`;
+const INVENTORY_ENDPOINT = `${config.API_URL}/inventory`;
 
 // Define allowed categories for dropdown
 const STORE_CATEGORIES = [
@@ -149,37 +149,46 @@ function InventoryTable() {
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    doc.text('Inventory List', 14, 16);
-
-    // Prepare table columns and rows
-    const columns = [
-      { header: 'ID', dataKey: 'id' },
-      { header: 'Name', dataKey: 'name' },
-      { header: 'Category', dataKey: 'category' },
-      { header: 'Description', dataKey: 'description' },
-      { header: 'Quantity', dataKey: 'quantity' },
-      { header: 'Price', dataKey: 'price' },
-      { header: 'Status', dataKey: 'status' }
-    ];
-
-    const rows = filteredItems.map((item, idx) => ({
-      id: idx + 1,
-      name: item.name,
-      category: item.category,
-      description: item.description,
-      quantity: item.quantity,
-      price: `Rs. ${Number(item.price).toFixed(2)}`,
-      status: item.status || (item.quantity > 0 ? 'In Stock' : 'Out of Stock')
-    }));
-
-    doc.autoTable({
-      columns,
-      body: rows,
-      startY: 24,
-      styles: { fontSize: 10 }
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Inventory Report', 14, 15);
+    
+    // Add date
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 22);
+    
+    // Prepare data for the table
+    const tableData = items.map(item => [
+      item.name,
+      item.category,
+      item.quantity,
+      `Rs. ${item.price.toFixed(2)}`,
+      item.quantity > 0 ? 'In Stock' : 'Out of Stock'
+    ]);
+    
+    // Add the table
+    autoTable(doc, {
+      head: [['Name', 'Category', 'Quantity', 'Price', 'Status']],
+      body: tableData,
+      startY: 30,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 9,
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      }
     });
-
-    doc.save(`inventory_${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    // Save the PDF
+    doc.save('inventory_report.pdf');
   };
 
   const compressImage = (file) => {

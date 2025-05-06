@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import { format } from 'date-fns';
 import { useParams } from 'react-router-dom';
+import config from '../config';
 
 const VaccinationTracker = () => {
   const { petId } = useParams();
@@ -17,6 +18,7 @@ const VaccinationTracker = () => {
     isCompleted: false
   });
   const { enqueueSnackbar } = useSnackbar();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (petId) {
@@ -26,10 +28,11 @@ const VaccinationTracker = () => {
 
   const fetchVaccinations = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/pets/${petId}/vaccinations`);
+      const response = await axios.get(`${config.API_URL}/pets/${petId}/vaccinations`);
       setVaccinations(response.data);
     } catch (error) {
-      enqueueSnackbar('Error fetching vaccinations', { variant: 'error' });
+      console.error('Failed to fetch vaccinations:', error);
+      setError('Failed to load vaccinations. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -38,67 +41,37 @@ const VaccinationTracker = () => {
   const handleAddVaccination = async (e) => {
     e.preventDefault();
     try {
-      // Validate required fields
-      if (!newVaccination.name || !newVaccination.date || !newVaccination.nextDueDate) {
-        enqueueSnackbar('Please fill in all required fields', { variant: 'error' });
-        return;
-      }
-
-      // Format dates to ISO string
-      const formattedVaccination = {
-        ...newVaccination,
-        date: new Date(newVaccination.date).toISOString(),
-        nextDueDate: new Date(newVaccination.nextDueDate).toISOString()
-      };
-
       const response = await axios.post(
-        `http://localhost:5000/api/pets/${petId}/vaccinations`,
-        formattedVaccination,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
+        `${config.API_URL}/pets/${petId}/vaccinations`,
+        newVaccination
       );
-
-      if (response.data) {
-        enqueueSnackbar('Vaccination added successfully', { variant: 'success' });
-        setShowAddForm(false);
-        setNewVaccination({
-          name: '',
-          date: '',
-          nextDueDate: '',
-          notes: '',
-          isCompleted: false
-        });
-        fetchVaccinations();
-      }
+      setVaccinations([...vaccinations, response.data]);
+      setNewVaccination({ name: '', date: '', nextDueDate: '', notes: '' });
     } catch (error) {
-      console.error('Error adding vaccination:', error);
-      enqueueSnackbar(
-        error.response?.data?.message || 'Error adding vaccination',
-        { variant: 'error' }
-      );
+      console.error('Failed to add vaccination:', error);
+      setError('Failed to add vaccination. Please try again.');
     }
   };
 
   const handleUpdateVaccination = async (vaccinationId, updates) => {
     try {
-      await axios.put(`http://localhost:5000/api/pets/${petId}/vaccinations/${vaccinationId}`, updates);
-      enqueueSnackbar('Vaccination updated successfully', { variant: 'success' });
-      fetchVaccinations();
+      await axios.put(`${config.API_URL}/pets/${petId}/vaccinations/${vaccinationId}`, updates);
+      setVaccinations(vaccinations.map(v => 
+        v._id === vaccinationId ? { ...v, ...updates } : v
+      ));
     } catch (error) {
-      enqueueSnackbar('Error updating vaccination', { variant: 'error' });
+      console.error('Failed to update vaccination:', error);
+      setError('Failed to update vaccination. Please try again.');
     }
   };
 
   const handleDeleteVaccination = async (vaccinationId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/pets/${petId}/vaccinations/${vaccinationId}`);
-      enqueueSnackbar('Vaccination deleted successfully', { variant: 'success' });
-      fetchVaccinations();
+      await axios.delete(`${config.API_URL}/pets/${petId}/vaccinations/${vaccinationId}`);
+      setVaccinations(vaccinations.filter(v => v._id !== vaccinationId));
     } catch (error) {
-      enqueueSnackbar('Error deleting vaccination', { variant: 'error' });
+      console.error('Failed to delete vaccination:', error);
+      setError('Failed to delete vaccination. Please try again.');
     }
   };
 

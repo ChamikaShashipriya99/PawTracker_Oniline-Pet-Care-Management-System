@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import config from '../config';
 
 function Signup({ setIsLoggedIn }) {
   const navigate = useNavigate();
@@ -55,27 +56,17 @@ function Signup({ setIsLoggedIn }) {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/users/signup', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      const res = await axios.post(`${config.API_URL}/users/signup`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      // Store user data in localStorage
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      
-      // Show success message
-      alert('Registration successful! Please verify your email.');
-      
-      // Redirect to verification page with email and previewUrl
-      navigate('/verify-email', { 
-        state: { 
-          email: user.email,
-          previewUrl: res.data.previewUrl 
-        } 
-      });
+      if (res.data) {
+        alert('Signup successful! Please verify your email.');
+        navigate('/login');
+      }
     } catch (error) {
-      alert('Registration failed: ' + (error.response?.data?.error || 'Unknown error'));
+      console.error('Signup failed:', error);
+      setErrors({ general: error.response?.data?.error || 'Signup failed. Please try again.' });
     }
   };
 

@@ -9,6 +9,7 @@ import { MdEmail, MdContactPhone, MdSubject } from "react-icons/md";
 import { BiUserCircle } from "react-icons/bi";
 import { LuType } from "react-icons/lu";
 import "./Advertisement.css";
+import config from '../config';
 
 const AdvertisingDashboard = () => {
   const lostAndFoundSample = [
@@ -84,7 +85,7 @@ const AdvertisingDashboard = () => {
         <div className="modal-body">
           {book.photo && (
             <img
-              src={book._id.startsWith("sample") ? book.photo : `http://localhost:5000/uploads/${book.photo}`}
+              src={book._id.startsWith("sample") ? book.photo : `${config.API_URL}/uploads/${book.photo}`}
               alt={book.heading}
               className="modal-img"
             />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 function AddPet() {
   const navigate = useNavigate();
@@ -59,45 +60,35 @@ function AddPet() {
     const newErrors = {};
     const lettersRegex = /^[A-Za-z\s]+$/;
     const today = new Date();
-  
-    if (!pet.name) {
-      newErrors.name = "Pet name is required.";
-    } else if (!lettersRegex.test(pet.name)) {
-      newErrors.name = "Pet name must contain only letters.";
+
+    if (!pet.name || !lettersRegex.test(pet.name)) {
+      newErrors.name = 'Pet name must contain only letters.';
+    }
+    if (!pet.type) {
+      newErrors.type = 'Pet type is required.';
+    }
+    if (!pet.breed || !lettersRegex.test(pet.breed)) {
+      newErrors.breed = 'Breed must contain only letters.';
+    }
+    if (!pet.birthday || new Date(pet.birthday) >= today) {
+      newErrors.birthday = 'Birthday must be a past date.';
+    }
+    if (!pet.age || pet.age <= 0) {
+      newErrors.age = 'Age must be a positive number.';
+    }
+    if (!pet.weight || pet.weight <= 0) {
+      newErrors.weight = 'Weight must be a positive number.';
+    }
+    if (pet.specialConditions && !lettersRegex.test(pet.specialConditions)) {
+      newErrors.specialConditions = 'Special conditions must contain only letters and spaces.';
+    }
+    if (petPhoto && !petPhoto.type.startsWith('image/')) {
+      newErrors.petPhoto = 'Only image files are allowed.';
     }
 
-    if (!pet.type) {
-      newErrors.type = "Pet type is required.";
-    }
-  
-    if (!pet.breed) {
-      newErrors.breed = "Breed is required.";
-    } else if (!lettersRegex.test(pet.breed)) {
-      newErrors.breed = "Breed must contain only letters.";
-    }
-  
-    if (!pet.birthday) {
-      newErrors.birthday = "Birthday is required.";
-    } else if (new Date(pet.birthday) >= today) {
-      newErrors.birthday = "Birthday must be a past date.";
-    }
-  
-    if (!pet.age || pet.age <= 0) {
-      newErrors.age = "Age cannot be calculated from birthday.";
-    }
-  
-    if (!pet.weight || pet.weight <= 0) {
-      newErrors.weight = "Weight must be a positive number.";
-    }
-  
-    if (!petPhoto) {
-      newErrors.petPhoto = "Pet photo is required.";
-    }
-  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,7 +108,7 @@ function AddPet() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/pets', formData, {
+      const response = await axios.post(`${config.API_URL}/users/pets`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       

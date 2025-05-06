@@ -1,64 +1,51 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 function UpdatePetImage({ pet, onUpdate, onClose }) {
-  const [petPhoto, setPetPhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(pet.photo ? `http://localhost:5000${pet.photo}` : null);
+  const [photo, setPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(pet.photo ? `${config.API_URL}${pet.photo}` : null);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('File size should be less than 5MB');
-        return;
-      }
-
-      // Validate file type
       if (!file.type.startsWith('image/')) {
-        setError('Only image files are allowed');
+        setError('Please select an image file');
         return;
       }
-
-      setPetPhoto(file);
+      setPhoto(file);
+      setPhotoPreview(URL.createObjectURL(file));
       setError('');
-      
-      // Create a preview URL for the selected image
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
-  const handleUpdate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!petPhoto) {
-      setError('Please select an image to update');
+    if (!photo) {
+      setError('Please select a photo');
       return;
     }
 
-    setIsLoading(true);
-    setError('');
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('photo', photo);
 
     try {
-      const formData = new FormData();
-      formData.append('photo', petPhoto);
-
-      const res = await axios.put(`http://localhost:5000/api/users/pets/${pet._id}/photo`, formData, {
+      const res = await axios.put(`${config.API_URL}/users/pets/${pet._id}/photo`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-
-      onUpdate(res.data);
-      onClose();
+      
+      if (res.data) {
+        onUpdate(res.data);
+        onClose();
+      }
     } catch (error) {
-      console.error('Error updating pet photo:', error);
-      setError(error.response?.data?.error || 'Failed to update pet photo. Please try again.');
+      console.error('Failed to update pet photo:', error);
+      setError(error.response?.data?.error || 'Failed to update photo. Please try again.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -105,7 +92,7 @@ function UpdatePetImage({ pet, onUpdate, onClose }) {
                   onChange={handleFileChange}
                   accept="image/*"
                   style={{ borderRadius: '10px' }}
-                  disabled={isLoading}
+                  disabled={loading}
                 />
                 {error && <div className="invalid-feedback">{error}</div>}
               </div>
@@ -116,18 +103,18 @@ function UpdatePetImage({ pet, onUpdate, onClose }) {
               type="button" 
               className="btn btn-secondary" 
               onClick={onClose}
-              disabled={isLoading}
+              disabled={loading}
             >
               Cancel
             </button>
             <button 
               type="button" 
               className="btn btn-primary" 
-              onClick={handleUpdate} 
+              onClick={handleSubmit} 
               style={{ backgroundColor: '#00c4cc', border: 'none' }}
-              disabled={isLoading}
+              disabled={loading}
             >
-              {isLoading ? (
+              {loading ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                   Updating...

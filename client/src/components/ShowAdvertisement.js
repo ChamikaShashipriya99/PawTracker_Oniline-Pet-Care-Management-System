@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams, Link } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
+import config from '../config';
 
 const ShowAdvertisement = () => {
   const [advertisement, setAdvertisement] = useState(null);
@@ -92,7 +93,7 @@ const ShowAdvertisement = () => {
                       <div className="detail-row">
                         <span className="detail-label">Image:</span>
                         <img
-                          src={`http://localhost:5000/uploads/${advertisement.photo}`}
+                          src={`${config.API_URL}/uploads/${advertisement.photo}`}
                           alt={advertisement.heading}
                           className="detail-img"
                         />

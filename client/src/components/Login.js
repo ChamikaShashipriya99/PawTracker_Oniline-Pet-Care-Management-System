@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import TwoFactorAuth from './TwoFactorAuth';
+import config from '../config';
 
 function Login({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -49,7 +50,7 @@ function Login({ setIsLoggedIn }) {
     if (!validateForm()) return;
     
     try {
-      const response = await axios.post('http://localhost:5000/api/users/login', formData);
+      const response = await axios.post(`${config.API_URL}/users/login`, formData);
       
       if (response.data.needsVerification) {
         navigate('/verify-email', { state: { email: formData.email } });

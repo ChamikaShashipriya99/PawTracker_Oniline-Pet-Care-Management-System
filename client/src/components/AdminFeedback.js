@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Feedback.css';
+import config from '../config';
 
 const AdminFeedback = () => {
     const navigate = useNavigate();
@@ -26,7 +27,7 @@ const AdminFeedback = () => {
                 return;
             }
 
-            const response = await axios.get('http://localhost:5000/api/feedback/all', {
+            const response = await axios.get(`${config.API_URL}/feedback/all`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -56,7 +57,7 @@ const AdminFeedback = () => {
             }
 
             const response = await axios.patch(
-                `http://localhost:5000/api/feedback/${id}/status`,
+                `${config.API_URL}/feedback/${id}/status`,
                 { status: newStatus },
                 { 
                     headers: { 
@@ -108,7 +109,7 @@ const AdminFeedback = () => {
             }
 
             const response = await axios.post(
-                `http://localhost:5000/api/feedback/${id}/reply`,
+                `${config.API_URL}/feedback/${id}/reply`,
                 { message: replyMessage[id].trim() },
                 { 
                     headers: { 

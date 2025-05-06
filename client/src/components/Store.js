@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiX } from 'react-icons/fi';
+import config from '../config';
 
 function Store() {
   const [items, setItems] = useState([]);
@@ -23,7 +24,7 @@ function Store() {
 
   useEffect(() => {
     console.log("Store component loaded");
-    axios.get('http://localhost:5000/api/inventory')
+    axios.get(`${config.API_URL}/inventory`)
       .then(res => {
         // Filter out DOG, CAT, BIRDS products
         const filtered = res.data.filter(item => {

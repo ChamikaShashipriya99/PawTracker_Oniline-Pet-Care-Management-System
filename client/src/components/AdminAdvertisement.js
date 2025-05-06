@@ -4,6 +4,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { BsArrowLeft } from "react-icons/bs";
 import "./Advertisement.css";
+import config from '../config';
 
 const AdminAdvertisement = () => {
   const [advertisements, setAdvertisements] = useState([]);
@@ -17,7 +18,7 @@ const AdminAdvertisement = () => {
   const fetchAdvertisements = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/api/advertisements");
+      const response = await axios.get(`${config.API_URL}/advertisements`);
       setAdvertisements(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -34,7 +35,7 @@ const AdminAdvertisement = () => {
       
       // Use the specific endpoint based on the status
       const endpoint = newStatus === 'Approved' ? 'approve' : 'reject';
-      const response = await axios.put(`http://localhost:5000/api/advertisements/${endpoint}/${id}`);
+      const response = await axios.put(`${config.API_URL}/advertisements/${endpoint}/${id}`);
       
       console.log('Server response:', response.data);
       if (response.data.message) {
@@ -71,6 +72,10 @@ const AdminAdvertisement = () => {
                     <span className="visually-hidden">Loading...</span>
                   </div>
                 </div>
+              ) : advertisements.length === 0 ? (
+                <div className="text-center py-5">
+                  <p>No advertisements found.</p>
+                </div>
               ) : (
                 <div className="table-responsive">
                   <table className="table table-hover">
@@ -91,7 +96,7 @@ const AdminAdvertisement = () => {
                           <td>
                             {ad.photo && (
                               <img
-                                src={`http://localhost:5000/uploads/${ad.photo}`}
+                                src={`${config.API_URL}/uploads/${ad.photo}`}
                                 alt={ad.heading}
                                 className="img-thumbnail"
                                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
@@ -114,31 +119,29 @@ const AdminAdvertisement = () => {
                             </div>
                           </td>
                           <td>
-                            <span className={`badge bg-${ad.status === 'Approved' ? 'success' : ad.status === 'Rejected' ? 'danger' : 'warning'}`}>
-                              {ad.status}
+                            <span className={`badge ${ad.status === 'Approved' ? 'bg-success' : ad.status === 'Rejected' ? 'bg-danger' : 'bg-warning'}`}>
+                              {ad.status || 'Pending'}
                             </span>
                           </td>
                           <td>
-                            <div className="btn-group">
-                              {ad.status === 'Pending' && (
-                                <>
-                                  <button
-                                    className="btn btn-success btn-sm"
-                                    onClick={() => handleStatusChange(ad._id, 'Approved')}
-                                    disabled={loading}
-                                  >
-                                    Approve
-                                  </button>
-                                  <button
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => handleStatusChange(ad._id, 'Rejected')}
-                                    disabled={loading}
-                                  >
-                                    Reject
-                                  </button>
-                                </>
-                              )}
-                            </div>
+                            {ad.status !== 'Approved' && (
+                              <button
+                                className="btn btn-success btn-sm me-2"
+                                onClick={() => handleStatusChange(ad._id, 'Approved')}
+                                disabled={loading}
+                              >
+                                Approve
+                              </button>
+                            )}
+                            {ad.status !== 'Rejected' && (
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleStatusChange(ad._id, 'Rejected')}
+                                disabled={loading}
+                              >
+                                Reject
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}

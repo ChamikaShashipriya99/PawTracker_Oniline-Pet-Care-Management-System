@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 function AdminLogin({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -30,17 +32,15 @@ function AdminLogin({ setIsLoggedIn }) {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post('http://localhost:5000/api/users/admin/login', formData);
-      if (!res.data.user.isAdmin) {
-        throw new Error('Not an admin account');
-      }
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      localStorage.setItem('token', res.data.token);
+      const res = await axios.post(`${config.API_URL}/users/admin/login`, formData);
+      localStorage.setItem('adminToken', res.data.token);
+      localStorage.setItem('admin', JSON.stringify(res.data.admin));
       setIsLoggedIn(true);
       alert('Admin login successful!');
       navigate('/admin/dashboard');
     } catch (error) {
-      alert('Admin login failed: ' + (error.response?.data?.message || error.message));
+      console.error('Login failed:', error);
+      setError(error.response?.data?.error || 'Login failed. Please try again.');
     }
   };
 
@@ -48,6 +48,7 @@ function AdminLogin({ setIsLoggedIn }) {
     <div className="container mt-5">
       <div className="card shadow p-4" style={{ maxWidth: '400px', margin: '0 auto', borderRadius: '15px' }}>
         <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Admin Login 🐾</h2>
+        {error && <div className="alert alert-danger">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <input 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Feedback.css';
+import config from '../config';
 
 const FeedbackForm = () => {
     const navigate = useNavigate();
@@ -36,7 +37,7 @@ const FeedbackForm = () => {
                 user : user
             }
             console.log('Submitting feedback:', feedbackDetails); // Debug log
-            const response = await axios.post('http://localhost:5000/api/feedback', feedbackDetails, {
+            const response = await axios.post(`${config.API_URL}/feedback`, feedbackDetails, {
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

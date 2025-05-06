@@ -12,6 +12,7 @@ import advertisementRoutes from './routes/advertisementsRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import storeRoutes from './routes/storeRoutes.js';
 import supplierRoutes from './routes/suppliers.js';
+import inventoryRoutes from './routes/inventoryRoutes.js';
 
 // Resolve __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +45,7 @@ app.use('/api/advertisements', advertisementRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/store', storeRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

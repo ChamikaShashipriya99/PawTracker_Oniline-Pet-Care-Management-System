@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import UpdatePetImage from './UpdatePetImage';
+import config from '../config';
 
 function MyPets() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ function MyPets() {
 
     const fetchPets = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/pets/${user._id}`);
+        const res = await axios.get(`${config.API_URL}/users/pets/${user._id}`);
         // Ensure vaccinations are properly sorted by date
         const petsWithSortedVaccinations = res.data.map(pet => ({
           ...pet,
@@ -51,7 +52,7 @@ function MyPets() {
   const handleDeletePet = async (id) => {
     if (window.confirm('Are you sure you want to delete this pet?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/users/pets/${id}`);
+        await axios.delete(`${config.API_URL}/users/pets/${id}`);
         setPets(pets.filter(pet => pet._id !== id));
         setStatusMessage('Pet deleted successfully!');
         setStatusType('success');
@@ -113,7 +114,7 @@ function MyPets() {
     if (!validateEditPet()) return;
   
     try {
-      const res = await axios.put(`http://localhost:5000/api/users/pets/${editPet._id}`, editPet);
+      const res = await axios.put(`${config.API_URL}/users/pets/${editPet._id}`, editPet);
       setPets(pets.map(p => (p._id === editPet._id ? res.data : p)));
       setEditPet(null);
       setStatusMessage('Pet updated successfully!');
@@ -155,7 +156,7 @@ function MyPets() {
         isCompleted: Boolean(newVaccination.isCompleted)
       };
 
-      const res = await axios.post(`http://localhost:5000/api/users/pets/${selectedPet._id}/vaccinations`, formattedVaccination);
+      const res = await axios.post(`${config.API_URL}/users/pets/${selectedPet._id}/vaccinations`, formattedVaccination);
       
       // Update the selected pet's vaccinations
       const updatedPet = {
@@ -211,7 +212,7 @@ function MyPets() {
       };
 
       const res = await axios.put(
-        `http://localhost:5000/api/users/pets/${selectedPet._id}/vaccinations/${editingVaccination._id}`,
+        `${config.API_URL}/users/pets/${selectedPet._id}/vaccinations/${editingVaccination._id}`,
         formattedVaccination
       );
       
@@ -240,23 +241,17 @@ function MyPets() {
   };
 
   const handleDeleteVaccination = async (vaccinationId) => {
-    console.log('Attempting to delete vaccination:', vaccinationId);
-    console.log('Selected pet:', selectedPet);
-    
     if (window.confirm('Are you sure you want to delete this vaccination?')) {
       try {
-        console.log('Sending delete request...');
-        const response = await axios.delete(
-          `http://localhost:5000/api/users/pets/${selectedPet._id}/vaccinations/${vaccinationId}`
+        await axios.delete(
+          `${config.API_URL}/users/pets/${selectedPet._id}/vaccinations/${vaccinationId}`
         );
-        console.log('Delete response:', response.data);
         
         // Update the selected pet's vaccinations
         const updatedPet = {
           ...selectedPet,
           vaccinations: selectedPet.vaccinations.filter(v => v._id !== vaccinationId)
         };
-        console.log('Updated pet:', updatedPet);
         
         // Update the pets list
         setPets(pets.map(p => p._id === selectedPet._id ? updatedPet : p));
@@ -267,7 +262,6 @@ function MyPets() {
         setTimeout(() => setStatusMessage(''), 3000);
       } catch (error) {
         console.error('Failed to delete vaccination:', error);
-        console.error('Error response:', error.response);
         setStatusMessage(error.response?.data?.error || 'Failed to delete vaccination. Please try again.');
         setStatusType('danger');
         setTimeout(() => setStatusMessage(''), 3000);
@@ -322,7 +316,7 @@ function MyPets() {
                     <div className="text-center mb-3">
                       {pet.photo ? (
                         <img 
-                          src={`http://localhost:5000${pet.photo}`} 
+                          src={`${config.API_URL}${pet.photo}`} 
                           alt={pet.name} 
                           className="img-fluid rounded mb-3" 
                           style={{ 

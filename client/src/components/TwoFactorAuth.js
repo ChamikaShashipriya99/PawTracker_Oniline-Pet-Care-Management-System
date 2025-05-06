@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 function TwoFactorAuth({ user, onClose, isLogin = false, onSuccess }) {
   const [token, setToken] = useState('');
@@ -12,7 +13,7 @@ function TwoFactorAuth({ user, onClose, isLogin = false, onSuccess }) {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/verify-2fa-login', {
+      const response = await axios.post(`${config.API_URL}/users/verify-2fa-login`, {
         email: user.email,
         token
       });

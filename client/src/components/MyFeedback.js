@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Feedback.css';
+import config from '../config';
 
 const MyFeedback = () => {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ const MyFeedback = () => {
             const user = JSON.parse(localStorage.getItem('user'))._id;
             console.log("token : " + token + " userId : " + user);
     
-            const response = await axios.get('http://localhost:5000/api/feedback/my-feedback', {
+            const response = await axios.get(`${config.API_URL}/feedback/my-feedback`, {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
             });
     
@@ -55,7 +56,7 @@ const MyFeedback = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/feedback/${id}`, {
+            await axios.delete(`${config.API_URL}/feedback/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
