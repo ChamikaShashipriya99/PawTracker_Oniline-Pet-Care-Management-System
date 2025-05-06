@@ -56,26 +56,56 @@ const AdminFeedback = () => {
                 return;
             }
 
+            // Validate status value
+            if (!['pending', 'approved', 'rejected'].includes(newStatus)) {
+                setError('Invalid status value. Must be one of: pending, approved, rejected');
+                return;
+            }
+
+            console.log('Updating feedback status:', {
+                feedbackId: id,
+                newStatus: newStatus,
+                token: token ? 'token exists' : 'no token'
+            });
+
+            // Use the correct API endpoint with proper headers
             const response = await axios.patch(
                 `${config.API_URL}/feedback/${id}/status`,
                 { status: newStatus },
                 { 
                     headers: { 
-                        Authorization: `Bearer ${token}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     } 
                 }
             );
 
-            setFeedbacks(feedbacks.map(feedback =>
-                feedback._id === id ? response.data : feedback
-            ));
-            setSuccess(`Feedback ${newStatus} successfully!`);
-            setError('');
+            // Check if response is successful
+            if (response.status === 200 && response.data) {
+                console.log('Server response:', response.data);
+                const updatedFeedback = response.data.data; // Get the feedback from the server's response
+                setFeedbacks(feedbacks.map(feedback =>
+                    feedback._id === id ? updatedFeedback : feedback
+                ));
+                setSuccess(`Feedback ${newStatus} successfully!`);
+            } else {
+                setError('Failed to update feedback status');
+            }
+            
             clearMessages();
         } catch (err) {
-            console.error('Error updating status:', err);
-            setError(err.response?.data?.message || 'Error updating feedback status');
+            console.error('Error details:', {
+                error: err,
+                response: err.response,
+                status: err.response?.status,
+                data: err.response?.data
+            });
+            const errorMessage = err.response?.data?.message || 
+                err.response?.data?.error || 
+                err.response?.status === 403 ? 'Access denied. Admin privileges required.' :
+                err.response?.status === 404 ? 'Feedback not found' :
+                'Error updating feedback status';
+            setError(errorMessage);
             clearMessages();
         }
     };

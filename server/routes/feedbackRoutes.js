@@ -50,19 +50,52 @@ router.get('/my-feedback', auth, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+
 // Update feedback status (admin only)
 router.patch('/:id/status', auth, async (req, res) => {
     try {
+        console.log('Updating feedback status:', {
+            feedbackId: req.params.id,
+            newStatus: req.body.status,
+            userId: req.user.id
+        });
+
         // Check if user exists and is admin
         const user = await User.findById(req.user.id);
-        if (!user || !user.isAdmin) {
-            return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+        if (!user) {
+            console.error('User not found for ID:', req.user.id);
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Access denied. User not found.' 
+            });
+        }
+
+        if (!user.isAdmin) {
+            console.error('User is not admin:', user._id);
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Access denied. Admin privileges required.' 
+            });
         }
 
         const feedback = await Feedback.findById(req.params.id);
         if (!feedback) {
-            return res.status(404).json({ message: 'Feedback not found' });
+            console.error('Feedback not found for ID:', req.params.id);
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Feedback not found' 
+            });
         }
+
+        // Validate status value
+        if (!['pending', 'approved', 'rejected'].includes(req.body.status)) {
+            console.error('Invalid status value:', req.body.status);
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid status value. Must be one of: pending, approved, rejected' 
+            });
+        }
+
         feedback.status = req.body.status;
         await feedback.save();
 
@@ -70,10 +103,30 @@ router.patch('/:id/status', auth, async (req, res) => {
         const updatedFeedback = await Feedback.findById(feedback._id)
             .populate('user', 'name email');
             
-        res.json(updatedFeedback);
+        console.log('Successfully updated feedback:', {
+            id: feedback._id,
+            status: feedback.status,
+            userId: user._id
+        });
+
+        res.status(200).json({ 
+            success: true, 
+            data: updatedFeedback 
+        });
     } catch (error) {
-        console.error('Error updating feedback status:', error);
-        res.status(400).json({ message: error.message });
+        console.error('Error details:', {
+            error: error,
+            message: error.message,
+            stack: error.stack
+        });
+        
+        const errorMessage = error.message || 'Internal server error';
+        const statusCode = error.statusCode || 500;
+        
+        res.status(statusCode).json({ 
+            success: false, 
+            message: errorMessage 
+        });
     }
 });
 

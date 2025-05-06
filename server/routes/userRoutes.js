@@ -314,44 +314,93 @@ router.post('/reset-password/:token', resetPasswordValidation, async (req, res) 
 
     res.json({ message: 'Password reset successful' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+// Reset password route
+router.post('/reset-password/:token', resetPasswordValidation, async (req, res) => {
+  try {
+    const user = await User.findOne({
+      resetToken: req.params.token,
+      resetTokenExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'An error occurred. Please try again later.' });
   }
 });
 
-// Forgot password
+// Reset password route
 router.post('/forgot-password', forgotPasswordValidation, async (req, res) => {
-  try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user) {
+            // Don't reveal whether email exists for security
+            return res.status(200).json({ message: 'If an account exists with this email, you will receive an email with instructions' });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        user.resetToken = resetToken;
+        user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+        await user.save();
+
+        // Configure email transport
+        const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
+            port: process.env.EMAIL_PORT || 587,
+            secure: false,
+            auth: {
+                user: process.env.EMAIL_USER || 'your-ethereal-email',
+                pass: process.env.EMAIL_PASS || 'your-ethereal-password'
+            }
+        });
+
+        // Get the frontend URL from environment or default to localhost
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+        // Send email
+        const mailOptions = {
+            from: process.env.EMAIL_FROM || '"PawTracker" <noreply@pawtracker.com>',
+            to: user.email,
+            subject: 'Password Reset Request',
+            html: `
+                <h2>Password Reset Request</h2>
+                <p>You requested a password reset. Click the link below to reset your password:</p>
+                <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                <p>If you did not request this, please ignore this email.</p>
+                <p>This link will expire in 1 hour.</p>
+            `
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+            res.status(200).json({ 
+                message: 'If an account exists with this email, you will receive an email with instructions' 
+            });
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            // Don't reveal email sending errors to users
+            res.status(200).json({ 
+                message: 'If an account exists with this email, you will receive an email with instructions' 
+            });
+        }
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ 
+            message: 'An error occurred. Please try again later.' 
+        });
     }
-
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
-    await user.save();
-
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
-    const mailOptions = {
-      from: '"PawTracker" <noreply@pawtracker.com>',
-      to: user.email,
-      subject: 'Password Reset Request',
-      html: `
-        <h2>Password Reset Request</h2>
-        <p>You requested a password reset. Click the link below to reset your password:</p>
-        <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
-        <p>If you did not request this, please ignore this email.</p>
-        <p>This link will expire in 1 hour.</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-    res.json({ 
-      message: 'Password reset email sent'
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
 
 // Get all users (admin only)
