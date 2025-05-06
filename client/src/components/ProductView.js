@@ -34,18 +34,42 @@ function ProductView() {
   };
 
   const handleAddToCart = () => {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find(item => item._id === product._id);
-    
-    if (existing) {
-      existing.cartQuantity = (existing.cartQuantity || 0) + quantity;
-      Object.assign(existing, product);
-    } else {
+    try {
+      // Get cart data from localStorage
+      const cartData = localStorage.getItem('cart');
+      let cart;
+      
+      // If cart data exists, parse it
+      if (cartData) {
+        cart = JSON.parse(cartData);
+        // If parsing failed or result is not an array, initialize as empty array
+        if (!Array.isArray(cart)) {
+          cart = [];
+        }
+      } else {
+        // If no cart data, initialize as empty array
+        cart = [];
+      }
+
+      const existing = cart.find(item => item._id === product._id);
+      
+      if (existing) {
+        existing.cartQuantity = (existing.cartQuantity || 0) + quantity;
+        Object.assign(existing, product);
+      } else {
+        cart.push({ ...product, cartQuantity: quantity });
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(cart));
+      navigate('/cart');
+    } catch (error) {
+      console.error('Error processing cart:', error);
+      // If any error occurs, initialize cart as empty array
+      const cart = [];
       cart.push({ ...product, cartQuantity: quantity });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      navigate('/cart');
     }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    navigate('/cart');
   };
 
   if (loading) {
