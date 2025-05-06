@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Service.css';
@@ -27,41 +27,11 @@ function BookAppointment() {
         time: '',
         notes: ''
     });
-    const [amount, setAmount] = useState(0);
     const [errors, setErrors] = useState({});
     const [notification, setNotification] = useState({ message: '', type: '' });
-    const [forceUpdate, setForceUpdate] = useState(0);
-
-    useEffect(() => {
-        calculateAmount(formData.serviceType, formData.trainingType);
-    }, [formData.serviceType, formData.trainingType]);
-
-    const calculateAmount = (service, trainingType) => {
-        let calculatedAmount = 0;
-        switch (service) {
-            case 'Vet Service':
-                calculatedAmount = 5000;
-                break;
-            case 'Pet Grooming':
-                calculatedAmount = 4500;
-                break;
-            case 'Pet Training':
-                calculatedAmount = trainingType === 'Private' ? 7500 : 3500;
-                break;
-            default:
-                calculatedAmount = 0;
-        }
-        setAmount(calculatedAmount);
-    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        // Prevent changes to petOwner field
-        if (name === 'petOwner') {
-            return;
-        }
-
         setFormData(prev => ({
             ...prev,
             [name]: value,
@@ -74,13 +44,6 @@ function BookAppointment() {
     const validateForm = () => {
         const newErrors = {};
         const today = new Date().toISOString().split('T')[0];
-
-        // Skip validation for petOwner since it's automatically set
-        // if (!formData.petOwner.trim()) {
-        //     newErrors.petOwner = 'Pet owner name is required';
-        // } else if (formData.petOwner.length < 2) {
-        //     newErrors.petOwner = 'Pet owner name must be at least 2 characters';
-        // }
 
         if (!formData.petName.trim()) {
             newErrors.petName = 'Pet name is required';
@@ -113,58 +76,44 @@ function BookAppointment() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setErrors({ submit: 'Please login to book an appointment' });
-                    return;
-                }
+        if (!validateForm()) return;
 
-                const config = {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                };
-
-                // Get user ID from token
-                const user = JSON.parse(localStorage.getItem('user'));
-                const userId = user ? user._id : null;
-
-                const appointmentData = {
-                    ...formData,
-                    amount: amount,
-                    userId: userId
-                };
-
-                const response = await axios.post('http://localhost:5000/api/appointments', appointmentData, config);
-                setNotification({ message: 'Appointment booked successfully!', type: 'success' });
-
-                // Redirect to MyAppointments page after a short delay
-                setTimeout(() => {
-                    navigate('/my-appointments');
-                }, 1500);
-
-                setFormData({
-                    petOwner: '',
-                    petName: '',
-                    serviceType: '',
-                    trainingType: 'N/A',
-                    date: '',
-                    time: '',
-                    notes: ''
-                });
-                setAmount(0);
-                setForceUpdate(prev => !prev);
-            } catch (error) {
-                console.error('Error booking appointment:', error);
-                setNotification({ message: error.response?.data?.message || 'Error booking appointment', type: 'error' });
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setErrors({ submit: 'Please login to book an appointment' });
+                return;
             }
+
+            const user = JSON.parse(localStorage.getItem('user'));
+            const userId = user ? user._id : null;
+
+            const appointmentData = {
+                ...formData,
+                userId: userId
+            };
+
+            const response = await axios.post('/api/appointments', appointmentData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            setNotification({ message: 'Appointment booked successfully!', type: 'success' });
+            setTimeout(() => {
+                navigate('/my-appointments');
+            }, 2000);
+        } catch (error) {
+            console.error('Error booking appointment:', error);
+            setNotification({ 
+                message: error.response?.data?.message || 'Failed to book appointment', 
+                type: 'error' 
+            });
         }
     };
 
-    // Generate 30-minute time slots from 09:00 to 16:30
+    // Generate time slots from 09:00 to 16:30
     const generateTimeSlots = (start = 9, end = 17) => {
         const slots = [];
         for (let hour = start; hour < end; hour++) {
@@ -205,7 +154,6 @@ function BookAppointment() {
                                         readOnly
                                         disabled
                                     />
-                                    {errors.petOwner && <span className="error">{errors.petOwner}</span>}
                                 </div>
 
                                 <div className="form-group">
@@ -248,8 +196,8 @@ function BookAppointment() {
                                             value={formData.trainingType}
                                             onChange={handleChange}
                                         >
-                                            <option value="Private">Private Training (Rs.7500)</option>
-                                            <option value="Group">Group Training (Rs.3500)</option>
+                                            <option value="Private">Private Training</option>
+                                            <option value="Group">Group Training</option>
                                         </select>
                                     </div>
                                 )}
@@ -296,7 +244,6 @@ function BookAppointment() {
                                     ></textarea>
                                 </div>
 
-                                <div className="amount-display">Total Amount: Rs.{amount ?? 'N/A'}</div>
                                 <button type="submit" className="hero-btn submit-button">Confirm Appointment</button>
                             </form>
                         </div>

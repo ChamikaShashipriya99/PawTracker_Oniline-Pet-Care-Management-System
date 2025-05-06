@@ -34,7 +34,9 @@ const notificationController = require('./Controllers/notificationController');
 // const { protect } = require('./middleware/auth');
 
 // Set JWT secret
-process.env.JWT_SECRET = 'pawtracker_secret_key_2024';
+if (!process.env.JWT_SECRET) {
+    process.env.JWT_SECRET = 'pawtracker_secret_key_2024';
+}
 
 const app = express();
 
@@ -45,10 +47,13 @@ app.use(express.json());
 // Serve static files from 'uploads' directory
 app.use('/uploads', express.static('uploads'));
 
-// MongoDB Connection
+// Connect to MongoDB
 mongoose.connect('mongodb+srv://Chamika1999:I8qGjr7vC6F9OUaZ@cluster0.nyd4g.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => {
+        console.error('MongoDB connection error:', err);
+        process.exit(1);
+    });
 
 // Routes
 app.use('/api/users', userRoutes);

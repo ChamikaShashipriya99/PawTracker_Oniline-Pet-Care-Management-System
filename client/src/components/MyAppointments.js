@@ -107,12 +107,6 @@ function MyAppointments() {
         }
     };
 
-    const handleProceedToPay = (appointment) => {
-        const amount = appointment.amount ?? 0;
-        console.log(`Proceeding to pay for appointment ${appointment._id} - Amount: Rs.${amount}`);
-        alert(`Proceed to pay Rs.${amount} for ${appointment.serviceType}`);
-    };
-
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
     };
@@ -135,7 +129,6 @@ function MyAppointments() {
             `${appointment.serviceType}${appointment.trainingType !== 'N/A' ? ` (${appointment.trainingType})` : ''}`,
             `${formatDate(appointment.date)} at ${appointment.time}`,
             appointment.status,
-            `Rs.${appointment.amount ?? 'N/A'}`,
             `${appointment.petOwner}`,
             appointment.petName,
             appointment.notes || 'N/A'
@@ -143,7 +136,7 @@ function MyAppointments() {
 
         autoTable(doc, {
             startY: 40,
-            head: [['Service', 'Date & Time', 'Status', 'Amount', 'Pet Owner', 'Pet Name', 'Notes']],
+            head: [['Service', 'Date & Time', 'Status', 'Pet Owner', 'Pet Name', 'Notes']],
             body: tableData,
             theme: 'grid',
             styles: { fontSize: 10, cellPadding: 3 },
@@ -280,7 +273,6 @@ function MyAppointments() {
                                                 <th>Pet Name</th>
                                                 <th>Date & Time</th>
                                                 <th>Status</th>
-                                                <th>Amount</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -291,13 +283,10 @@ function MyAppointments() {
                                                         {appointment.serviceType}
                                                         {appointment.trainingType !== 'N/A' && ` (${appointment.trainingType})`}
                                                     </td>
-                                                    <td>
-                                                        {appointment.petOwner}
-                                                    </td>
+                                                    <td>{appointment.petOwner}</td>
                                                     <td>{appointment.petName}</td>
                                                     <td>{formatDate(appointment.date)} at {appointment.time}</td>
                                                     <td className={`status-${appointment.status.toLowerCase()}`}>{appointment.status}</td>
-                                                    <td>Rs.{appointment.amount ?? 'N/A'}</td>
                                                     <td>
                                                         <div className="action-buttons">
                                                             <button className="hero-btn view-button" onClick={() => handleViewAppointment(appointment._id)}>
@@ -312,11 +301,6 @@ function MyAppointments() {
                                                                         Cancel
                                                                     </button>
                                                                 </>
-                                                            )}
-                                                            {appointment.status === 'Approved' && (
-                                                                <button className="hero-btn pay-button" onClick={() => handleProceedToPay(appointment)}>
-                                                                    Proceed to Pay
-                                                                </button>
                                                             )}
                                                             <button className="hero-btn download-button" onClick={() => downloadPDF(appointment)}>
                                                                 Download PDF

@@ -36,11 +36,7 @@ const appointmentSchema = new mongoose.Schema({
     time: {
         type: String,
         required: [true, 'Time is required'],
-    },
-    amount: {
-        type: Number,
-        required: [true, 'Amount is required'],
-        min: [0, 'Amount cannot be negative'],
+        match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
     },
     notes: {
         type: String,
@@ -48,7 +44,7 @@ const appointmentSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Approved', 'Rejected'],
+        enum: ['Pending', 'Approved', 'Rejected', 'Completed'],
         default: 'Pending',
     },
 }, {
