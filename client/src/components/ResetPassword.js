@@ -59,13 +59,29 @@ function ResetPassword({ setIsLoggedIn }) {
 
     try {
       const res = await axios.post(`${config.API_URL}/users/reset-password/${token}`, { password: formData.password });
-      setMessage(res.data.message);
-      setFormData({ password: '', confirmPassword: '' });
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000); // Redirect to login after 2 seconds
+      
+      if (res.status === 200 && res.data) {
+        setMessage(res.data.message);
+        setFormData({ password: '', confirmPassword: '' });
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000); // Redirect to login after 2 seconds
+      } else {
+        throw new Error('Failed to reset password');
+      }
     } catch (error) {
-      setErrors({ ...errors, password: error.response?.data?.message || 'An error occurred. Please try again.' });
+      console.error('Password reset error:', error);
+      let errorMessage = error.response?.data?.message || 
+                        error.response?.data?.error || 
+                        'An error occurred. Please try again.';
+      
+      if (error.response?.status === 400) {
+        errorMessage = 'Invalid or expired reset token';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Reset token not found';
+      }
+      
+      setErrors({ ...errors, password: errorMessage });
     }
   };
 
