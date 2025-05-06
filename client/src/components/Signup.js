@@ -17,6 +17,7 @@ function Signup({ setIsLoggedIn }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -48,6 +49,7 @@ function Signup({ setIsLoggedIn }) {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsLoading(true);
     const formData = new FormData();
     Object.keys(user).forEach(key => {
       formData.append(key, user[key]);
@@ -61,13 +63,20 @@ function Signup({ setIsLoggedIn }) {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      if (res.data) {
-        alert('Signup successful! Please verify your email.');
-        navigate('/login');
+      if (res.data.needsVerification) {
+        // Navigate to verification page with email
+        navigate('/verify-email', { 
+          state: { 
+            email: res.data.email,
+            message: 'Please check your email for the verification code.'
+          }
+        });
       }
     } catch (error) {
       console.error('Signup failed:', error);
       setErrors({ general: error.response?.data?.error || 'Signup failed. Please try again.' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +84,11 @@ function Signup({ setIsLoggedIn }) {
     <div className="container mt-5">
       <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
         <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Sign Up 🐾</h2>
+        {errors.general && (
+          <div className="alert alert-danger" role="alert">
+            {errors.general}
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="row">
             <div className="col-md-6 mb-3">
@@ -134,10 +148,17 @@ function Signup({ setIsLoggedIn }) {
             <input type="file" name="profilePhoto" className="form-control" onChange={handleFileChange} style={{ borderRadius: '10px' }} />
             {errors.profilePhoto && <small className="text-danger">{errors.profilePhoto}</small>}
           </div>
-          <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}>Sign Up</button>
+          <button 
+            type="submit" 
+            className="btn btn-primary w-100" 
+            style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing up...' : 'Sign Up'}
+          </button>
         </form>
         <p className="text-center mt-3" style={{ color: '#555' }}>
-          Already have an account? <Link to="/Login" style={{ color: '#007bff', textDecoration: 'none' }}>Login here</Link>
+          Already have an account? <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>Login here</Link>
         </p>
       </div>
       <br></br>

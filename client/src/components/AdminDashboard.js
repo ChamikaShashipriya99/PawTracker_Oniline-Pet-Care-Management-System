@@ -25,6 +25,8 @@ function AdminDashboard() {
     firstName: '', lastName: '', username: '', email: '', phone: '', password: ''
   });
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const user = JSON.parse(localStorage.getItem('user'));
 
   // Validation functions
@@ -131,13 +133,15 @@ function AdminDashboard() {
         const updatedUsers = users.filter(user => user._id !== id);
         setUsers(updatedUsers);
         setFilteredUsers(filteredUsers.filter(user => user._id !== id));
-        alert('User deleted successfully!');
+        setSuccessMessage('User deleted successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
         if (id === user._id) {
           localStorage.removeItem('user');
           navigate('/admin/login');
         }
       } catch (error) {
-        alert('Delete failed: ' + error.message);
+        setErrorMessage(error.response?.data?.error || 'Failed to delete user. Please try again.');
+        setTimeout(() => setErrorMessage(''), 3000);
       }
     }
   };
@@ -162,7 +166,8 @@ function AdminDashboard() {
 
     try {
       const response = await axios.post(`${config.API_URL}/users/admin/add`, newAdmin);
-      alert('New admin added successfully!');
+      setSuccessMessage('New admin added successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
       setNewAdmin({ firstName: '', lastName: '', username: '', email: '', phone: '', password: '' });
       const res = await axios.get(`${config.API_URL}/users/users`);
       setUsers(res.data);
@@ -177,7 +182,8 @@ function AdminDashboard() {
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.response?.data?.details || error.message;
-      alert('Failed to add admin: ' + errorMessage);
+      setErrorMessage('Failed to add admin: ' + errorMessage);
+      setTimeout(() => setErrorMessage(''), 3000);
     }
   };
 
@@ -211,12 +217,14 @@ function AdminDashboard() {
       setUsers(updatedUsers);
       setFilteredUsers(filteredUsers.map(u => (u._id === editUser._id ? res.data : u)));
       setEditUser(null);
-      alert('User updated successfully!');
+      setSuccessMessage('User updated successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
       if (editUser._id === user._id) {
         localStorage.setItem('user', JSON.stringify(res.data));
       }
     } catch (error) {
-      alert('Update failed: ' + error.message);
+      setErrorMessage('Failed to update user: ' + (error.response?.data?.error || error.message));
+      setTimeout(() => setErrorMessage(''), 3000);
     }
   };
 
@@ -407,6 +415,18 @@ function AdminDashboard() {
 
   return (
     <div className="container mt-5">
+      {successMessage && (
+        <div className="alert alert-success alert-dismissible fade show" role="alert">
+          {successMessage}
+          <button type="button" className="btn-close" onClick={() => setSuccessMessage('')}></button>
+        </div>
+      )}
+      {errorMessage && (
+        <div className="alert alert-danger alert-dismissible fade show" role="alert">
+          {errorMessage}
+          <button type="button" className="btn-close" onClick={() => setErrorMessage('')}></button>
+        </div>
+      )}
       <div className="card shadow-lg p-4" style={{ borderRadius: '15px', border: 'none' }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="mb-0" style={{ color: '#007bff', fontWeight: '600' }}>Admin Dashboard 🐾</h2>

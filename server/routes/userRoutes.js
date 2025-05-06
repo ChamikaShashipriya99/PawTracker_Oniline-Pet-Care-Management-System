@@ -53,16 +53,29 @@ let transporter;
 // Initialize the transporter with your email service
 const initializeEmailTransporter = () => {
   try {
-    // Gmail configuration with App Password
+    // Gmail configuration with explicit SMTP settings
     transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: 'samankumara990209@gmail.com',
         pass: 'lbcyivjbrwnktwgk' // App Password
+      },
+      debug: true,
+      logger: true
+    });
+    
+    // Verify the transporter configuration
+    transporter.verify((error, success) => {
+      if (error) {
+        console.error('Email transporter verification failed:', error);
+      } else {
+        console.log('Email transporter is ready to send emails');
       }
     });
     
-    console.log('Gmail transporter created with direct configuration');
+    console.log('Gmail transporter created with SMTP configuration');
   } catch (error) {
     console.error('Error creating email transporter:', error);
   }
@@ -77,13 +90,92 @@ router.post('/signup', upload.single('profilePhoto'), signupValidation, async (r
   const profilePhoto = req.file ? `/uploads/${req.file.filename}` : null;
   
   try {
+    // Check if email or username already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }]
+    });
+
+    if (existingUser) {
+      // Delete uploaded file if user already exists
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({ 
+        error: existingUser.email === email ? 
+          'Email already registered' : 
+          'Username already taken'
+      });
+    }
+
+    // Generate verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCodeExpiry = Date.now() + 3600000; // 1 hour
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ firstName, lastName, username, email, phone, password: hashedPassword, profilePhoto });
+    const user = new User({ 
+      firstName, 
+      lastName, 
+      username, 
+      email, 
+      phone, 
+      password: hashedPassword, 
+      profilePhoto,
+      verificationCode,
+      verificationCodeExpiry,
+      isVerified: false
+    });
+
     await user.save();
-    res.status(201).json({ message: 'User created', user: { ...user.toObject(), password: undefined } });
+
+    // Send verification email
+    const mailOptions = {
+      from: 'samankumara990209@gmail.com',
+      to: email,
+      subject: 'Verify Your PawTracker Account',
+      html: `
+        <h2>Welcome to PawTracker!</h2>
+        <p>Thank you for registering. Please verify your email address by entering the following code:</p>
+        <h1 style="color: #007bff; font-size: 32px; letter-spacing: 5px;">${verificationCode}</h1>
+        <p>This code will expire in 1 hour.</p>
+        <p>If you did not create this account, please ignore this email.</p>
+      `
+    };
+
+    try {
+      if (!transporter) {
+        console.log('Transporter not initialized yet, waiting...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      await transporter.sendMail(mailOptions);
+      console.log('Verification email sent successfully to:', email);
+      
+      res.status(201).json({ 
+        message: 'User created successfully. Please check your email for verification code.',
+        needsVerification: true,
+        email: email
+      });
+    } catch (emailError) {
+      console.error('Error sending verification email:', emailError);
+      // Delete the user if email sending fails
+      await User.findByIdAndDelete(user._id);
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ 
+        error: 'Error sending verification email. Please try again later.' 
+      });
+    }
   } catch (error) {
     console.error('Signup error:', error);
-    res.status(500).json({ error: 'Error creating user account' });
+    // Delete uploaded file if there's an error
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ 
+      error: 'Error creating user account',
+      details: error.message 
+    });
   }
 });
 
@@ -314,26 +406,6 @@ router.post('/reset-password/:token', resetPasswordValidation, async (req, res) 
 
     res.json({ message: 'Password reset successful' });
   } catch (error) {
-// Reset password route
-router.post('/reset-password/:token', resetPasswordValidation, async (req, res) => {
-  try {
-    const user = await User.findOne({
-      resetToken: req.params.token,
-      resetTokenExpiry: { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired reset token' });
-    }
-
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    user.password = hashedPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-    await user.save();
-
-    res.json({ message: 'Password reset successful' });
-  } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ message: 'An error occurred. Please try again later.' });
   }
@@ -344,9 +416,11 @@ router.post('/forgot-password', forgotPasswordValidation, async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (!user) {
-            // Don't reveal whether email exists for security
+            console.log('Password reset requested for non-existent email:', req.body.email);
             return res.status(200).json({ message: 'If an account exists with this email, you will receive an email with instructions' });
         }
+
+        console.log('Password reset requested for user:', user.email);
 
         // Generate reset token
         const resetToken = crypto.randomBytes(20).toString('hex');
@@ -354,26 +428,15 @@ router.post('/forgot-password', forgotPasswordValidation, async (req, res) => {
         user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        // Configure email transport
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
-            port: process.env.EMAIL_PORT || 587,
-            secure: false,
-            auth: {
-                user: process.env.EMAIL_USER || 'your-ethereal-email',
-                pass: process.env.EMAIL_PASS || 'your-ethereal-password'
-            }
-        });
-
         // Get the frontend URL from environment or default to localhost
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
         const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
         // Send email
         const mailOptions = {
-            from: process.env.EMAIL_FROM || '"PawTracker" <noreply@pawtracker.com>',
+            from: 'samankumara990209@gmail.com',
             to: user.email,
-            subject: 'Password Reset Request',
+            subject: 'Password Reset Request - PawTracker',
             html: `
                 <h2>Password Reset Request</h2>
                 <p>You requested a password reset. Click the link below to reset your password:</p>
@@ -384,12 +447,31 @@ router.post('/forgot-password', forgotPasswordValidation, async (req, res) => {
         };
 
         try {
-            await transporter.sendMail(mailOptions);
+            if (!transporter) {
+                console.log('Transporter not initialized yet, waiting...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            console.log('Attempting to send password reset email to:', user.email);
+            const info = await transporter.sendMail(mailOptions);
+            console.log('Password reset email sent successfully:', {
+                messageId: info.messageId,
+                response: info.response,
+                accepted: info.accepted,
+                rejected: info.rejected
+            });
+            
             res.status(200).json({ 
                 message: 'If an account exists with this email, you will receive an email with instructions' 
             });
         } catch (emailError) {
-            console.error('Email sending error:', emailError);
+            console.error('Detailed email sending error:', {
+                error: emailError,
+                message: emailError.message,
+                code: emailError.code,
+                response: emailError.response,
+                stack: emailError.stack
+            });
             // Don't reveal email sending errors to users
             res.status(200).json({ 
                 message: 'If an account exists with this email, you will receive an email with instructions' 
