@@ -61,8 +61,12 @@ function Login({ setIsLoggedIn }) {
         setUserFor2FA(response.data.user);
         setShow2FA(true);
       } else {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        localStorage.setItem('token',response.data.token)
+        const userData = {
+          ...response.data.user,
+          createdAt: response.data.user.createdAt
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('token', response.data.token);
         setIsLoggedIn(true);
         navigate('/profile');
       }

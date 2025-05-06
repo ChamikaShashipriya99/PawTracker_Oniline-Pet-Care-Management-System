@@ -4,6 +4,7 @@ import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import TwoFactorSetup from './TwoFactorSetup';
+import ChangePassword from './ChangePassword';
 import config from '../config';
 
 function Profile() {
@@ -339,7 +340,11 @@ function Profile() {
                       <div>
                         <p className="text-muted mb-0">Member Since</p>
                         <p className="mb-0 fw-bold">
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          }) : 'Not available'}
                         </p>
                       </div>
                     </div>
@@ -426,28 +431,36 @@ function Profile() {
                       </div>
                     </div>
                     <small className="text-muted">
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }) : 'Not available'}
                     </small>
                   </div>
                 </div>
-                {pets.length > 0 && (
-                  <div className="list-group-item border-0 p-3">
+                {pets.length > 0 && pets.map(pet => (
+                  <div key={pet._id} className="list-group-item border-0 p-3">
                     <div className="d-flex justify-content-between align-items-center">
                       <div className="d-flex align-items-center">
                         <div className="rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', backgroundColor: '#e6ffe6' }}>
                           <i className="fas fa-paw text-success"></i>
                         </div>
                         <div>
-                          <p className="mb-0 fw-bold">Added {pets.length} pet{pets.length > 1 ? 's' : ''}</p>
-                          <small className="text-muted">Your furry friends are now registered</small>
+                          <p className="mb-0 fw-bold">Added {pet.name}</p>
+                          <small className="text-muted">Your furry friend is now registered</small>
                         </div>
                       </div>
                       <small className="text-muted">
-                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                        {pet.createdAt ? new Date(pet.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        }) : 'Not available'}
                       </small>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           </div>
@@ -678,102 +691,105 @@ function Profile() {
             </h5>
           </div>
           <div className="card-body">
-            <div className="row align-items-center">
-              <div className="col-md-8">
-                <div className="d-flex align-items-center mb-2">
-                  <h6 className="mb-0 me-2">Two-Factor Authentication (2FA)</h6>
-                  {user.twoFactorEnabled ? (
-                    <span className="badge bg-success">
-                      <i className="fas fa-check-circle me-1"></i>
-                      Enabled
-                    </span>
-                  ) : (
-                    <span className="badge bg-secondary">
-                      <i className="fas fa-times-circle me-1"></i>
-                      Disabled
-                    </span>
+            {/* Change Password Component */}
+            <ChangePassword />
+            
+            <div className="mt-4 pt-4 border-top">
+              <div className="row align-items-center">
+                <div className="col-md-8">
+                  <div className="d-flex align-items-center mb-2">
+                    <h6 className="mb-0 me-2">Two-Factor Authentication (2FA)</h6>
+                    {user.twoFactorEnabled ? (
+                      <span className="badge bg-success">
+                        <i className="fas fa-check-circle me-1"></i>
+                        Enabled
+                      </span>
+                    ) : (
+                      <span className="badge bg-secondary">
+                        <i className="fas fa-times-circle me-1"></i>
+                        Disabled
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted mb-0">
+                    {user.twoFactorEnabled 
+                      ? "Your account is protected with two-factor authentication. You will need to enter a verification code each time you log in."
+                      : "Add an extra layer of security to your account by enabling two-factor authentication."}
+                  </p>
+                  {user.twoFactorEnabled && (
+                    <div className="mt-2">
+                      <small className="text-muted">
+                        <i className="fas fa-info-circle me-1"></i>
+                        Last verified: {new Date(user.twoFactorVerified).toLocaleDateString()}
+                      </small>
+                    </div>
                   )}
                 </div>
-                <p className="text-muted mb-0">
-                  {user.twoFactorEnabled 
-                    ? "Your account is protected with two-factor authentication. You will need to enter a verification code each time you log in."
-                    : "Add an extra layer of security to your account by enabling two-factor authentication."}
-                </p>
-                {user.twoFactorEnabled && (
-                  <div className="mt-2">
-                    <small className="text-muted">
-                      <i className="fas fa-info-circle me-1"></i>
-                      Last verified: {new Date(user.twoFactorVerified).toLocaleDateString()}
-                    </small>
-                  </div>
-                )}
-              </div>
-              <div className="col-md-4 text-end">
-                {user.twoFactorEnabled ? (
-                  <div className="d-flex justify-content-end gap-2">
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => {
-                        if (window.confirm('Are you sure you want to disable Two-Factor Authentication? This will make your account less secure.')) {
-                          // Open the TwoFactorSetup component in disable mode
-                          setShow2FASetup(true);
-                          // We'll modify the TwoFactorSetup component to show the disable view
-                        }
-                      }}
-                      style={{ border: 'none', borderRadius: '10px' }}
-                    >
-                      <i className="fas fa-times-circle me-2"></i>
-                      Disable 2FA
-                    </button>
+                <div className="col-md-4 text-end">
+                  {user.twoFactorEnabled ? (
+                    <div className="d-flex justify-content-end gap-2">
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to disable Two-Factor Authentication? This will make your account less secure.')) {
+                            setShow2FASetup(true);
+                          }
+                        }}
+                        style={{ border: 'none', borderRadius: '10px' }}
+                      >
+                        <i className="fas fa-times-circle me-2"></i>
+                        Disable 2FA
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => setShow2FASetup(true)}
+                        style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
+                      >
+                        <i className="fas fa-shield-alt me-2"></i>
+                        Manage 2FA
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       className="btn btn-primary"
                       onClick={() => setShow2FASetup(true)}
                       style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
                     >
                       <i className="fas fa-shield-alt me-2"></i>
-                      Manage 2FA
+                      Enable 2FA
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setShow2FASetup(true)}
-                    style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
-                  >
-                    <i className="fas fa-shield-alt me-2"></i>
-                    Enable 2FA
-                  </button>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
 
-            {user.twoFactorEnabled && (
-              <div className="mt-3 pt-3 border-top">
-                <h6 className="mb-3">Security Recommendations</h6>
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center mb-2">
-                      <i className="fas fa-check-circle text-success me-2"></i>
-                      <span>2FA is enabled</span>
+              {user.twoFactorEnabled && (
+                <div className="mt-3 pt-3 border-top">
+                  <h6 className="mb-3">Security Recommendations</h6>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center mb-2">
+                        <i className="fas fa-check-circle text-success me-2"></i>
+                        <span>2FA is enabled</span>
+                      </div>
+                      <div className="d-flex align-items-center mb-2">
+                        <i className="fas fa-check-circle text-success me-2"></i>
+                        <span>Backup codes are available</span>
+                      </div>
                     </div>
-                    <div className="d-flex align-items-center mb-2">
-                      <i className="fas fa-check-circle text-success me-2"></i>
-                      <span>Backup codes are available</span>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="d-flex align-items-center mb-2">
-                      <i className="fas fa-info-circle text-info me-2"></i>
-                      <span>Keep your authenticator app secure</span>
-                    </div>
-                    <div className="d-flex align-items-center mb-2">
-                      <i className="fas fa-info-circle text-info me-2"></i>
-                      <span>Save your backup codes in a safe place</span>
+                    <div className="col-md-6">
+                      <div className="d-flex align-items-center mb-2">
+                        <i className="fas fa-info-circle text-info me-2"></i>
+                        <span>Keep your authenticator app secure</span>
+                      </div>
+                      <div className="d-flex align-items-center mb-2">
+                        <i className="fas fa-info-circle text-info me-2"></i>
+                        <span>Save your backup codes in a safe place</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

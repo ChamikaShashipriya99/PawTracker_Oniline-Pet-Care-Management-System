@@ -19,7 +19,11 @@ function TwoFactorAuth({ user, onClose, isLogin = false, onSuccess }) {
       });
 
       if (onSuccess) {
-        onSuccess(response.data.user);
+        const userData = {
+          ...response.data.user,
+          createdAt: response.data.user.createdAt
+        };
+        onSuccess(userData);
       }
     } catch (error) {
       setError(error.response?.data?.error || 'Invalid verification code');
