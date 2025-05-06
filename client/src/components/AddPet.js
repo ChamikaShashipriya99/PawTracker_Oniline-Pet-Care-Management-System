@@ -46,8 +46,6 @@ function AddPet() {
     }
 
     setPet(newPet);
-
-    // Clear error when user starts typing
     setErrors({ ...errors, [name]: '' });
   };
 

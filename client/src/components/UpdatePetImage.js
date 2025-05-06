@@ -4,7 +4,7 @@ import config from '../config';
 
 function UpdatePetImage({ pet, onUpdate, onClose }) {
   const [photo, setPhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(pet.photo ? `${config.API_URL}${pet.photo}` : null);
+  const [photoPreview, setPhotoPreview] = useState(pet.photo ? `${config.UPLOADS_URL}${pet.photo}` : null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 

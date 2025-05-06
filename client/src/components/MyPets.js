@@ -22,6 +22,8 @@ function MyPets() {
     isCompleted: false
   });
   const [editingVaccination, setEditingVaccination] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!user) {
@@ -79,6 +81,31 @@ function MyPets() {
     setPets(pets.map(p => (p._id === updatedPet._id ? updatedPet : p)));
   };
 
+  const calculateAge = (birthday) => {
+    if (!birthday) return '';
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const handleChangeEditPet = (e) => {
+    const { name, value } = e.target;
+    const newPet = { ...editPet, [name]: value };
+    
+    // If birthday changes, calculate age
+    if (name === 'birthday') {
+      newPet.age = calculateAge(value);
+    }
+
+    setEditPet(newPet);
+    setErrors({ ...errors, [name]: '' });
+  };
+
   const validateEditPet = () => {
     const lettersRegex = /^[A-Za-z\s]+$/;
     const today = new Date();
@@ -126,10 +153,6 @@ function MyPets() {
       setStatusType('danger');
       setTimeout(() => setStatusMessage(''), 3000);
     }
-  };
-
-  const handleChangeEditPet = (e) => {
-    setEditPet({ ...editPet, [e.target.name]: e.target.value });
   };
 
   const handleVaccinationClick = (pet) => {
@@ -465,152 +488,159 @@ function MyPets() {
         )}
 
         {editPet && (
-          <div className="mt-5">
-            <div className="card shadow-sm" style={{ borderRadius: '15px', border: 'none' }}>
-              <div className="card-header bg-white py-3" style={{ borderRadius: '15px 15px 0 0' }}>
-                <h3 className="fw-bold mb-0" style={{ color: '#00c4cc' }}>
-                  <i className="fas fa-edit me-2"></i>Edit Pet
-                </h3>
-              </div>
-              <div className="card-body p-4">
-                <form onSubmit={handleUpdatePet}>
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Pet Name</label>
+          <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-lg">
+              <div className="modal-content" style={{ borderRadius: '15px' }}>
+                <div className="modal-header">
+                  <h5 className="modal-title fw-bold" style={{ color: '#00c4cc' }}>
+                    <i className="fas fa-edit me-2"></i>Edit Pet
+                  </h5>
+                  <button 
+                    type="button" 
+                    className="btn-close" 
+                    onClick={() => setEditPet(null)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleUpdatePet}>
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label fw-bold">Pet Name</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="fas fa-paw"></i></span>
+                          <input 
+                            type="text" 
+                            name="name" 
+                            className="form-control" 
+                            value={editPet.name} 
+                            onChange={handleChangeEditPet} 
+                            required 
+                            style={{ borderRadius: '0 10px 10px 0' }} 
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label fw-bold">Pet Type</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="fas fa-dog"></i></span>
+                          <select
+                            name="type"
+                            className="form-control"
+                            value={editPet.type}
+                            onChange={handleChangeEditPet}
+                            required
+                            style={{ borderRadius: '0 10px 10px 0' }}
+                          >
+                            <option value="">Select Type</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Bird">Bird</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label fw-bold">Breed</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="fas fa-dog"></i></span>
+                          <input 
+                            type="text" 
+                            name="breed" 
+                            className="form-control" 
+                            value={editPet.breed} 
+                            onChange={handleChangeEditPet} 
+                            required 
+                            style={{ borderRadius: '0 10px 10px 0' }} 
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label fw-bold">Birthday</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="fas fa-calendar-alt"></i></span>
+                          <input 
+                            type="date" 
+                            name="birthday" 
+                            className="form-control" 
+                            value={editPet.birthday ? new Date(editPet.birthday).toISOString().split('T')[0] : ''} 
+                            onChange={handleChangeEditPet} 
+                            required 
+                            style={{ borderRadius: '0 10px 10px 0' }} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label fw-bold">Age</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="fas fa-birthday-cake"></i></span>
+                          <input 
+                            type="number" 
+                            name="age" 
+                            className="form-control" 
+                            value={editPet.age} 
+                            onChange={handleChangeEditPet} 
+                            required 
+                            style={{ borderRadius: '0 10px 10px 0' }} 
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label fw-bold">Weight (kg)</label>
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="fas fa-weight"></i></span>
+                          <input 
+                            type="number" 
+                            name="weight" 
+                            className="form-control" 
+                            value={editPet.weight} 
+                            onChange={handleChangeEditPet} 
+                            required 
+                            style={{ borderRadius: '0 10px 10px 0' }} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Special Needs</label>
                       <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-paw"></i></span>
+                        <span className="input-group-text"><i className="fas fa-notes-medical"></i></span>
                         <input 
                           type="text" 
-                          name="name" 
+                          name="specialNeeds" 
                           className="form-control" 
-                          value={editPet.name} 
+                          value={editPet.specialNeeds || ''} 
                           onChange={handleChangeEditPet} 
-                          required 
                           style={{ borderRadius: '0 10px 10px 0' }} 
                         />
                       </div>
                     </div>
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Pet Type</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-dog"></i></span>
-                        <select
-                          name="type"
-                          className="form-control"
-                          value={editPet.type}
-                          onChange={handleChangeEditPet}
-                          required
-                          style={{ borderRadius: '0 10px 10px 0' }}
-                        >
-                          <option value="">Select Type</option>
-                          <option value="Dog">Dog</option>
-                          <option value="Cat">Cat</option>
-                          <option value="Bird">Bird</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
+                    
+                    <div className="d-flex justify-content-end gap-2">
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary" 
+                        onClick={() => setEditPet(null)}
+                        style={{ borderRadius: '10px' }}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        type="submit" 
+                        className="btn btn-primary"
+                        style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
+                      >
+                        Save Changes
+                      </button>
                     </div>
-                  </div>
-                  
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Breed</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-dog"></i></span>
-                        <input 
-                          type="text" 
-                          name="breed" 
-                          className="form-control" 
-                          value={editPet.breed} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Birthday</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-calendar-alt"></i></span>
-                        <input 
-                          type="date" 
-                          name="birthday" 
-                          className="form-control" 
-                          value={editPet.birthday ? new Date(editPet.birthday).toISOString().split('T')[0] : ''} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Age</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-birthday-cake"></i></span>
-                        <input 
-                          type="number" 
-                          name="age" 
-                          className="form-control" 
-                          value={editPet.age} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label fw-bold">Weight (kg)</label>
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-weight"></i></span>
-                        <input 
-                          type="number" 
-                          name="weight" 
-                          className="form-control" 
-                          value={editPet.weight} 
-                          onChange={handleChangeEditPet} 
-                          required 
-                          style={{ borderRadius: '0 10px 10px 0' }} 
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Special Needs</label>
-                    <div className="input-group">
-                      <span className="input-group-text"><i className="fas fa-notes-medical"></i></span>
-                      <input 
-                        type="text" 
-                        name="specialNeeds" 
-                        className="form-control" 
-                        value={editPet.specialNeeds || ''} 
-                        onChange={handleChangeEditPet} 
-                        style={{ borderRadius: '0 10px 10px 0' }} 
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="d-flex justify-content-end gap-2">
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
-                      onClick={() => setEditPet(null)}
-                      style={{ borderRadius: '10px' }}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary"
-                      style={{ backgroundColor: '#00c4cc', border: 'none', borderRadius: '10px' }}
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
