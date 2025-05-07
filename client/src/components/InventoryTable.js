@@ -1,46 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button, Modal, Form, InputGroup, Tabs, Tab, Row, Col, Card } from 'react-bootstrap';
+import { Table, Button, Modal, Form, InputGroup, Tabs, Tab } from 'react-bootstrap';
 import * as XLSX from 'xlsx';
 import SuppliersTable from './SuppliersTable';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import config from '../config';
-import { 
-  BoxArrowUpRight, 
-  Cart, 
-  CurrencyDollar, 
-  ExclamationTriangle, 
-  XCircle,
-  BarChart,
-  ListCheck,
-  ExclamationCircle
-} from 'react-bootstrap-icons';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement,
-} from 'chart.js';
-import { Bar, Pie, Line } from 'react-chartjs-2';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement
-);
 
 const INVENTORY_ENDPOINT = `${config.API_URL}/inventory`;
 
@@ -247,6 +212,129 @@ function InventoryTable() {
     
     // Save the PDF
     doc.save('inventory_report.pdf');
+  };
+
+  const handleDownloadReport = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text('Inventory Report', 14, 20);
+    
+    // Add date
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    // Add summary statistics
+    doc.setFontSize(14);
+    doc.text('Summary Statistics', 14, 45);
+    
+    // Create summary table
+    autoTable(doc, {
+      startY: 50,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Total Items', inventoryStats.totalItems.toString()],
+        ['Total Value', `Rs. ${inventoryStats.totalValue.toFixed(2)}`],
+        ['Low Stock Items', inventoryStats.lowStockItems.toString()],
+        ['Out of Stock Items', inventoryStats.outOfStockItems.toString()]
+      ],
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Add category distribution
+    doc.setFontSize(14);
+    doc.text('Category Distribution', 14, doc.lastAutoTable.finalY + 15);
+    
+    const categoryData = Object.entries(inventoryStats.categoryDistribution).map(([category, count]) => [
+      category,
+      count.toString()
+    ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Category', 'Count']],
+      body: categoryData,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Add low stock items
+    doc.setFontSize(14);
+    doc.text('Low Stock Items', 14, doc.lastAutoTable.finalY + 15);
+    
+    const lowStockData = items
+      .filter(item => item.quantity < 5 && item.quantity > 0)
+      .map(item => [
+        item.name,
+        item.category,
+        item.quantity.toString(),
+        `Rs. ${item.price.toFixed(2)}`
+      ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Name', 'Category', 'Quantity', 'Price']],
+      body: lowStockData,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Add out of stock items
+    doc.setFontSize(14);
+    doc.text('Out of Stock Items', 14, doc.lastAutoTable.finalY + 15);
+    
+    const outOfStockData = items
+      .filter(item => item.quantity === 0)
+      .map(item => [
+        item.name,
+        item.category,
+        `Rs. ${item.price.toFixed(2)}`
+      ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Name', 'Category', 'Last Price']],
+      body: outOfStockData,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Save the PDF
+    doc.save('inventory_detailed_report.pdf');
   };
 
   const compressImage = (file) => {
@@ -707,263 +795,6 @@ function InventoryTable() {
         <Tab eventKey="suppliers" title="Suppliers">
           <SuppliersTable />
         </Tab>
-        <Tab eventKey="report" title="Inventory Report">
-          <div className="inventory-report p-4">
-            <h2 className="mb-4 text-primary">
-              <BarChart className="me-2" />
-              Inventory Report
-            </h2>
-            
-            <Row className="mb-4 g-4">
-              <Col md={3}>
-                <div className="stat-card bg-primary text-white p-4 rounded-3 shadow-sm">
-                  <div className="d-flex align-items-center mb-2">
-                    <Cart size={24} className="me-2" />
-                    <h5 className="mb-0">Total Items</h5>
-                  </div>
-                  <h2 className="mb-0">{inventoryStats.totalItems}</h2>
-                </div>
-              </Col>
-              <Col md={3}>
-                <div className="stat-card bg-success text-white p-4 rounded-3 shadow-sm">
-                  <div className="d-flex align-items-center mb-2">
-                    <CurrencyDollar size={24} className="me-2" />
-                    <h5 className="mb-0">Total Value</h5>
-                  </div>
-                  <h2 className="mb-0">Rs. {inventoryStats.totalValue.toFixed(2)}</h2>
-                </div>
-              </Col>
-              <Col md={3}>
-                <div className="stat-card bg-warning text-white p-4 rounded-3 shadow-sm">
-                  <div className="d-flex align-items-center mb-2">
-                    <ExclamationTriangle size={24} className="me-2" />
-                    <h5 className="mb-0">Low Stock Items</h5>
-                  </div>
-                  <h2 className="mb-0">{inventoryStats.lowStockItems}</h2>
-                </div>
-              </Col>
-              <Col md={3}>
-                <div className="stat-card bg-danger text-white p-4 rounded-3 shadow-sm">
-                  <div className="d-flex align-items-center mb-2">
-                    <XCircle size={24} className="me-2" />
-                    <h5 className="mb-0">Out of Stock</h5>
-                  </div>
-                  <h2 className="mb-0">{inventoryStats.outOfStockItems}</h2>
-                </div>
-              </Col>
-            </Row>
-
-            <Row className="mb-4 g-4">
-              <Col md={6}>
-                <Card className="shadow-sm h-100">
-                  <Card.Body>
-                    <h5 className="card-title text-primary mb-3">
-                      <BoxArrowUpRight className="me-2" />
-                      Category Distribution
-                    </h5>
-                    <div style={{ height: '300px' }}>
-                      <Pie
-                        data={{
-                          labels: Object.keys(inventoryStats.categoryDistribution),
-                          datasets: [
-                            {
-                              data: Object.values(inventoryStats.categoryDistribution),
-                              backgroundColor: [
-                                '#4e73df',
-                                '#1cc88a',
-                                '#36b9cc',
-                                '#f6c23e',
-                                '#e74a3b',
-                                '#858796',
-                              ],
-                              borderWidth: 1,
-                            },
-                          ],
-                        }}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          plugins: {
-                            legend: {
-                              position: 'bottom',
-                            },
-                          },
-                        }}
-                      />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={6}>
-                <Card className="shadow-sm h-100">
-                  <Card.Body>
-                    <h5 className="card-title text-warning mb-3">
-                      <ExclamationCircle className="me-2" />
-                      Stock Levels Overview
-                    </h5>
-                    <div style={{ height: '300px' }}>
-                      <Bar
-                        data={{
-                          labels: items.map(item => item.name),
-                          datasets: [
-                            {
-                              label: 'Current Stock',
-                              data: items.map(item => item.quantity),
-                              backgroundColor: items.map(item => 
-                                item.quantity === 0 ? '#e74a3b' :
-                                item.quantity < 5 ? '#f6c23e' : '#1cc88a'
-                              ),
-                              borderWidth: 1,
-                            },
-                          ],
-                        }}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          plugins: {
-                            legend: {
-                              display: false,
-                            },
-                          },
-                          scales: {
-                            y: {
-                              beginAtZero: true,
-                              title: {
-                                display: true,
-                                text: 'Quantity'
-                              }
-                            },
-                            x: {
-                              ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                              }
-                            }
-                          }
-                        }}
-                      />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-
-            <Row className="mb-4">
-              <Col md={12}>
-                <Card className="shadow-sm">
-                  <Card.Body>
-                    <h5 className="card-title text-success mb-3">
-                      <CurrencyDollar className="me-2" />
-                      Inventory Value by Category
-                    </h5>
-                    <div style={{ height: '300px' }}>
-                      <Line
-                        data={{
-                          labels: Object.keys(inventoryStats.categoryDistribution),
-                          datasets: [
-                            {
-                              label: 'Total Value (Rs.)',
-                              data: Object.keys(inventoryStats.categoryDistribution).map(category => 
-                                items
-                                  .filter(item => item.category === category)
-                                  .reduce((sum, item) => sum + (item.price * item.quantity), 0)
-                              ),
-                              borderColor: '#1cc88a',
-                              backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                              fill: true,
-                              tension: 0.4,
-                            },
-                          ],
-                        }}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          plugins: {
-                            legend: {
-                              position: 'bottom',
-                            },
-                          },
-                          scales: {
-                            y: {
-                              beginAtZero: true,
-                              title: {
-                                display: true,
-                                text: 'Value (Rs.)'
-                              }
-                            }
-                          }
-                        }}
-                      />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-
-            <Row className="mb-4 g-4">
-              <Col md={6}>
-                <Card className="shadow-sm h-100">
-                  <Card.Body>
-                    <h5 className="card-title text-warning mb-3">
-                      <ExclamationCircle className="me-2" />
-                      Low Stock Items
-                    </h5>
-                    <Table striped bordered hover responsive>
-                      <thead className="table-light">
-                        <tr>
-                          <th>Name</th>
-                          <th>Category</th>
-                          <th>Quantity</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {items
-                          .filter(item => item.quantity < 5 && item.quantity > 0)
-                          .map(item => (
-                            <tr key={item._id}>
-                              <td>{item.name}</td>
-                              <td>{item.category}</td>
-                              <td className="text-warning fw-bold">{item.quantity}</td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </Table>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={6}>
-                <Card className="shadow-sm h-100">
-                  <Card.Body>
-                    <h5 className="card-title text-danger mb-3">
-                      <ListCheck className="me-2" />
-                      Out of Stock Items
-                    </h5>
-                    <Table striped bordered hover responsive>
-                      <thead className="table-light">
-                        <tr>
-                          <th>Name</th>
-                          <th>Category</th>
-                          <th>Last Price</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {items
-                          .filter(item => item.quantity === 0)
-                          .map(item => (
-                            <tr key={item._id}>
-                              <td>{item.name}</td>
-                              <td>{item.category}</td>
-                              <td>Rs. {item.price.toFixed(2)}</td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </Table>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </div>
-        </Tab>
       </Tabs>
 
       <style>
@@ -1328,56 +1159,6 @@ function InventoryTable() {
 
             .upload-area {
               min-height: 150px;
-            }
-          }
-
-          .inventory-report {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-          }
-
-          .stat-card {
-            transition: transform 0.2s ease-in-out;
-          }
-
-          .stat-card:hover {
-            transform: translateY(-5px);
-          }
-
-          .stat-card h5 {
-            font-size: 1rem;
-            font-weight: 500;
-          }
-
-          .stat-card h2 {
-            font-size: 1.8rem;
-            font-weight: 600;
-          }
-
-          .card {
-            border: none;
-            border-radius: 10px;
-          }
-
-          .card-title {
-            font-weight: 600;
-          }
-
-          .table {
-            margin-bottom: 0;
-          }
-
-          .table thead th {
-            font-weight: 600;
-          }
-
-          @media (max-width: 768px) {
-            .stat-card {
-              margin-bottom: 1rem;
-            }
-
-            .stat-card h2 {
-              font-size: 1.5rem;
             }
           }
         `}
