@@ -109,15 +109,24 @@ const AdminRefundDashboard = () => {
     setSearchQuery(e.target.value);
   };
 
-  // Filter refunds based on search query
+  // Filter refunds based on search query and status
   const filteredRefunds = refunds.filter(refund => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      refund.refundId?.toLowerCase().includes(query) ||
-      refund.transactionId?.toLowerCase().includes(query) ||
-      refund.email?.toLowerCase().includes(query)
-    );
+    // Apply status filter if set
+    if (filters.status && refund.status !== filters.status) {
+      return false;
+    }
+    
+    // Apply search query if set
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        (refund.refundId?.toLowerCase().includes(query) ||
+        refund.transactionId?.toLowerCase().includes(query) ||
+        refund.email?.toLowerCase().includes(query))
+      );
+    }
+    
+    return true;
   });
 
   const formatDateTime = (dateString) => {

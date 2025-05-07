@@ -106,7 +106,6 @@ const PaymentHistory = () => {
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
-    status: '',
     refundStatus: ''
   });
   const [notifications, setNotifications] = useState([]);
@@ -156,7 +155,6 @@ const PaymentHistory = () => {
       const query = new URLSearchParams();
       if (filters.startDate) query.append('startDate', filters.startDate);
       if (filters.endDate) query.append('endDate', filters.endDate);
-      if (filters.status) query.append('status', filters.status);
       if (filters.refundStatus) query.append('refundStatus', filters.refundStatus);
 
       const requestUrl = `${API_BASE_URL}/api/payments/user?${query.toString()}`;
@@ -176,7 +174,7 @@ const PaymentHistory = () => {
       setPayments(paymentResponse.data);
 
       // Fetch refunds
-      const refundsUrl = `${API_BASE_URL}/api/refund/user`;
+      const refundsUrl = `${API_BASE_URL}/api/refunds/user`;
       console.log('Refunds API URL:', refundsUrl);
       
       const refundResponse = await axios.get(refundsUrl, { 
@@ -290,16 +288,28 @@ const PaymentHistory = () => {
     return () => clearInterval(interval);
   }, [location.state]);
 
-  // Search functionality
+  // Filter functionality
   const filteredPayments = useMemo(() => {
-    if (!searchQuery) return payments;
-
-    const lowerQuery = searchQuery.toLowerCase();
-    return payments.filter(payment =>
-      payment.transactionId.toLowerCase().includes(lowerQuery) ||
-      payment.purpose.toLowerCase().includes(lowerQuery)
-    );
-  }, [payments, searchQuery]);
+    let result = [...payments];
+    
+    // Apply search filter
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(payment =>
+        payment.transactionId?.toLowerCase().includes(lowerQuery) ||
+        payment.purpose?.toLowerCase().includes(lowerQuery)
+      );
+    }
+    
+    // Apply refund status filter
+    if (filters.refundStatus) {
+      result = result.filter(payment => 
+        payment.refundStatus?.toLowerCase() === filters.refundStatus.toLowerCase()
+      );
+    }
+    
+    return result;
+  }, [payments, searchQuery, filters.refundStatus]);
 
   // Sorting functionality
   const sortedPayments = useMemo(() => {
@@ -593,13 +603,6 @@ const PaymentHistory = () => {
     }
   };
 
-  const statusOptions = [
-    { value: '', label: 'All' },
-    { value: 'paid', label: 'Paid' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'failed', label: 'Failed' }
-  ];
-
   const refundStatusOptions = [
     { value: '', label: 'All' },
     { value: 'pending', label: 'Pending' },
@@ -762,15 +765,6 @@ const PaymentHistory = () => {
                         name="endDate"
                         value={filters.endDate}
                         onChange={handleFilterChange}
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <FormSelect
-                        label="Payment Status"
-                        name="status"
-                        value={filters.status}
-                        onChange={handleFilterChange}
-                        options={statusOptions}
                       />
                     </div>
                     <div className="col-md-2">
