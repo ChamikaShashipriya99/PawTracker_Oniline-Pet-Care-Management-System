@@ -50,6 +50,24 @@ const AdminAdvertisement = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this advertisement?')) {
+      try {
+        setLoading(true);
+        const response = await axios.delete(`${config.API_URL}/advertisements/delete/${id}`);
+        if (response.data.message) {
+          enqueueSnackbar(response.data.message, { variant: "success" });
+          await fetchAdvertisements(); // Refresh the list
+        }
+      } catch (error) {
+        console.error("Delete Error:", error.response?.data || error.message);
+        enqueueSnackbar(error.response?.data?.message || "Error deleting advertisement", { variant: "error" });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="container-fluid py-5">
       <div className="row justify-content-center">
@@ -135,13 +153,20 @@ const AdminAdvertisement = () => {
                             )}
                             {ad.status !== 'Rejected' && (
                               <button
-                                className="btn btn-danger btn-sm"
+                                className="btn btn-danger btn-sm me-2"
                                 onClick={() => handleStatusChange(ad._id, 'Rejected')}
                                 disabled={loading}
                               >
                                 Reject
                               </button>
                             )}
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDelete(ad._id)}
+                              disabled={loading}
+                            >
+                              Delete
+                            </button>
                           </td>
                         </tr>
                       ))}
