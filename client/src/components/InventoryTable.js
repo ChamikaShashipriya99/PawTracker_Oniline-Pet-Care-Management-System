@@ -56,22 +56,23 @@ function InventoryTable() {
   };
 
   const handleAdd = async () => {
-    // Basic validation
-    if (!form.name || !form.category) {
-      setError('Name and Category are required fields');
+    // Enhanced validation
+    if (!form.name || !form.category || !form.description) {
+      setError('Name, Category, and Description are required fields');
       return;
     }
-    
-    if (form.quantity < 0) {
-      setError('Quantity cannot be negative');
+    if (/\d/.test(form.name)) {
+      setError('Product name cannot contain numbers');
       return;
     }
-
-    if (form.price < 0) {
-      setError('Price cannot be negative');
+    if (!Number.isInteger(form.quantity) || form.quantity <= 0) {
+      setError('Quantity must be a positive integer');
       return;
     }
-
+    if (isNaN(form.price) || form.price <= 0) {
+      setError('Price must be a positive number');
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
