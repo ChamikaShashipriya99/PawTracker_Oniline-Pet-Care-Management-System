@@ -55,7 +55,9 @@ const CreateAdvertisement = () => {
     </div>
   );
 
-  const handleSaveAdvertisement = () => {
+  const handleSaveAdvertisement = async (e) => {
+    if (e) e.preventDefault();
+
     // Client-side validation
     if (!name.trim()) {
       enqueueSnackbar("Please enter a valid name", { variant: "error" });
@@ -90,61 +92,49 @@ const CreateAdvertisement = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("contactNumber", contactNumber);
-    formData.append("advertisementType", advertisementType);
-    if (petType) formData.append("petType", petType);
-    formData.append("heading", heading);
-    formData.append("description", description);
-    formData.append("photo", uploadImage);
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("contactNumber", contactNumber);
+      formData.append("advertisementType", advertisementType);
+      if (petType) formData.append("petType", petType);
+      formData.append("heading", heading);
+      formData.append("description", description);
+      formData.append("photo", uploadImage);
 
-    setLoading(true);
-
-    axios
-      .post(`${config.API_URL}/advertisements`, formData, {
+      const response = await axios.post(`${config.API_URL}/advertisements`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((response) => {
-        setLoading(false);
-        if (response.status === 201) {
-          enqueueSnackbar("Advertisement Created Successfully", {
-            variant: "success",
-            autoHideDuration: 3000,
-          });
-          setName("");
-          setEmail("");
-          setContactNumber("");
-          setAdvertisementType("");
-          setPetType("");
-          setHeading("");
-          setDescription("");
-          setUploadImage(null);
-          navigate("/my-advertisements", { 
-            state: { email },
-            replace: true 
-          });
-        } else {
-          throw new Error("Unexpected response status");
-        }
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error("Submission Error:", error.response?.data || error.message);
-        let errorMessage = "Error creating advertisement";
-        if (error.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        } else if (error.response?.data?.error) {
-          errorMessage = error.response.data.error;
-        } else if (error.message.includes("Network Error")) {
-          errorMessage = "Unable to connect to the server. Please try again later.";
-        }
-        enqueueSnackbar(errorMessage, {
-          variant: "error",
-          autoHideDuration: 5000,
-        });
       });
+
+      if (response.status === 201) {
+        enqueueSnackbar("Advertisement created successfully!", { 
+          variant: "success",
+          autoHideDuration: 3000,
+        });
+        navigate("/my-advertisements", { 
+          state: { email },
+          replace: true 
+        });
+      }
+    } catch (error) {
+      console.error("Submission Error:", error.response?.data || error.message);
+      let errorMessage = "Error creating advertisement";
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message.includes("Network Error")) {
+        errorMessage = "Unable to connect to the server. Please try again later.";
+      }
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+        autoHideDuration: 5000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
