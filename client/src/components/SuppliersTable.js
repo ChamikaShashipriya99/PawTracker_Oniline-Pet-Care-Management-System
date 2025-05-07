@@ -28,6 +28,7 @@ function SuppliersTable() {
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     fetchSuppliers();
@@ -49,23 +50,45 @@ function SuppliersTable() {
 
   const handleAdd = async () => {
     setError(null);
-    // Validate required fields
+    const errors = {};
+    // Name validation
     if (!form.name.trim()) {
-      setError('Supplier name is required');
-      return;
+      errors.name = 'Supplier name is required.';
+    } else if (!/^[A-Za-z\s]+$/.test(form.name.trim())) {
+      errors.name = 'Name must contain only letters and spaces.';
+    } else if (form.name.length < 2 || form.name.length > 50) {
+      errors.name = 'Name must be between 2 and 50 characters.';
     }
+    // Email validation
     if (!form.email.trim()) {
-      setError('Supplier email is required');
-      return;
+      errors.email = 'Supplier email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      errors.email = 'Please enter a valid email address.';
     }
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email.trim())) {
-      setError('Please enter a valid email address');
+    // Phone validation (optional)
+    if (form.phone && !/^[\d\s\-+()]{7,20}$/.test(form.phone.trim())) {
+      errors.phone = 'Please enter a valid phone number.';
+    }
+    // Address validation (optional)
+    if (form.address && form.address.length > 200) {
+      errors.address = 'Address must be less than 200 characters.';
+    }
+    // At least one product field (optional, but if present, must be string)
+    const hasProduct = Object.values(form.products).some(val => val && val.trim() !== '');
+    if (hasProduct) {
+      Object.entries(form.products).forEach(([key, val]) => {
+        if (val && typeof val !== 'string') {
+          errors[key] = 'Product must be a string.';
+        }
+      });
+    }
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
     try {
       setLoading(true);
+      setFormErrors({});
       // Convert products object to string with category labels
       let productsString = '';
       if (typeof form.products === 'object' && form.products !== null) {
@@ -631,6 +654,7 @@ function SuppliersTable() {
                     className="form-input"
                     placeholder="Enter supplier name"
                   />
+                  {formErrors.name && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.name}</div>}
                 </Form.Group>
               </div>
               <div className="col-md-6">
@@ -643,6 +667,7 @@ function SuppliersTable() {
                     className="form-input"
                     placeholder="Enter supplier email"
                   />
+                  {formErrors.email && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.email}</div>}
                 </Form.Group>
               </div>
               <div className="col-md-6">
@@ -655,6 +680,7 @@ function SuppliersTable() {
                     className="form-input"
                     placeholder="Enter supplier phone"
                   />
+                  {formErrors.phone && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.phone}</div>}
                 </Form.Group>
               </div>
               <div className="col-12">
@@ -668,6 +694,7 @@ function SuppliersTable() {
                     className="form-input"
                     placeholder="Enter supplier address"
                   />
+                  {formErrors.address && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.address}</div>}
                 </Form.Group>
               </div>
               <div className="col-12">
@@ -686,6 +713,7 @@ function SuppliersTable() {
                         })}
                         placeholder="Enter supplements (comma separated)"
                       />
+                      {formErrors.supplements && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.supplements}</div>}
                     </div>
                     <div className="mb-3">
                       <Form.Label>Medicine</Form.Label>
@@ -699,6 +727,7 @@ function SuppliersTable() {
                         })}
                         placeholder="Enter medicines (comma separated)"
                       />
+                      {formErrors.medicine && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.medicine}</div>}
                     </div>
                     <div className="mb-3">
                       <Form.Label>Cages</Form.Label>
@@ -712,6 +741,7 @@ function SuppliersTable() {
                         })}
                         placeholder="Enter cages (comma separated)"
                       />
+                      {formErrors.cages && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.cages}</div>}
                     </div>
                     <div className="mb-3">
                       <Form.Label>Food</Form.Label>
@@ -725,6 +755,7 @@ function SuppliersTable() {
                         })}
                         placeholder="Enter food items (comma separated)"
                       />
+                      {formErrors.food && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.food}</div>}
                     </div>
                     <div className="mb-3">
                       <Form.Label>Other Products</Form.Label>
@@ -738,6 +769,7 @@ function SuppliersTable() {
                         })}
                         placeholder="Enter other products (comma separated)"
                       />
+                      {formErrors.other && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.other}</div>}
                     </div>
                   </div>
                 </Form.Group>

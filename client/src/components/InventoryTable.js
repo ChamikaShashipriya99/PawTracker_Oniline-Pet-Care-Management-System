@@ -50,6 +50,7 @@ function InventoryTable() {
     outOfStockItems: 0,
     categoryDistribution: {}
   });
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -93,35 +94,54 @@ function InventoryTable() {
   };
 
   const handleAdd = async () => {
-    // Basic validation
-    if (!form.name || !form.category) {
-      setError('Name and Category are required fields');
+    // Full form validation
+    const errors = {};
+    // Name validation
+    if (!form.name || form.name.trim().length === 0) {
+      errors.name = 'Product name is required.';
+    } else {
+      if (/\d/.test(form.name)) errors.name = 'Product name cannot contain numbers.';
+      else if (/[^a-zA-Z\s]/.test(form.name)) errors.name = 'Product name cannot contain special characters.';
+      else if (form.name.length < 2 || form.name.length > 50) errors.name = 'Product name must be between 2 and 50 characters.';
+    }
+    // Category validation
+    if (!form.category || !STORE_CATEGORIES.includes(form.category)) {
+      errors.category = 'Please select a valid category.';
+    }
+    // Description validation
+    if (!form.description || form.description.trim().length === 0) {
+      errors.description = 'Description is required.';
+    } else if (form.description.length < 5 || form.description.length > 500) {
+      errors.description = 'Description must be between 5 and 500 characters.';
+    }
+    // Quantity validation
+    if (form.quantity === undefined || form.quantity === null || form.quantity === '') {
+      errors.quantity = 'Quantity is required.';
+    } else if (!Number.isInteger(form.quantity) || form.quantity <= 0) {
+      errors.quantity = 'Quantity must be a positive integer.';
+    }
+    // Price validation
+    if (form.price === undefined || form.price === null || form.price === '') {
+      errors.price = 'Price is required.';
+    } else if (isNaN(form.price) || form.price <= 0) {
+      errors.price = 'Price must be a positive number.';
+    }
+    // If there are errors, show them and do not submit
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
-    
-    if (form.quantity < 0) {
-      setError('Quantity cannot be negative');
-      return;
-    }
-
-    if (form.price < 0) {
-      setError('Price cannot be negative');
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
+      setFormErrors({});
       const response = await axios.post(INVENTORY_ENDPOINT, form);
-      console.log('Server response:', response.data); // Debug log
       setShowAdd(false);
       setForm({ name: '', category: '', description: '', quantity: 0, price: 0, image: '' });
       await fetchItems();
     } catch (err) {
-      console.error('Error adding item:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Failed to add item. Please try again.';
       setError(`Error: ${errorMessage}`);
-      console.log('Full error object:', err); // Debug log
     } finally {
       setLoading(false);
     }
@@ -528,6 +548,7 @@ function InventoryTable() {
                         className="form-input"
                         placeholder="Enter product name"
                       />
+                      {formErrors.name && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.name}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-md-6">
@@ -546,6 +567,7 @@ function InventoryTable() {
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
                       </Form.Control>
+                      {formErrors.category && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.category}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-12">
@@ -560,6 +582,7 @@ function InventoryTable() {
                         className="form-input"
                         placeholder="Enter product description"
                       />
+                      {formErrors.description && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.description}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-md-6">
@@ -574,6 +597,7 @@ function InventoryTable() {
                         placeholder="Enter quantity"
                         min="0"
                       />
+                      {formErrors.quantity && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.quantity}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-md-6">
@@ -589,6 +613,7 @@ function InventoryTable() {
                         min="0"
                         step="0.01"
                       />
+                      {formErrors.price && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.price}</div>}
                     </Form.Group>
                   </div>
                 </div>
