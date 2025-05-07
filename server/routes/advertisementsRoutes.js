@@ -106,6 +106,8 @@ router.post('/', upload.single('photo'), requirePhoto, async (req, res) => {
       contactNumber,
       advertisementType,
       petType: advertisementType === 'Sell a Pet' ? petType : '',
+      petPrice: advertisementType === 'Sell a Pet' ? req.body.petPrice : undefined,
+      advertisementCost: req.body.advertisementCost,
       heading,
       description,
       photo: req.file.filename

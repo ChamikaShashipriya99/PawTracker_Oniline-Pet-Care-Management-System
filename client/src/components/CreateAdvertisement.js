@@ -15,6 +15,8 @@ const CreateAdvertisement = () => {
   const [description, setDescription] = useState("");
   const [uploadImage, setUploadImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [petPrice, setPetPrice] = useState("");
+  const [advertisementCost, setAdvertisementCost] = useState(0);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -36,6 +38,18 @@ const CreateAdvertisement = () => {
       navigate('/login');
     }
   }, [navigate, enqueueSnackbar]);
+
+  // Add this after the useEffect hook
+  useEffect(() => {
+    // Set advertisement cost based on type
+    if (advertisementType === "Lost Pet" || advertisementType === "Found Pet") {
+      setAdvertisementCost(500);
+    } else if (advertisementType === "Sell a Pet") {
+      setAdvertisementCost(1000);
+    } else {
+      setAdvertisementCost(0);
+    }
+  }, [advertisementType]);
 
   // Inline BackButton component
   const BackButton = ({ destination = "/advertisemenmy-advertisementsts/my-ads" }) => (
@@ -88,6 +102,10 @@ const CreateAdvertisement = () => {
       enqueueSnackbar("Please upload a photo", { variant: "error" });
       return;
     }
+    if (advertisementType === "Sell a Pet" && !petPrice) {
+      enqueueSnackbar("Please enter the pet price", { variant: "error" });
+      return;
+    }
 
     const formData = new FormData();
     formData.append("name", name);
@@ -95,6 +113,8 @@ const CreateAdvertisement = () => {
     formData.append("contactNumber", contactNumber);
     formData.append("advertisementType", advertisementType);
     if (petType) formData.append("petType", petType);
+    if (petPrice) formData.append("petPrice", petPrice);
+    formData.append("advertisementCost", advertisementCost);
     formData.append("heading", heading);
     formData.append("description", description);
     formData.append("photo", uploadImage);
@@ -120,6 +140,7 @@ const CreateAdvertisement = () => {
           setHeading("");
           setDescription("");
           setUploadImage(null);
+          setPetPrice("");
           navigate("/my-advertisements", { 
             state: { email },
             replace: true 
@@ -280,6 +301,38 @@ const CreateAdvertisement = () => {
                                 </select>
                               </div>
                             )}
+                          </div>
+
+                          {advertisementType === "Sell a Pet" && (
+                            <div className="mb-3">
+                              <label htmlFor="petPrice" className="form-label">Pet Price (Rs.)</label>
+                              <input
+                                type="number"
+                                id="petPrice"
+                                name="petPrice"
+                                value={petPrice}
+                                onChange={(e) => setPetPrice(e.target.value)}
+                                className="form-control"
+                                min="0"
+                                required
+                              />
+                            </div>
+                          )}
+
+                          <div className="mb-3">
+                            <label className="form-label">Advertisement Cost (Rs.)</label>
+                            <input
+                              type="text"
+                              value={advertisementCost}
+                              className="form-control bg-light"
+                              readOnly
+                              disabled
+                            />
+                            <small className="text-muted">
+                              {advertisementType === "Sell a Pet" 
+                                ? "Fixed cost of Rs.1000 for selling a pet" 
+                                : "Fixed cost of Rs.500 for lost/found pet advertisements"}
+                            </small>
                           </div>
 
                           <div className="mb-3">

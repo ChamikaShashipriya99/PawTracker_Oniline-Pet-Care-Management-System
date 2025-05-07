@@ -49,6 +49,24 @@ const AdminAdvertisement = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this advertisement?')) {
+      try {
+        setLoading(true);
+        await axios.delete(`http://localhost:5000/api/advertisements/delete/${id}`);
+        enqueueSnackbar('Advertisement deleted successfully', { variant: 'success' });
+        await fetchAdvertisements(); // Refresh the list
+      } catch (error) {
+        enqueueSnackbar(
+          error.response?.data?.message || 'Error deleting advertisement',
+          { variant: 'error' }
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="container-fluid py-5">
       <div className="row justify-content-center">
@@ -138,6 +156,13 @@ const AdminAdvertisement = () => {
                                   </button>
                                 </>
                               )}
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDelete(ad._id)}
+                                disabled={loading}
+                              >
+                                Delete
+                              </button>
                             </div>
                           </td>
                         </tr>
