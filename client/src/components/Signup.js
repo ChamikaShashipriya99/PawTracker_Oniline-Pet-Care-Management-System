@@ -16,11 +16,23 @@ function Signup({ setIsLoggedIn }) {
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Clear messages after 3 seconds
+  const clearMessages = () => {
+    setTimeout(() => {
+      setSuccessMessage('');
+      setErrorMessage('');
+    }, 3000);
+  };
+
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: '' });
+    setErrorMessage('');
   };
 
   const handleFileChange = (e) => {
@@ -50,6 +62,9 @@ function Signup({ setIsLoggedIn }) {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+    
     const formData = new FormData();
     Object.keys(user).forEach(key => {
       formData.append(key, user[key]);
@@ -64,17 +79,19 @@ function Signup({ setIsLoggedIn }) {
       });
       
       if (res.data.needsVerification) {
-        // Navigate to verification page with email
-        navigate('/verify-email', { 
-          state: { 
-            email: res.data.email,
-            message: 'Please check your email for the verification code.'
-          }
-        });
+        setSuccessMessage('Registration successful! Please check your email for verification.');
+        setTimeout(() => {
+          navigate('/verify-email', { 
+            state: { 
+              email: res.data.email,
+              message: 'Please check your email for the verification code.'
+            }
+          });
+        }, 1500);
       }
     } catch (error) {
       console.error('Signup failed:', error);
-      setErrors({ general: error.response?.data?.error || 'Signup failed. Please try again.' });
+      setErrorMessage(error.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -84,11 +101,21 @@ function Signup({ setIsLoggedIn }) {
     <div className="container mt-5">
       <div className="card shadow p-4" style={{ borderRadius: '15px' }}>
         <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Sign Up 🐾</h2>
-        {errors.general && (
-          <div className="alert alert-danger" role="alert">
-            {errors.general}
+        
+        {successMessage && (
+          <div className="alert alert-success alert-dismissible fade show" role="alert">
+            {successMessage}
+            <button type="button" className="btn-close" onClick={() => setSuccessMessage('')}></button>
           </div>
         )}
+        
+        {errorMessage && (
+          <div className="alert alert-danger alert-dismissible fade show" role="alert">
+            {errorMessage}
+            <button type="button" className="btn-close" onClick={() => setErrorMessage('')}></button>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="row">
             <div className="col-md-6 mb-3">

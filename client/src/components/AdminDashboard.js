@@ -504,6 +504,12 @@ function AdminDashboard() {
     };
   };
 
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setFilteredUsers([]);
+    setSearchError('');
+  };
+
   const userCount = users.filter(u => !u.isAdmin).length;
   const adminCount = users.filter(u => u.isAdmin).length;
 
@@ -740,14 +746,24 @@ function AdminDashboard() {
                   </h5>
                 </div>
                 <div className="card-body">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search by username..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    style={{ borderRadius: '10px' }}
-                  />
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search by username..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      style={{ borderRadius: '10px 0 0 10px' }}
+                    />
+                    <button
+                      className="btn btn-outline-secondary"
+                      type="button"
+                      onClick={handleClearSearch}
+                      style={{ borderRadius: '0 10px 10px 0' }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
                   {searchError && <p className="text-danger mt-2">{searchError}</p>}
                 </div>
               </div>
@@ -925,14 +941,24 @@ function AdminDashboard() {
                   </h5>
                 </div>
                 <div className="card-body">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search by username..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    style={{ borderRadius: '10px' }}
-                  />
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search by username..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      style={{ borderRadius: '10px 0 0 10px' }}
+                    />
+                    <button
+                      className="btn btn-outline-secondary"
+                      type="button"
+                      onClick={handleClearSearch}
+                      style={{ borderRadius: '0 10px 10px 0' }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
                   {searchError && <p className="text-danger mt-2">{searchError}</p>}
                 </div>
               </div>

@@ -7,15 +7,26 @@ import config from '../config';
 function Login({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
   const [userFor2FA, setUserFor2FA] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Clear messages after 3 seconds
+  const clearMessages = () => {
+    setTimeout(() => {
+      setSuccessMessage('');
+      setErrorMessage('');
+    }, 3000);
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: '' });
+    setErrorMessage('');
   };
 
   const validateForm = () => {
@@ -47,6 +58,8 @@ function Login({ setIsLoggedIn }) {
     e.preventDefault();
     setIsLoading(true);
     setErrors({ email: '', password: '' });
+    setErrorMessage('');
+    setSuccessMessage('');
 
     if (!validateForm()) return;
     
@@ -68,14 +81,17 @@ function Login({ setIsLoggedIn }) {
         };
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', response.data.token);
+        setSuccessMessage('Login successful! Redirecting...');
         setIsLoggedIn(true);
-        navigate('/profile');
+        setTimeout(() => {
+          navigate('/profile');
+        }, 1500);
       }
     } catch (error) {
       if (error.response?.status === 403 && error.response?.data?.needsVerification) {
         navigate('/verify-email', { state: { email: formData.email } });
       } else {
-        setErrors({ email: '', password: error.response?.data?.message || 'Login failed' });
+        setErrorMessage(error.response?.data?.message || 'Login failed. Please check your credentials.');
       }
     } finally {
       setIsLoading(false);
@@ -93,6 +109,21 @@ function Login({ setIsLoggedIn }) {
       <br></br>
       <div className="card shadow p-4" style={{ maxWidth: '400px', margin: '0 auto', borderRadius: '15px' }}>
         <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Login 🐾</h2>
+        
+        {successMessage && (
+          <div className="alert alert-success alert-dismissible fade show" role="alert">
+            {successMessage}
+            <button type="button" className="btn-close" onClick={() => setSuccessMessage('')}></button>
+          </div>
+        )}
+        
+        {errorMessage && (
+          <div className="alert alert-danger alert-dismissible fade show" role="alert">
+            {errorMessage}
+            <button type="button" className="btn-close" onClick={() => setErrorMessage('')}></button>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <input 
