@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiX } from 'react-icons/fi';
-import config from '../config';
 
 function Store() {
   const [items, setItems] = useState([]);
@@ -24,7 +23,7 @@ function Store() {
 
   useEffect(() => {
     console.log("Store component loaded");
-    axios.get(`${config.API_URL}/inventory`)
+    axios.get('http://localhost:5000/api/inventory')
       .then(res => {
         // Filter out DOG, CAT, BIRDS products
         const filtered = res.data.filter(item => {
@@ -89,35 +88,7 @@ function Store() {
         {/* Main Content */}
         <div className="col-md-9">
           <div className="store-header text-center mb-5">
-            <div className="banner-image mb-4" style={{
-              width: '100%',
-              height: '300px',
-              backgroundImage: 'url(https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '15px',
-              position: 'relative'
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0, 0, 0, 0.4)',
-                borderRadius: '15px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                color: 'white'
-              }}>
-                <h1 className="display-4 mb-3" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Pet Store</h1>
-                <p className="lead" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Find everything your pet needs</p>
-              </div>
-            </div>
+            <h1 className="display-4 mb-4">Pet Store</h1>
             <div className="row justify-content-center">
               <div className="col-md-8">
                 <div className="search-container">
