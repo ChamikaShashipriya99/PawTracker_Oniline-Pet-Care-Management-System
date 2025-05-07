@@ -33,6 +33,27 @@ const advertisementSchema = new mongoose.Schema({
     },
     default: ""
   },
+  petPrice: {
+    type: Number,
+    min: [0, 'Pet price cannot be negative'],
+    required: function() {
+      return this.advertisementType === "Sell a Pet";
+    }
+  },
+  advertisementCost: {
+    type: Number,
+    required: [true, 'Advertisement cost is required'],
+    validate: {
+      validator: function(value) {
+        if (this.advertisementType === "Sell a Pet") {
+          return value === 1000;
+        } else {
+          return value === 500;
+        }
+      },
+      message: 'Invalid advertisement cost for the selected type'
+    }
+  },
   heading: { 
     type: String, 
     required: [true, 'Heading is required'],

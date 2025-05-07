@@ -51,6 +51,32 @@ const upload = multer({
   fileFilter
 });
 
+// Error handling middleware for Multer
+const handleMulterError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ 
+        error: 'File too large',
+        details: 'Maximum file size is 5MB'
+      });
+    }
+    return res.status(400).json({ 
+      error: 'Upload error',
+      details: err.message
+    });
+  }
+  if (err.message.includes('Only JPEG, PNG, and GIF images are allowed')) {
+    return res.status(400).json({ 
+      error: 'Invalid file type',
+      details: err.message
+    });
+  }
+  next(err);
+};
+
+// Apply error handling middleware
+router.use(handleMulterError);
+
 // Get all advertisements
 router.get('/', async (req, res) => {
   try {
@@ -106,6 +132,8 @@ router.post('/', upload.single('photo'), requirePhoto, async (req, res) => {
       contactNumber,
       advertisementType,
       petType: advertisementType === 'Sell a Pet' ? petType : '',
+      petPrice: advertisementType === 'Sell a Pet' ? req.body.petPrice : undefined,
+      advertisementCost: req.body.advertisementCost,
       heading,
       description,
       photo: req.file.filename

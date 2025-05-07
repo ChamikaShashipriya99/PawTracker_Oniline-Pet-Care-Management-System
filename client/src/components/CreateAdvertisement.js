@@ -16,6 +16,8 @@ const CreateAdvertisement = () => {
   const [description, setDescription] = useState("");
   const [uploadImage, setUploadImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [petPrice, setPetPrice] = useState("");
+  const [advertisementCost, setAdvertisementCost] = useState(0);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -37,6 +39,18 @@ const CreateAdvertisement = () => {
       navigate('/login');
     }
   }, [navigate, enqueueSnackbar]);
+
+  // Add this after the useEffect hook
+  useEffect(() => {
+    // Set advertisement cost based on type
+    if (advertisementType === "Lost Pet" || advertisementType === "Found Pet") {
+      setAdvertisementCost(500);
+    } else if (advertisementType === "Sell a Pet") {
+      setAdvertisementCost(1000);
+    } else {
+      setAdvertisementCost(0);
+    }
+  }, [advertisementType]);
 
   // Inline BackButton component
   const BackButton = ({ destination = "/advertisemenmy-advertisementsts/my-ads" }) => (
@@ -91,50 +105,66 @@ const CreateAdvertisement = () => {
       enqueueSnackbar("Please upload a photo", { variant: "error" });
       return;
     }
-
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", email);
-      formData.append("contactNumber", contactNumber);
-      formData.append("advertisementType", advertisementType);
-      if (petType) formData.append("petType", petType);
-      formData.append("heading", heading);
-      formData.append("description", description);
-      formData.append("photo", uploadImage);
-
-      const response = await axios.post(`${config.API_URL}/advertisements`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (response.status === 201) {
-        enqueueSnackbar("Advertisement created successfully!", { 
-          variant: "success",
-          autoHideDuration: 3000,
-        });
-        navigate("/my-advertisements", { 
-          state: { email },
-          replace: true 
-        });
-      }
-    } catch (error) {
-      console.error("Submission Error:", error.response?.data || error.message);
-      let errorMessage = "Error creating advertisement";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.message.includes("Network Error")) {
-        errorMessage = "Unable to connect to the server. Please try again later.";
-      }
-      enqueueSnackbar(errorMessage, {
-        variant: "error",
-        autoHideDuration: 5000,
-      });
-    } finally {
-      setLoading(false);
+    if (advertisementType === "Sell a Pet" && !petPrice) {
+      enqueueSnackbar("Please enter the pet price", { variant: "error" });
+      return;
     }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("contactNumber", contactNumber);
+    formData.append("advertisementType", advertisementType);
+    if (petType) formData.append("petType", petType);
+    formData.append("heading", heading);
+    formData.append("description", description);
+    formData.append("photo", uploadImage);
+
+    setLoading(true);
+
+    axios
+      .post(`${config.API_URL}/advertisements`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((response) => {
+        setLoading(false);
+        if (response.status === 201) {
+          enqueueSnackbar("Advertisement Created Successfully", {
+            variant: "success",
+            autoHideDuration: 3000,
+          });
+          setName("");
+          setEmail("");
+          setContactNumber("");
+          setAdvertisementType("");
+          setPetType("");
+          setHeading("");
+          setDescription("");
+          setUploadImage(null);
+          navigate("/my-advertisements", { 
+            state: { email },
+            replace: true 
+          });
+        } else {
+          throw new Error("Unexpected response status");
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error("Submission Error:", error.response?.data || error.message);
+        let errorMessage = "Error creating advertisement";
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        } else if (error.message.includes("Network Error")) {
+          errorMessage = "Unable to connect to the server. Please try again later.";
+        }
+        enqueueSnackbar(errorMessage, {
+          variant: "error",
+          autoHideDuration: 5000,
+        });
+      });
   };
 
   return (
@@ -170,7 +200,7 @@ const CreateAdvertisement = () => {
                             <input
                               type="file"
                               id="uploadImage"
-                              name="uploadImage"
+                              name="photo"
                               onChange={(e) => setUploadImage(e.target.files[0])}
                               className="form-control"
                               accept="image/jpeg,image/png,image/gif"
@@ -271,6 +301,38 @@ const CreateAdvertisement = () => {
                                 </select>
                               </div>
                             )}
+                          </div>
+
+                          {advertisementType === "Sell a Pet" && (
+                            <div className="mb-3">
+                              <label htmlFor="petPrice" className="form-label">Pet Price (Rs.)</label>
+                              <input
+                                type="number"
+                                id="petPrice"
+                                name="petPrice"
+                                value={petPrice}
+                                onChange={(e) => setPetPrice(e.target.value)}
+                                className="form-control"
+                                min="0"
+                                required
+                              />
+                            </div>
+                          )}
+
+                          <div className="mb-3">
+                            <label className="form-label">Advertisement Cost (Rs.)</label>
+                            <input
+                              type="text"
+                              value={advertisementCost}
+                              className="form-control bg-light"
+                              readOnly
+                              disabled
+                            />
+                            <small className="text-muted">
+                              {advertisementType === "Sell a Pet" 
+                                ? "Fixed cost of Rs.1000 for selling a pet" 
+                                : "Fixed cost of Rs.500 for lost/found pet advertisements"}
+                            </small>
                           </div>
 
                           <div className="mb-3">
