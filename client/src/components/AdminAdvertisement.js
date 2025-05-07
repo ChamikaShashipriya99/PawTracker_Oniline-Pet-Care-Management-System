@@ -50,6 +50,24 @@ const AdminAdvertisement = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this advertisement?')) {
+      try {
+        setLoading(true);
+        await axios.delete(`http://localhost:5000/api/advertisements/delete/${id}`);
+        enqueueSnackbar('Advertisement deleted successfully', { variant: 'success' });
+        await fetchAdvertisements(); // Refresh the list
+      } catch (error) {
+        enqueueSnackbar(
+          error.response?.data?.message || 'Error deleting advertisement',
+          { variant: 'error' }
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="container-fluid py-5">
       <div className="row justify-content-center">
@@ -124,24 +142,26 @@ const AdminAdvertisement = () => {
                             </span>
                           </td>
                           <td>
-                            {ad.status !== 'Approved' && (
-                              <button
-                                className="btn btn-success btn-sm me-2"
-                                onClick={() => handleStatusChange(ad._id, 'Approved')}
-                                disabled={loading}
-                              >
-                                Approve
-                              </button>
-                            )}
-                            {ad.status !== 'Rejected' && (
-                              <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() => handleStatusChange(ad._id, 'Rejected')}
-                                disabled={loading}
-                              >
-                                Reject
-                              </button>
-                            )}
+                            <div className="btn-group">
+                              {ad.status === 'Pending' && (
+                                <>
+                                  <button
+                                    className="btn btn-success btn-sm"
+                                    onClick={() => handleStatusChange(ad._id, 'Approved')}
+                                    disabled={loading}
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => handleStatusChange(ad._id, 'Rejected')}
+                                    disabled={loading}
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
