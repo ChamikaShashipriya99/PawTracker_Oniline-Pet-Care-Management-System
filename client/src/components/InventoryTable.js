@@ -23,6 +23,38 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const INVENTORY_ENDPOINT = `${config.API_URL}/inventory`;
 
+// Add function to get auth token
+const getAuthToken = () => {
+  return localStorage.getItem('token');
+};
+
+// Add axios interceptor for authentication
+axios.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add axios interceptor for handling auth errors
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear token and redirect to login
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Define allowed categories for dropdown
 const STORE_CATEGORIES = [
   'SUPPLEMENTS',
@@ -83,11 +115,20 @@ function InventoryTable() {
     try {
       setLoading(true);
       setError(null);
+      const token = getAuthToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
       const res = await axios.get(INVENTORY_ENDPOINT);
       setItems(res.data);
     } catch (err) {
       console.error('Error fetching items:', err);
-      setError(err.response?.data?.message || 'Failed to load inventory items. Please check if the server is running.');
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please login again.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to load inventory items. Please check if the server is running.');
+      }
     } finally {
       setLoading(false);
     }
@@ -135,29 +176,86 @@ function InventoryTable() {
       setLoading(true);
       setError(null);
       setFormErrors({});
+      const token = getAuthToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
       const response = await axios.post(INVENTORY_ENDPOINT, form);
       setShowAdd(false);
       setForm({ name: '', category: '', description: '', quantity: 0, price: 0, image: '' });
       await fetchItems();
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to add item. Please try again.';
-      setError(`Error: ${errorMessage}`);
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please login again.');
+      } else {
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to add item. Please try again.';
+        setError(`Error: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = async () => {
+    // Full form validation
+    const errors = {};
+    // Name validation
+    if (!form.name || form.name.trim().length === 0) {
+      errors.name = 'Product name is required.';
+    } else {
+      if (/\d/.test(form.name)) errors.name = 'Product name cannot contain numbers.';
+      else if (/[^a-zA-Z\s]/.test(form.name)) errors.name = 'Product name cannot contain special characters.';
+      else if (form.name.length < 2 || form.name.length > 50) errors.name = 'Product name must be between 2 and 50 characters.';
+    }
+    // Category validation
+    if (!form.category || !STORE_CATEGORIES.includes(form.category)) {
+      errors.category = 'Please select a valid category.';
+    }
+    // Description validation
+    if (!form.description || form.description.trim().length === 0) {
+      errors.description = 'Description is required.';
+    } else if (form.description.length < 5 || form.description.length > 500) {
+      errors.description = 'Description must be between 5 and 500 characters.';
+    }
+    // Quantity validation
+    if (form.quantity === undefined || form.quantity === null || form.quantity === '') {
+      errors.quantity = 'Quantity is required.';
+    } else if (!Number.isInteger(form.quantity) || form.quantity < 0) {
+      errors.quantity = 'Quantity must be a non-negative integer.';
+    }
+    // Price validation
+    if (form.price === undefined || form.price === null || form.price === '') {
+      errors.price = 'Price is required.';
+    } else if (isNaN(form.price) || form.price < 0) {
+      errors.price = 'Price must be a non-negative number.';
+    }
+    // If there are errors, show them and do not submit
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
+      setFormErrors({});
+      const token = getAuthToken();
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
       await axios.put(`${INVENTORY_ENDPOINT}/${current._id}`, form);
       setShowEdit(false);
       setForm({ name: '', category: '', description: '', quantity: 0, price: 0, image: '' });
       await fetchItems();
     } catch (err) {
       console.error('Error updating item:', err);
-      setError(err.response?.data?.message || 'Failed to update item. Please try again.');
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please login again.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to update item. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -168,11 +266,20 @@ function InventoryTable() {
       try {
         setLoading(true);
         setError(null);
+        const token = getAuthToken();
+        if (!token) {
+          window.location.href = '/login';
+          return;
+        }
         await axios.delete(`${INVENTORY_ENDPOINT}/${id}`);
         await fetchItems();
       } catch (err) {
         console.error('Error deleting item:', err);
-        setError(err.response?.data?.message || 'Failed to delete item. Please try again.');
+        if (err.response?.status === 401) {
+          setError('Your session has expired. Please login again.');
+        } else {
+          setError(err.response?.data?.message || 'Failed to delete item. Please try again.');
+        }
       } finally {
         setLoading(false);
       }
@@ -692,6 +799,7 @@ function InventoryTable() {
                         className="form-input"
                         placeholder="Enter product name"
                       />
+                      {formErrors.name && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.name}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-md-6">
@@ -710,6 +818,7 @@ function InventoryTable() {
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
                       </Form.Control>
+                      {formErrors.category && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.category}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-12">
@@ -724,6 +833,7 @@ function InventoryTable() {
                         className="form-input"
                         placeholder="Enter product description"
                       />
+                      {formErrors.description && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.description}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-md-6">
@@ -738,6 +848,7 @@ function InventoryTable() {
                         placeholder="Enter quantity"
                         min="0"
                       />
+                      {formErrors.quantity && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.quantity}</div>}
                     </Form.Group>
                   </div>
                   <div className="col-md-6">
@@ -753,6 +864,7 @@ function InventoryTable() {
                         min="0"
                         step="0.01"
                       />
+                      {formErrors.price && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.price}</div>}
                     </Form.Group>
                   </div>
                 </div>
@@ -1403,8 +1515,10 @@ function InventoryTable() {
           }
         `}
       </style>
-    </div>
-  );
+      <br></br>
+      <br></br>
+    </div>  
+    );
 }
 
 export default InventoryTable;
