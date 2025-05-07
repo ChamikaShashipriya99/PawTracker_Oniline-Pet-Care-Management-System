@@ -104,7 +104,10 @@ const CreateAdvertisement = () => {
 
     axios
       .post(`${config.API_URL}/advertisements`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 
+          "Content-Type": "multipart/form-data",
+          "Accept": "application/json"
+        },
       })
       .then((response) => {
         setLoading(false);
@@ -180,7 +183,7 @@ const CreateAdvertisement = () => {
                             <input
                               type="file"
                               id="uploadImage"
-                              name="uploadImage"
+                              name="photo"
                               onChange={(e) => setUploadImage(e.target.files[0])}
                               className="form-control"
                               accept="image/jpeg,image/png,image/gif"

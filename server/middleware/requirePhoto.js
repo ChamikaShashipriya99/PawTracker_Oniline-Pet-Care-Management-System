@@ -56,7 +56,12 @@ export const handleMulterError = (err, req, res, next) => {
 };
 
 const requirePhoto = (req, res, next) => {
-  // Image is optional, no validation required
+  if (!req.file) {
+    return res.status(400).json({ 
+      error: 'Photo required',
+      details: 'Please upload a photo'
+    });
+  }
   next();
 };
 
