@@ -37,8 +37,8 @@ router.use('/uploads', express.static('uploads'));
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
-    user: 'myactualemail@gmail.com', // Your actual Gmail address
-    pass: 'abcd-efgh-ijkl-mnop'      // Your Gmail App Password
+    user: process.env.EMAIL_USER || 'your-email@gmail.com',
+    pass: process.env.EMAIL_PASS || 'your-app-password'
   }
 });
 
