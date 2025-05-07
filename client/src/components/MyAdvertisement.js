@@ -116,6 +116,7 @@ const MyAdvertisement = () => {
                             <p className="card-text">
                               <strong>Type:</strong> {ad.advertisementType}
                               {ad.petType && <><br /><strong>Pet Type:</strong> {ad.petType}</>}
+                              {ad.petPrice && <><br /><strong>Pet Price:</strong> Rs.{ad.petPrice}</>}
                               <br /><strong>Description:</strong> {ad.description}
                               <br /><strong>Contact:</strong> {ad.contactNumber}
                               <br /><strong>Status:</strong> {ad.status}
@@ -123,47 +124,54 @@ const MyAdvertisement = () => {
                             </p>
                           </div>
                           <div className="card-footer">
-                            <div className="d-flex justify-content-between">
-                              {ad.status === "Pending" && (
-                                <>
-                                  <Link
-                                    to={`/advertisements/edit/${ad._id}`}
-                                    state={{ advertisement: ad }}
-                                    className="btn btn-primary"
-                                  >
-                                    Edit
-                                  </Link>
-                                  <button
-                                    onClick={() => handleDelete(ad._id)}
-                                    className="btn btn-danger"
-                                    disabled={loading}
-                                  >
-                                    Delete
-                                  </button>
-                                </>
+                            <div className="d-flex justify-content-between align-items-center">
+                              {ad.advertisementCost && (
+                                <div className="advertisement-cost">
+                                  <strong>Advertisement Cost:</strong> Rs.{ad.advertisementCost}
+                                </div>
                               )}
-                              {ad.status === "Approved" && (
-                                <>
-                                  {ad.paymentStatus === "Pending" && (
-                                    <button
-                                      className="btn btn-success"
-                                      onClick={() => navigate(`/payment/${ad._id}`)}
+                              <div className="d-flex gap-2">
+                                {ad.status === "Pending" && (
+                                  <>
+                                    <Link
+                                      to={`/advertisements/edit/${ad._id}`}
+                                      state={{ advertisement: ad }}
+                                      className="btn btn-primary"
                                     >
-                                      Proceed to Pay
+                                      Edit
+                                    </Link>
+                                    <button
+                                      onClick={() => handleDelete(ad._id)}
+                                      className="btn btn-danger"
+                                      disabled={loading}
+                                    >
+                                      Delete
                                     </button>
-                                  )}
-                                  <button
-                                    onClick={() => handleDelete(ad._id)}
-                                    className="btn btn-danger"
-                                    disabled={loading}
-                                  >
-                                    Delete
-                                  </button>
-                                </>
-                              )}
-                              {ad.status === "Rejected" && (
-                                <span className="text-danger">Advertisement Rejected</span>
-                              )}
+                                  </>
+                                )}
+                                {ad.status === "Approved" && (
+                                  <>
+                                    {ad.paymentStatus === "Pending" && (
+                                      <button
+                                        className="btn btn-success"
+                                        onClick={() => navigate(`/payment/${ad._id}`)}
+                                      >
+                                        Proceed to Pay
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => handleDelete(ad._id)}
+                                      className="btn btn-danger"
+                                      disabled={loading}
+                                    >
+                                      Delete
+                                    </button>
+                                  </>
+                                )}
+                                {ad.status === "Rejected" && (
+                                  <span className="text-danger">Advertisement Rejected</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>

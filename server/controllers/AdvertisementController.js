@@ -17,7 +17,7 @@ export const getAllAdvertisements = async (req, res) => {
 // Create new advertisement
 export const createAdvertisement = async (req, res) => {
   try {
-    const { name, email, contactNumber, advertisementType, petType, heading, description } = req.body;
+    const { name, email, contactNumber, advertisementType, petType, heading, description, petPrice, advertisementCost } = req.body;
 
     // Validate required fields
     if (!name || !email || !contactNumber || !advertisementType || !heading || !description) {
@@ -30,9 +30,20 @@ export const createAdvertisement = async (req, res) => {
       return res.status(400).send({ message: "Invalid advertisement type" });
     }
 
-    // Require petType for "Sell a Pet"
-    if (advertisementType === "Sell a Pet" && !petType) {
-      return res.status(400).send({ message: "Pet type is required for selling a pet" });
+    // Require petType and petPrice for "Sell a Pet"
+    if (advertisementType === "Sell a Pet") {
+      if (!petType) {
+        return res.status(400).send({ message: "Pet type is required for selling a pet" });
+      }
+      if (!petPrice) {
+        return res.status(400).send({ message: "Pet price is required for selling a pet" });
+      }
+    }
+
+    // Validate advertisement cost
+    const expectedCost = advertisementType === "Sell a Pet" ? 1000 : 500;
+    if (parseInt(advertisementCost) !== expectedCost) {
+      return res.status(400).send({ message: "Invalid advertisement cost" });
     }
 
     const newAdvertisement = {
@@ -41,6 +52,8 @@ export const createAdvertisement = async (req, res) => {
       contactNumber,
       advertisementType,
       petType: advertisementType === "Sell a Pet" ? petType : undefined,
+      petPrice: advertisementType === "Sell a Pet" ? petPrice : undefined,
+      advertisementCost,
       heading,
       description,
       photo: req.file?.filename,

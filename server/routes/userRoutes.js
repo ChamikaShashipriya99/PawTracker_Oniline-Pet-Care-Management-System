@@ -47,37 +47,12 @@ if (!fs.existsSync('uploads')) {
 // Serve uploaded files statically
 router.use('/uploads', express.static('uploads'));
 
-// Email configuration - Using real email service
-let transporter;
-
-// Initialize the transporter with your email service
-const initializeEmailTransporter = () => {
-  try {
-    // Gmail configuration with explicit SMTP settings
-    transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: 'samankumara990209@gmail.com',
-        pass: 'lbcyivjbrwnktwgk' // App Password
-      },
-      debug: true,
-      logger: true
-    });
-    
-    // Verify the transporter configuration
-    transporter.verify((error, success) => {
-      if (error) {
-        console.error('Email transporter verification failed:', error);
-      } else {
-        console.log('Email transporter is ready to send emails');
-      }
-    });
-    
-    console.log('Gmail transporter created with SMTP configuration');
-  } catch (error) {
-    console.error('Error creating email transporter:', error);
+// Email configuration
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: 'myactualemail@gmail.com', // Your actual Gmail address
+    pass: 'abcd-efgh-ijkl-mnop'      // Your Gmail App Password
   }
 };
 
