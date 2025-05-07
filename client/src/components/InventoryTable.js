@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button, Modal, Form, InputGroup, Tabs, Tab } from 'react-bootstrap';
+import { Table, Button, Modal, Form, InputGroup, Tabs, Tab, Card, Row, Col } from 'react-bootstrap';
 import * as XLSX from 'xlsx';
 import SuppliersTable from './SuppliersTable';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import config from '../config';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faBoxes, 
+  faMoneyBillWave, 
+  faExclamationTriangle, 
+  faTimesCircle,
+  faChartPie,
+  faBox,
+  faExclamationCircle,
+  faDownload
+} from '@fortawesome/free-solid-svg-icons';
 
 const INVENTORY_ENDPOINT = `${config.API_URL}/inventory`;
 
@@ -29,6 +40,13 @@ function InventoryTable() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory');
+  const [inventoryStats, setInventoryStats] = useState({
+    totalItems: 0,
+    totalValue: 0,
+    lowStockItems: 0,
+    outOfStockItems: 0,
+    categoryDistribution: {}
+  });
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -40,6 +58,22 @@ function InventoryTable() {
     );
     setFilteredItems(results);
   }, [searchTerm, items]);
+
+  useEffect(() => {
+    if (items.length > 0) {
+      const stats = {
+        totalItems: items.length,
+        totalValue: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        lowStockItems: items.filter(item => item.quantity < 5 && item.quantity > 0).length,
+        outOfStockItems: items.filter(item => item.quantity === 0).length,
+        categoryDistribution: items.reduce((acc, item) => {
+          acc[item.category] = (acc[item.category] || 0) + 1;
+          return acc;
+        }, {})
+      };
+      setInventoryStats(stats);
+    }
+  }, [items]);
 
   const fetchItems = async () => {
     try {
@@ -189,6 +223,129 @@ function InventoryTable() {
     
     // Save the PDF
     doc.save('inventory_report.pdf');
+  };
+
+  const handleDownloadReport = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text('Inventory Report', 14, 20);
+    
+    // Add date
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    // Add summary statistics
+    doc.setFontSize(14);
+    doc.text('Summary Statistics', 14, 45);
+    
+    // Create summary table
+    autoTable(doc, {
+      startY: 50,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Total Items', inventoryStats.totalItems.toString()],
+        ['Total Value', `Rs. ${inventoryStats.totalValue.toFixed(2)}`],
+        ['Low Stock Items', inventoryStats.lowStockItems.toString()],
+        ['Out of Stock Items', inventoryStats.outOfStockItems.toString()]
+      ],
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Add category distribution
+    doc.setFontSize(14);
+    doc.text('Category Distribution', 14, doc.lastAutoTable.finalY + 15);
+    
+    const categoryData = Object.entries(inventoryStats.categoryDistribution).map(([category, count]) => [
+      category,
+      count.toString()
+    ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Category', 'Count']],
+      body: categoryData,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Add low stock items
+    doc.setFontSize(14);
+    doc.text('Low Stock Items', 14, doc.lastAutoTable.finalY + 15);
+    
+    const lowStockData = items
+      .filter(item => item.quantity < 5 && item.quantity > 0)
+      .map(item => [
+        item.name,
+        item.category,
+        item.quantity.toString(),
+        `Rs. ${item.price.toFixed(2)}`
+      ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Name', 'Category', 'Quantity', 'Price']],
+      body: lowStockData,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Add out of stock items
+    doc.setFontSize(14);
+    doc.text('Out of Stock Items', 14, doc.lastAutoTable.finalY + 15);
+    
+    const outOfStockData = items
+      .filter(item => item.quantity === 0)
+      .map(item => [
+        item.name,
+        item.category,
+        `Rs. ${item.price.toFixed(2)}`
+      ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Name', 'Category', 'Last Price']],
+      body: outOfStockData,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
+      }
+    });
+    
+    // Save the PDF
+    doc.save('inventory_detailed_report.pdf');
   };
 
   const compressImage = (file) => {
@@ -649,6 +806,163 @@ function InventoryTable() {
         <Tab eventKey="suppliers" title="Suppliers">
           <SuppliersTable />
         </Tab>
+        <Tab eventKey="report" title="Inventory Report">
+          <div className="inventory-report">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="report-title">
+                <FontAwesomeIcon icon={faChartPie} className="me-2" />
+                Inventory Report
+              </h2>
+              <Button 
+                variant="primary" 
+                className="download-report-btn"
+                onClick={handleDownloadReport}
+              >
+                <FontAwesomeIcon icon={faDownload} className="me-2" />
+                Download Report
+              </Button>
+            </div>
+            
+            <Row className="mb-4">
+              <Col md={3}>
+                <Card className="stat-card total-items">
+                  <Card.Body>
+                    <div className="stat-icon">
+                      <FontAwesomeIcon icon={faBoxes} />
+                    </div>
+                    <h5>Total Items</h5>
+                    <h2>{inventoryStats.totalItems}</h2>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="stat-card total-value">
+                  <Card.Body>
+                    <div className="stat-icon">
+                      <FontAwesomeIcon icon={faMoneyBillWave} />
+                    </div>
+                    <h5>Total Value</h5>
+                    <h2>Rs. {inventoryStats.totalValue.toFixed(2)}</h2>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="stat-card low-stock">
+                  <Card.Body>
+                    <div className="stat-icon">
+                      <FontAwesomeIcon icon={faExclamationTriangle} />
+                    </div>
+                    <h5>Low Stock Items</h5>
+                    <h2>{inventoryStats.lowStockItems}</h2>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="stat-card out-of-stock">
+                  <Card.Body>
+                    <div className="stat-icon">
+                      <FontAwesomeIcon icon={faTimesCircle} />
+                    </div>
+                    <h5>Out of Stock</h5>
+                    <h2>{inventoryStats.outOfStockItems}</h2>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+
+            <Row className="mb-4">
+              <Col md={6}>
+                <Card className="report-card">
+                  <Card.Body>
+                    <h5 className="card-title">
+                      <FontAwesomeIcon icon={faChartPie} className="me-2" />
+                      Category Distribution
+                    </h5>
+                    <Table striped bordered hover className="report-table">
+                      <thead>
+                        <tr>
+                          <th>Category</th>
+                          <th>Count</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(inventoryStats.categoryDistribution).map(([category, count]) => (
+                          <tr key={category}>
+                            <td>{category}</td>
+                            <td>{count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={6}>
+                <Card className="report-card">
+                  <Card.Body>
+                    <h5 className="card-title">
+                      <FontAwesomeIcon icon={faExclamationTriangle} className="me-2" />
+                      Low Stock Items
+                    </h5>
+                    <Table striped bordered hover className="report-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Category</th>
+                          <th>Quantity</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items
+                          .filter(item => item.quantity < 5 && item.quantity > 0)
+                          .map(item => (
+                            <tr key={item._id}>
+                              <td>{item.name}</td>
+                              <td>{item.category}</td>
+                              <td className="low-stock-quantity">{item.quantity}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </Table>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={12}>
+                <Card className="report-card">
+                  <Card.Body>
+                    <h5 className="card-title">
+                      <FontAwesomeIcon icon={faTimesCircle} className="me-2" />
+                      Out of Stock Items
+                    </h5>
+                    <Table striped bordered hover className="report-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Category</th>
+                          <th>Last Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items
+                          .filter(item => item.quantity === 0)
+                          .map(item => (
+                            <tr key={item._id}>
+                              <td>{item.name}</td>
+                              <td>{item.category}</td>
+                              <td>Rs. {item.price.toFixed(2)}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </Table>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        </Tab>
       </Tabs>
 
       <style>
@@ -1014,6 +1328,183 @@ function InventoryTable() {
             .upload-area {
               min-height: 150px;
             }
+          }
+
+          .inventory-report {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+          }
+
+          .report-title {
+            color: #2c3e50;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+          }
+
+          .report-title svg {
+            color: #0d6efd;
+          }
+
+          .stat-card {
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+          }
+
+          .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            z-index: -1;
+          }
+
+          .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+          }
+
+          .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #fff;
+          }
+
+          .stat-card h5 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 500;
+          }
+
+          .stat-card h2 {
+            color: #fff;
+            margin: 0;
+            font-weight: 600;
+            font-size: 2rem;
+          }
+
+          .total-items {
+            background: linear-gradient(45deg, #4e73df, #224abe);
+          }
+
+          .total-value {
+            background: linear-gradient(45deg, #1cc88a, #13855c);
+          }
+
+          .low-stock {
+            background: linear-gradient(45deg, #f6c23e, #dda20a);
+          }
+
+          .out-of-stock {
+            background: linear-gradient(45deg, #e74a3b, #be2617);
+          }
+
+          .report-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+          }
+
+          .report-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+          }
+
+          .card-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+          }
+
+          .card-title svg {
+            color: #0d6efd;
+          }
+
+          .report-table {
+            margin-bottom: 0;
+          }
+
+          .report-table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+            font-weight: 600;
+          }
+
+          .report-table tbody td {
+            vertical-align: middle;
+          }
+
+          .low-stock-quantity {
+            color: #f6c23e;
+            font-weight: 600;
+          }
+
+          .nav-tabs .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            border: none;
+            color: #6c757d;
+            transition: all 0.3s ease;
+          }
+
+          .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+          }
+
+          .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+          }
+
+          @media (max-width: 768px) {
+            .stat-card {
+              margin-bottom: 1rem;
+            }
+
+            .stat-card h2 {
+              font-size: 1.5rem;
+            }
+
+            .stat-icon {
+              font-size: 1.5rem;
+            }
+          }
+
+          .download-report-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #4e73df, #224abe);
+            border: none;
+          }
+
+          .download-report-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+          }
+
+          .download-report-btn svg {
+            font-size: 1.1rem;
           }
         `}
       </style>
