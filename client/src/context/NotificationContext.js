@@ -21,7 +21,7 @@ export const NotificationProvider = ({ children }) => {
       console.log('Fetching notifications...');
       const response = await axios.get('http://localhost:5000/api/notifications', {
         headers: { 
-          'Authorization': token,
+          'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
           'Expires': '0'

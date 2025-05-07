@@ -32,6 +32,8 @@ const notificationRoutes = require('./routes/notificationRoutes');
 // const authRoutes = require('./routes/authRoutes');
 const notificationController = require('./Controllers/notificationController');
 // const { protect } = require('./middleware/auth');
+const paymentRoutes = require('./routes/payment');
+const refundRoutes = require('./routes/refund');
 
 // Set JWT secret
 if (!process.env.JWT_SECRET) {
@@ -60,6 +62,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/notifications', notificationRoutes);
 // app.use('/api/auth', authRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/refunds', refundRoutes);
 
 // Start the Server
 const PORT = process.env.PORT || 5000;

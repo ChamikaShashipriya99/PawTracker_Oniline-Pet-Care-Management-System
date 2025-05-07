@@ -91,11 +91,7 @@ function MyAppointments() {
     const handleEditAppointment = (id) => navigate(`/edit-appointment/${id}`);
     
     const handleProceedToPay = (appointmentId) => {
-        // You can implement payment processing logic here
-        // For now, we'll just show an alert
-        alert(`Proceeding to payment for appointment ${appointmentId}`);
-        // In a real implementation, you would navigate to a payment page or open a payment modal
-        // navigate(`/payment/${appointmentId}`);
+        navigate(`/personal-information/${appointmentId}`);
     };
     
     const handleDeleteAppointment = async (id) => {

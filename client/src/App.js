@@ -1,6 +1,6 @@
 // client/src/App.js
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { NotificationProvider } from './context/NotificationContext';
 import Home from './components/Home';
@@ -28,6 +28,14 @@ import NotificationIcon from './components/NotificationIcon';
 import Notifications from './components/Notifications';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
+import PersonalInformation from './components/PersonalInformation';
+import PaymentMethodForm from './components/PaymentMethodForm';
+import PaymentOTPPage from './components/PaymentOTPPage';
+import PaymentConfirmation from './components/PaymentConfirmation';
+import PaymentCheckout from './components/PaymentCheckout';
+import PaymentHistory from './components/PaymentHistory';
+import AdminPaymentDashboard from './components/AdminPaymentDashboard';
+import AdminRefundDashboard from './components/AdminRefundDashboard';
 
 function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
   const navigate = useNavigate();
@@ -195,7 +203,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                           <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
                           <li><Link className="dropdown-item" to="/my-appointments">My Appointments</Link></li>
                           <li><Link className="dropdown-item" to="/my-advertisements">My Advertisements</Link></li>
-                          <li><Link className="dropdown-item" to="/my-payments">My Payments</Link></li>
+                          <li><Link className="dropdown-item" to="/payment-history">My Payments</Link></li>
                         </ul>
                       </li>
                       <li className="nav-item">
@@ -230,6 +238,9 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
             </button>
             <div className="collapse navbar-collapse" id="navbarNavAdmin">
               <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                  <Link className="nav-link" to="/admin-payment-dashboard">Payment</Link>
+                </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/admin/dashboard">Dashboard</Link>
                 </li>
@@ -267,7 +278,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                 <Route path="/faq" element={<div>FAQ Page</div>} />
                 <Route path="/my-appointments" element={<MyAppointments />} />
                 <Route path="/my-advertisements" element={<div>My Advertisements Page</div>} />
-                <Route path="/my-payments" element={<div>My Payments Page</div>} />
+                <Route path="/payment-history" element={<PaymentHistory />} />
                 <Route path="/book-appointment" element={<BookAppointment />} />
                 <Route path="/edit-appointment/:id" element={<EditAppointment />} />
                 <Route path="/view-appointment/:id" element={<ViewAppointment />} />
@@ -281,6 +292,23 @@ function AppContent({ isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin }) {
                 />
                 <Route path="/notification" element={<Notification />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/personal-information/:appointmentId?" element={<PersonalInformation />} />
+                <Route path="/payment-method/:appointmentId?" element={<PaymentMethodForm />} />
+                <Route path="/payment-otp/:appointmentId?" element={<PaymentOTPPage />} />
+                <Route path="/payment-confirmation/:appointmentId?" element={<PaymentConfirmation />} />
+                <Route path="/payment-checkout/:appointmentId?" element={<PaymentCheckout />} />
+                <Route 
+                  path="/payment-history" 
+                  element={
+                    isLoggedIn ? (
+                      <PaymentHistory />
+                    ) : (
+                      <Navigate to="/login" state={{ from: '/payment-history' }} replace />
+                    )
+                  } 
+                />
+                <Route path="/admin-payment-dashboard" element={<AdminPaymentDashboard />} />
+                <Route path="/admin-refund-dashboard" element={<AdminRefundDashboard />} />
               </>
             )}
             <Route path="/admin/login" element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />} />
