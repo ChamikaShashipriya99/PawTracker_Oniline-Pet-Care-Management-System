@@ -188,39 +188,66 @@ function InventoryTable() {
     const doc = new jsPDF();
     
     // Add title
-    doc.setFontSize(16);
+    doc.setFontSize(20);
     doc.text('Inventory Report', 14, 15);
     
     // Add date
-    doc.setFontSize(10);
+    doc.setFontSize(12);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 22);
     
-    // Prepare data for the table
-    const tableData = items.map(item => [
-      item.name,
-      item.category,
-      item.quantity,
-      `Rs. ${item.price.toFixed(2)}`,
-      item.quantity > 0 ? 'In Stock' : 'Out of Stock'
-    ]);
+    // Add summary statistics
+    doc.setFontSize(14);
+    doc.text('Summary Statistics', 14, 35);
+    doc.setFontSize(12);
+    doc.text(`Total Items: ${inventoryStats.totalItems}`, 20, 45);
+    doc.text(`Total Value: Rs. ${inventoryStats.totalValue.toFixed(2)}`, 20, 52);
+    doc.text(`Low Stock Items: ${inventoryStats.lowStockItems}`, 20, 59);
+    doc.text(`Out of Stock Items: ${inventoryStats.outOfStockItems}`, 20, 66);
     
-    // Add the table
+    // Add low stock items table
+    doc.setFontSize(14);
+    doc.text('Low Stock Items', 14, 80);
+    const lowStockData = items
+      .filter(item => item.quantity < 5 && item.quantity > 0)
+      .map(item => [item.name, item.category, item.quantity.toString()]);
+    
     autoTable(doc, {
-      head: [['Name', 'Category', 'Quantity', 'Price', 'Status']],
-      body: tableData,
-      startY: 30,
+      head: [['Name', 'Category', 'Quantity']],
+      body: lowStockData,
+      startY: 85,
       styles: {
-        fontSize: 8,
+        fontSize: 10,
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [41, 128, 185],
-        textColor: 255,
-        fontSize: 9,
+        fillColor: [255, 193, 7],
+        textColor: 0,
+        fontSize: 11,
         fontStyle: 'bold'
+      }
+    });
+    
+    // Add out of stock items table
+    const lastY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(14);
+    doc.text('Out of Stock Items', 14, lastY);
+    const outOfStockData = items
+      .filter(item => item.quantity === 0)
+      .map(item => [item.name, item.category, `Rs. ${item.price.toFixed(2)}`]);
+    
+    autoTable(doc, {
+      head: [['Name', 'Category', 'Last Price']],
+      body: outOfStockData,
+      startY: lastY + 5,
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
       },
-      alternateRowStyles: {
-        fillColor: [245, 245, 245]
+      headStyles: {
+        fillColor: [220, 53, 69],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold'
       }
     });
     
@@ -731,10 +758,20 @@ function InventoryTable() {
         </Tab>
         <Tab eventKey="report" title="Inventory Report">
           <div className="inventory-report p-4">
-            <h2 className="mb-4 text-primary">
-              <BarChart className="me-2" />
-              Inventory Report
-            </h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="text-primary mb-0">
+                <BarChart className="me-2" />
+                Inventory Report
+              </h2>
+              <Button 
+                variant="primary" 
+                onClick={handleDownloadPDF}
+                className="download-report-btn"
+              >
+                <BoxArrowUpRight className="me-2" />
+                Download Report
+              </Button>
+            </div>
             
             <Row className="mb-4 g-4">
               <Col md={3}>
@@ -1323,6 +1360,21 @@ function InventoryTable() {
 
           .chart-container canvas {
             max-width: 100%;
+          }
+
+          .download-report-btn {
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+          }
+
+          .download-report-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
           }
         `}
       </style>
