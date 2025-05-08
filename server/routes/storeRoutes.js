@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import Inventory from '../models/Inventory.js';
+
 const router = express.Router();
-const Inventory = require('../models/Inventory');
 
 // GET all inventory items for store
 router.get('/inventory', async (req, res) => {
@@ -12,4 +13,4 @@ router.get('/inventory', async (req, res) => {
     }
 });
 
-module.exports = router; 
+export default router; 

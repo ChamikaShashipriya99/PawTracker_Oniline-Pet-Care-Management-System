@@ -54,10 +54,7 @@ const transporter = nodemailer.createTransport({
     user: 'myactualemail@gmail.com', // Your actual Gmail address
     pass: 'abcd-efgh-ijkl-mnop'      // Your Gmail App Password
   }
-};
-
-// Initialize the transporter
-initializeEmailTransporter();
+});
 
 // Regular user signup with photo
 router.post('/signup', upload.single('profilePhoto'), signupValidation, async (req, res) => {
